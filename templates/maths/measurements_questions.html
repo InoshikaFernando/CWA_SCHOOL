@@ -7,6 +7,50 @@
         padding: 20px;
     }
     
+    .score-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 40px;
+        text-align: center;
+        color: white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        margin: 50px auto;
+        max-width: 600px;
+    }
+    
+    .score-title {
+        font-size: 32px;
+        margin-bottom: 20px;
+    }
+    
+    .score-value {
+        font-size: 72px;
+        font-weight: bold;
+        margin: 20px 0;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .score-percentage {
+        font-size: 24px;
+        margin-top: 20px;
+    }
+    
+    .back-button {
+        display: inline-block;
+        margin-top: 30px;
+        padding: 15px 40px;
+        background: white;
+        color: #667eea;
+        text-decoration: none;
+        border-radius: 30px;
+        font-weight: bold;
+        transition: transform 0.3s;
+    }
+    
+    .back-button:hover {
+        transform: scale(1.05);
+    }
+    
     .progress-bar {
         background: #e9ecef;
         border-radius: 10px;
@@ -170,6 +214,17 @@
 </style>
 
 <div class="question-container">
+    {% if completed %}
+    <div class="score-container">
+        <h1 class="score-title">🎉 Quiz Completed! 🎉</h1>
+        <div class="score-value">{{ total_score }}/{{ total_points }}</div>
+        {% widthratio total_score total_points 100 as percentage %}
+        <div class="score-percentage">{{ percentage }}%</div>
+        <div class="score-percentage">Time: {{ total_time_seconds }}s</div>
+        <div class="score-percentage">Points: {{ final_points }}</div>
+        <a href="{% url 'maths:dashboard' %}" class="back-button">Back to Dashboard</a>
+    </div>
+    {% else %}
     <h1>{{ level }}</h1>
     
     <!-- Progress Bar -->
@@ -178,6 +233,7 @@
         </div>
     </div>
     <p style="text-align: center; color: #666;">Question {{ question_number }} of {{ total_questions }}</p>
+    <p style="text-align: center; color: #333; font-weight: bold;">⏱️ Time: <span id="live-timer" data-start-time="{{ elapsed_seconds|default:0 }}">0s</span></p>
     
     <!-- Question Box -->
     <div class="question-box">
@@ -266,6 +322,21 @@
         fill.style.width = percentage + '%';
     });
     
+    // Live timer
+    (function() {
+        const timerEl = document.getElementById('live-timer');
+        if (!timerEl) return;
+        let elapsed = parseInt(timerEl.getAttribute('data-start-time')) || 0;
+        function render() {
+            timerEl.textContent = elapsed + 's';
+        }
+        render();
+        setInterval(function() {
+            elapsed += 1;
+            render();
+        }, 1000);
+    })();
+    
     // Text-to-speech function
     function speakText() {
         const questionText = document.getElementById('question-text').innerText;
@@ -275,4 +346,5 @@
         }
     }
 </script>
+    {% endif %}
 {% endblock %}

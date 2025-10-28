@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db import transaction
+import time
 from django.db.models import Q
 import random
 from .models import Topic, Level, ClassRoom, Enrollment, CustomUser, Question, Answer, StudentAnswer
@@ -354,6 +355,12 @@ def measurements_questions(request, level_number):
     # Get current question number from URL parameter (default to 1)
     question_number = int(request.GET.get('q', 1))
     
+    # Start timer on first question load
+    timer_session_key = "measurements_timer_start"
+    timer_start = request.session.get(timer_session_key)
+    if question_number == 1 and not timer_start:
+        request.session[timer_session_key] = time.time()
+    
     # Handle form submission
     if request.method == "POST":
         action = request.POST.get('action')
@@ -410,8 +417,43 @@ def measurements_questions(request, level_number):
             if next_question <= all_questions.count():
                 return redirect(f"{request.path}?q={next_question}")
             else:
-                # All questions completed
-                return redirect("maths:level_detail", level_number=level.level_number)
+                # All questions completed - show score
+                return redirect(f"{request.path}?completed=1")
+    
+    # Check if completed
+    completed = request.GET.get('completed') == '1'
+    
+    if completed:
+        # Calculate total score and time taken
+        student_answers = StudentAnswer.objects.filter(
+            student=request.user,
+            question__level=level
+        )
+        total_score = sum(answer.points_earned for answer in student_answers)
+        total_points = sum(q.points for q in all_questions)
+        now_ts = time.time()
+        start_ts = request.session.get(timer_session_key) or now_ts
+        total_time_seconds = max(1, int(now_ts - start_ts))
+        # Clear timer for next attempt
+        if timer_session_key in request.session:
+            del request.session[timer_session_key]
+        # Compute points: percentage * 100 * 60 / time_seconds
+        percentage = (total_score / total_points) if total_points else 0
+        final_points = (percentage * 100 * 60) / total_time_seconds if total_time_seconds else 0
+        # Round for display
+        final_points = round(final_points, 2)
+        
+        return render(request, "maths/measurements_questions.html", {
+            "level": level,
+            "completed": True,
+            "total_score": total_score,
+            "total_points": total_points,
+            "total_time_seconds": total_time_seconds,
+            "final_points": final_points,
+            "topic": measurements_topic,
+            "student_answers": student_answers,
+            "all_questions": all_questions
+        })
     
     # Get current question
     if question_number <= all_questions.count():
@@ -448,6 +490,10 @@ def measurements_questions(request, level_number):
         question__level=level
     )
     
+    # Elapsed time for live timer
+    start_ts = request.session.get(timer_session_key)
+    elapsed_seconds = int(time.time() - start_ts) if start_ts else 0
+
     return render(request, "maths/measurements_questions.html", {
         "level": level,
         "current_question": current_question,
@@ -458,5 +504,6 @@ def measurements_questions(request, level_number):
         "checked": checked,
         "selected_answer": selected_answer,
         "is_text_answer": is_text_answer,
-        "is_last_question": question_number == all_questions.count()
+        "is_last_question": question_number == all_questions.count(),
+        "elapsed_seconds": elapsed_seconds
     })

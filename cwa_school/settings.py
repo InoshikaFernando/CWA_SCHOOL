@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "replace-me-with-a-secure-key"
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['mathsroom.wizardslearninghub.co.nz', 'www.mathsroom.wizardslearninghub.co.nz']
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 

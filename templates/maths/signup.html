@@ -1,0 +1,16 @@
+{% extends "maths/base.html" %}
+{% block content %}
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>{{ type }} Sign up</title></head>
+<body>
+  <h1>{{ type }} Sign up</h1>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Sign up</button>
+  </form>
+  <p><a href="{% url 'maths:dashboard' %}">Back</a></p>
+</body>
+</html>
+{% endblock %}

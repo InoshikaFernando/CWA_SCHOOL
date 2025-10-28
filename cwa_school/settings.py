@@ -59,5 +59,8 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 # Media files
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+STATIC_URL = '/static/'
+# This is where collectstatic will copy all static files
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 AUTH_USER_MODEL = "maths.CustomUser"

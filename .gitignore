@@ -52,3 +52,7 @@ wheels/
 .DS_Store
 Thumbs.db
 
+
+# Database exports
+db_export.json
+backup.json.env

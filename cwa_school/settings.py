@@ -89,6 +89,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 AUTH_USER_MODEL = "maths.CustomUser"
 
+# Authentication redirects
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+
 # Email configuration (console in development; override via environment in production)
 EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "no-reply@mathsroom.local")

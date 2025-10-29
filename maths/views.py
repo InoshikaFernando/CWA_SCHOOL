@@ -102,13 +102,20 @@ def dashboard(request):
         level_data[level_num].append(session_id)
     
     # Calculate stats for each level
+    YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
     for level_num, session_ids in level_data.items():
         attempts_data = []
+        completed_session_ids = []
+        question_limit = YEAR_QUESTION_COUNTS.get(level_num, 10)
         for session_id in session_ids:
             session_answers = student_answers.filter(
                 session_id=session_id,
                 question__level__level_number=level_num
             )
+            # Count attempt only if a full quiz was completed for that level
+            if session_answers.count() != question_limit:
+                continue
+            completed_session_ids.append(session_id)
             
             # Calculate points using the formula: percentage * 100 * 60 / time_seconds
             # Get the first answer to get time_taken_seconds for the session
@@ -129,7 +136,7 @@ def dashboard(request):
         if attempts_data:
             progress_by_topic.append({
                 'topic': f'Year {level_num} - Measurements',
-                'attempts': len(session_ids),
+                'attempts': len(completed_session_ids),
                 'min_points': min(attempts_data),
                 'max_points': max(attempts_data),
                 'avg_points': round(sum(attempts_data) / len(attempts_data), 1)
@@ -194,13 +201,20 @@ def dashboard_detail(request):
         level_data[level_num].append(session_id)
     
     # Calculate stats for each level
+    YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
     for level_num, session_ids in level_data.items():
         attempts_data = []
+        completed_session_ids = []
+        question_limit = YEAR_QUESTION_COUNTS.get(level_num, 10)
         for session_id in session_ids:
             session_answers = student_answers.filter(
                 session_id=session_id,
                 question__level__level_number=level_num
             )
+            # Only count full attempts (completed all questions for that level)
+            if session_answers.count() != question_limit:
+                continue
+            completed_session_ids.append(session_id)
             
             # Calculate points using the formula: percentage * 100 * 60 / time_seconds
             # Get the first answer to get time_taken_seconds for the session
@@ -221,7 +235,7 @@ def dashboard_detail(request):
         if attempts_data:
             progress_by_topic.append({
                 'topic': f'Year {level_num} - Measurements',
-                'attempts': len(session_ids),
+                'attempts': len(completed_session_ids),
                 'min_points': min(attempts_data),
                 'max_points': max(attempts_data),
                 'avg_points': round(sum(attempts_data) / len(attempts_data), 1)

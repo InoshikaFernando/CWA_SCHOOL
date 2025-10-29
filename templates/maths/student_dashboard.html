@@ -112,10 +112,86 @@
 .info-box a:hover {
     text-decoration: underline;
 }
+
+.progress-table {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.progress-table h2 {
+    margin-top: 0;
+    color: #667eea;
+}
+
+.progress-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.progress-table th,
+.progress-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.progress-table th {
+    background: #f8f9fa;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.progress-table tr:hover {
+    background: #f8f9fa;
+}
 </style>
 
 <h1>📚 Student Dashboard</h1>
 
+{% if show_progress_table and not show_all_content %}
+    {% if progress_by_topic %}
+    <div class="progress-table">
+        <h2>📊 Your Progress</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Topic</th>
+                    <th>Attempts</th>
+                    <th>Min Points</th>
+                    <th>Max Points</th>
+                    <th>Avg Points</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in progress_by_topic %}
+                <tr>
+                    <td>{{ item.topic }}</td>
+                    <td>{{ item.attempts }}</td>
+                    <td>{{ item.min_points }}</td>
+                    <td>{{ item.max_points }}</td>
+                    <td>{{ item.avg_points }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="info-box">
+        <p>📊 No progress data yet. Start practicing to see your stats!</p>
+    </div>
+    {% endif %}
+{% endif %}
+
+{% if not show_all_content and show_progress_table %}
+    <p style="text-align: center; margin-top: 30px;">
+        <a href="{% url 'maths:dashboard' %}" style="color: #667eea; text-decoration: underline;">← Back to All Topics</a>
+    </p>
+{% endif %}
+
+{% if show_all_content %}
 <div class="info-box">
     {% if not has_class %}
         <p>👤 You are a single student and can access all levels.</p>
@@ -190,6 +266,7 @@
         </div>
     {% endfor %}
 </div>
+{% endif %}
 
 <script>
 function toggleAccordion(header) {

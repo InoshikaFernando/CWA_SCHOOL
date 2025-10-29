@@ -222,7 +222,7 @@
         <div class="score-percentage">{{ percentage }}%</div>
         <div class="score-percentage">Time: {{ total_time_seconds }}s</div>
         <div class="score-percentage">Points: {{ final_points }}</div>
-        <a href="{% url 'maths:dashboard' %}" class="back-button">Back to Dashboard</a>
+        <a href="{% url 'maths:dashboard_detail' %}" class="back-button">Back to Dashboard</a>
     </div>
     {% else %}
     <h1>{{ level }}</h1>

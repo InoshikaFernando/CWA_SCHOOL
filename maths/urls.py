@@ -4,6 +4,7 @@ from . import views
 app_name = "maths"
 urlpatterns = [
     path("", views.dashboard, name="dashboard"),
+    path("dashboard/", views.dashboard_detail, name="dashboard_detail"),
     path("topics/", views.topic_list, name="topics"),
     path("topic/<int:topic_id>/levels/", views.level_list, name="levels"),
     path("level/<int:level_number>/", views.level_detail, name="level_detail"),

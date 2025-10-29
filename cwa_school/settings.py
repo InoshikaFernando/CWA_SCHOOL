@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "replace-me-with-a-secure-key"
 DEBUG = True
-ALLOWED_HOSTS = ['mathsroom.wizardslearninghub.co.nz', 'www.mathsroom.wizardslearninghub.co.nz']
+ALLOWED_HOSTS = ['mathsroom.wizardslearninghub.co.nz', 'www.mathsroom.wizardslearninghub.co.nz', '127.0.0.1', 'localhost']
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -88,3 +88,19 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 AUTH_USER_MODEL = "maths.CustomUser"
+
+# Email configuration (console in development; override via environment in production)
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "no-reply@mathsroom.local")
+
+# If SMTP settings are provided, use them
+if os.getenv("EMAIL_HOST"):
+    EMAIL_HOST = os.getenv("EMAIL_HOST")
+    EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+    EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "true").lower() == "true"
+    EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "false").lower() == "true"
+
+# Optional: how long reset links are valid (seconds)
+PASSWORD_RESET_TIMEOUT = int(os.getenv("PASSWORD_RESET_TIMEOUT", "3600"))

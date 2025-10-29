@@ -71,10 +71,169 @@ def dashboard(request):
     # Sort years
     sorted_years = sorted(levels_by_year.keys())
     
+    # Calculate student progress by topic
+    from django.db.models import Count, Min, Max, Avg, Sum
+    from collections import defaultdict
+    
+    # Get all student answers for Measurements topic
+    student_answers = StudentAnswer.objects.filter(
+        student=request.user,
+        question__level__topics__name="Measurements"
+    ).select_related('question', 'question__level')
+    
+    # Group by level and session_id to count attempts
+    progress_by_topic = []
+    
+    # Get unique combinations of level_number and session_id
+    unique_level_sessions = student_answers.values('question__level__level_number', 'session_id').distinct()
+    
+    # Group by level
+    level_data = {}
+    for item in unique_level_sessions:
+        level_num = item['question__level__level_number']
+        session_id = item['session_id']
+        
+        if not session_id:  # Skip empty session_ids
+            continue
+            
+        if level_num not in level_data:
+            level_data[level_num] = []
+        
+        level_data[level_num].append(session_id)
+    
+    # Calculate stats for each level
+    for level_num, session_ids in level_data.items():
+        attempts_data = []
+        for session_id in session_ids:
+            session_answers = student_answers.filter(
+                session_id=session_id,
+                question__level__level_number=level_num
+            )
+            
+            # Calculate points using the formula: percentage * 100 * 60 / time_seconds
+            # Get the first answer to get time_taken_seconds for the session
+            first_answer = session_answers.first()
+            if first_answer and first_answer.time_taken_seconds > 0:
+                total_correct = sum(1 for a in session_answers if a.is_correct)
+                total_questions = session_answers.count()
+                time_seconds = first_answer.time_taken_seconds
+                
+                percentage = (total_correct / total_questions) if total_questions else 0
+                final_points = (percentage * 100 * 60) / time_seconds if time_seconds else 0
+                attempts_data.append(round(final_points, 2))
+            else:
+                # Fallback: just sum points_earned if no time data
+                total_points = sum(a.points_earned for a in session_answers)
+                attempts_data.append(total_points)
+        
+        if attempts_data:
+            progress_by_topic.append({
+                'topic': f'Year {level_num} - Measurements',
+                'attempts': len(session_ids),
+                'min_points': min(attempts_data),
+                'max_points': max(attempts_data),
+                'avg_points': round(sum(attempts_data) / len(attempts_data), 1)
+            })
+    
     return render(request, "maths/student_dashboard.html", {
         "levels_by_year": levels_by_year,
         "sorted_years": sorted_years,
-        "has_class": Enrollment.objects.filter(student=request.user).exists()
+        "has_class": Enrollment.objects.filter(student=request.user).exists(),
+        "progress_by_topic": progress_by_topic,
+        "show_progress_table": True,
+        "show_all_content": True
+    })
+
+@login_required
+def dashboard_detail(request):
+    """Detailed dashboard view showing progress table"""
+    if request.user.is_teacher:
+        classes = request.user.classes.all()
+        return render(request, "maths/teacher_dashboard.html", {"classes": classes})
+    allowed = student_allowed_levels(request.user)
+    levels = allowed if allowed is not None else Level.objects.all()
+    
+    # Group levels by year and topics
+    levels_by_year = {}
+    for level in levels:
+        year = level.level_number
+        if year not in levels_by_year:
+            levels_by_year[year] = []
+        levels_by_year[year].append(level)
+    
+    # Sort years
+    sorted_years = sorted(levels_by_year.keys())
+    
+    # Calculate student progress by topic
+    from django.db.models import Count, Min, Max, Avg, Sum
+    
+    # Get all student answers for Measurements topic
+    student_answers = StudentAnswer.objects.filter(
+        student=request.user,
+        question__level__topics__name="Measurements"
+    ).select_related('question', 'question__level')
+    
+    # Group by level and session_id to count attempts
+    progress_by_topic = []
+    
+    # Get unique combinations of level_number and session_id
+    unique_level_sessions = student_answers.values('question__level__level_number', 'session_id').distinct()
+    
+    # Group by level
+    level_data = {}
+    for item in unique_level_sessions:
+        level_num = item['question__level__level_number']
+        session_id = item['session_id']
+        
+        if not session_id:  # Skip empty session_ids
+            continue
+            
+        if level_num not in level_data:
+            level_data[level_num] = []
+        
+        level_data[level_num].append(session_id)
+    
+    # Calculate stats for each level
+    for level_num, session_ids in level_data.items():
+        attempts_data = []
+        for session_id in session_ids:
+            session_answers = student_answers.filter(
+                session_id=session_id,
+                question__level__level_number=level_num
+            )
+            
+            # Calculate points using the formula: percentage * 100 * 60 / time_seconds
+            # Get the first answer to get time_taken_seconds for the session
+            first_answer = session_answers.first()
+            if first_answer and first_answer.time_taken_seconds > 0:
+                total_correct = sum(1 for a in session_answers if a.is_correct)
+                total_questions = session_answers.count()
+                time_seconds = first_answer.time_taken_seconds
+                
+                percentage = (total_correct / total_questions) if total_questions else 0
+                final_points = (percentage * 100 * 60) / time_seconds if time_seconds else 0
+                attempts_data.append(round(final_points, 2))
+            else:
+                # Fallback: just sum points_earned if no time data
+                total_points = sum(a.points_earned for a in session_answers)
+                attempts_data.append(total_points)
+        
+        if attempts_data:
+            progress_by_topic.append({
+                'topic': f'Year {level_num} - Measurements',
+                'attempts': len(session_ids),
+                'min_points': min(attempts_data),
+                'max_points': max(attempts_data),
+                'avg_points': round(sum(attempts_data) / len(attempts_data), 1)
+            })
+    
+    return render(request, "maths/student_dashboard.html", {
+        "levels_by_year": levels_by_year,
+        "sorted_years": sorted_years,
+        "has_class": Enrollment.objects.filter(student=request.user).exists(),
+        "progress_by_topic": progress_by_topic,
+        "show_progress_table": True,
+        "show_all_content": False
     })
 
 @login_required
@@ -350,16 +509,53 @@ def measurements_questions(request, level_number):
         measurements_topic = Topic.objects.create(name="Measurements")
     
     # Get all measurements questions for this level
-    all_questions = Question.objects.filter(level=level).order_by('id')
+    all_questions_query = Question.objects.filter(level=level)
+    
+    # Question limits per year
+    YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
+    question_limit = YEAR_QUESTION_COUNTS.get(level.level_number, 10)
     
     # Get current question number from URL parameter (default to 1)
     question_number = int(request.GET.get('q', 1))
     
-    # Start timer on first question load
+    # Start timer on first question load and create session
     timer_session_key = "measurements_timer_start"
+    questions_session_key = "measurements_question_ids"
     timer_start = request.session.get(timer_session_key)
+    
     if question_number == 1 and not timer_start:
         request.session[timer_session_key] = time.time()
+        # Generate a unique session ID for this attempt
+        import uuid
+        request.session['current_attempt_id'] = str(uuid.uuid4())
+        
+        # Select random questions for this attempt
+        all_questions_list = list(all_questions_query)
+        if len(all_questions_list) > question_limit:
+            selected_questions = random.sample(all_questions_list, question_limit)
+        else:
+            selected_questions = all_questions_list
+        
+        # Randomize the order
+        random.shuffle(selected_questions)
+        
+        # Store question IDs in session
+        request.session[questions_session_key] = [q.id for q in selected_questions]
+    
+    # Get question IDs from session
+    question_ids = request.session.get(questions_session_key, [])
+    
+    # Get all questions from the stored IDs
+    all_questions = Question.objects.filter(id__in=question_ids).order_by(
+        'id'  # This won't work as expected, we need to preserve order
+    )
+    
+    # Convert to list and maintain the order from session
+    if question_ids:
+        all_questions = [Question.objects.get(id=qid) for qid in question_ids]
+    else:
+        # Fallback if no session
+        all_questions = []
     
     # Handle form submission
     if request.method == "POST":
@@ -378,14 +574,16 @@ def measurements_questions(request, level_number):
                         # Multiple choice or true/false question
                         answer = Answer.objects.get(id=answer_id, question=question)
                         
-                        # Save student answer
+                        # Save student answer with session ID
+                        attempt_id = request.session.get('current_attempt_id', '')
                         student_answer, created = StudentAnswer.objects.update_or_create(
                             student=request.user,
                             question=question,
                             defaults={
                                 'selected_answer': answer,
                                 'is_correct': answer.is_correct,
-                                'points_earned': question.points if answer.is_correct else 0
+                                'points_earned': question.points if answer.is_correct else 0,
+                                'session_id': attempt_id
                             }
                         )
                         
@@ -414,7 +612,7 @@ def measurements_questions(request, level_number):
         elif action == 'next_question':
             # Move to next question
             next_question = question_number + 1
-            if next_question <= all_questions.count():
+            if next_question <= len(all_questions):
                 return redirect(f"{request.path}?q={next_question}")
             else:
                 # All questions completed - show score
@@ -425,18 +623,28 @@ def measurements_questions(request, level_number):
     
     if completed:
         # Calculate total score and time taken
+        attempt_id = request.session.get('current_attempt_id', '')
         student_answers = StudentAnswer.objects.filter(
             student=request.user,
-            question__level=level
+            question__level=level,
+            session_id=attempt_id
         )
         total_score = sum(answer.points_earned for answer in student_answers)
         total_points = sum(q.points for q in all_questions)
         now_ts = time.time()
         start_ts = request.session.get(timer_session_key) or now_ts
         total_time_seconds = max(1, int(now_ts - start_ts))
-        # Clear timer for next attempt
+        
+        # Store time_taken_seconds for all answers in this session
+        student_answers.update(time_taken_seconds=total_time_seconds)
+        
+        # Clear timer and question list for next attempt
         if timer_session_key in request.session:
             del request.session[timer_session_key]
+        if questions_session_key in request.session:
+            del request.session[questions_session_key]
+        if 'current_attempt_id' in request.session:
+            del request.session['current_attempt_id']
         # Compute points: percentage * 100 * 60 / time_seconds
         percentage = (total_score / total_points) if total_points else 0
         final_points = (percentage * 100 * 60) / total_time_seconds if total_time_seconds else 0
@@ -456,7 +664,7 @@ def measurements_questions(request, level_number):
         })
     
     # Get current question
-    if question_number <= all_questions.count():
+    if question_number <= len(all_questions):
         current_question = all_questions[question_number - 1]
     else:
         messages.error(request, "Question not found.")
@@ -498,12 +706,12 @@ def measurements_questions(request, level_number):
         "level": level,
         "current_question": current_question,
         "question_number": question_number,
-        "total_questions": all_questions.count(),
+        "total_questions": len(all_questions),
         "topic": measurements_topic,
         "student_answers": student_answers,
         "checked": checked,
         "selected_answer": selected_answer,
         "is_text_answer": is_text_answer,
-        "is_last_question": question_number == all_questions.count(),
+        "is_last_question": question_number == len(all_questions),
         "elapsed_seconds": elapsed_seconds
     })

@@ -6,12 +6,6 @@ __pycache__/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-media/**/*.jpg
-media/**/*.png
-media/**/*.gif
-media/**/*.pdf
-media/**/*.jpeg
-media/**/*.webp
 
 # Keep the questions directory structure
 !media/questions/.gitkeep

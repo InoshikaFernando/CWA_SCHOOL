@@ -49,4 +49,5 @@ Thumbs.db
 
 # Database exports
 db_export.json
+db_export_utf8.json
 backup.json.env

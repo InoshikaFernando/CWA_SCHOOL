@@ -51,3 +51,6 @@ Thumbs.db
 db_export.json
 db_export_utf8.json
 backup.json.env
+
+# Environment variables
+.env

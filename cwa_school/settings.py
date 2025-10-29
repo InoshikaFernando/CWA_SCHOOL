@@ -1,5 +1,9 @@
 ﻿import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -93,18 +97,19 @@ AUTH_USER_MODEL = "maths.CustomUser"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
-# Email configuration (console in development; override via environment in production)
-EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
-DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "no-reply@mathsroom.local")
-
-# If SMTP settings are provided, use them
-if os.getenv("EMAIL_HOST"):
-    EMAIL_HOST = os.getenv("EMAIL_HOST")
+# Email configuration (console in development; SMTP in production)
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    DEFAULT_FROM_EMAIL = "no-reply@mathsroom.local"
+else:
+    # Production email settings (PythonAnywhere SMTP)
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = os.getenv("EMAIL_HOST", "smtp.gmail.com")  # Or your SMTP server
     EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+    EMAIL_USE_TLS = True
     EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
     EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
-    EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "true").lower() == "true"
-    EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "false").lower() == "true"
+    DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER or "no-reply@mathsroom.wizardslearninghub.co.nz")
 
 # Optional: how long reset links are valid (seconds)
 PASSWORD_RESET_TIMEOUT = int(os.getenv("PASSWORD_RESET_TIMEOUT", "3600"))

@@ -7,6 +7,8 @@ from django.db import transaction
 import time
 from django.db.models import Q
 import random
+from datetime import datetime
+import json
 from .models import Topic, Level, ClassRoom, Enrollment, CustomUser, Question, Answer, StudentAnswer
 from .forms import CreateClassForm, StudentSignUpForm, TeacherSignUpForm, TeacherCenterRegistrationForm, IndividualStudentRegistrationForm, StudentBulkRegistrationForm, QuestionForm, AnswerFormSet
 
@@ -97,9 +99,9 @@ def dashboard(request):
             continue
             
         if level_num not in level_data:
-            level_data[level_num] = []
+            level_data[level_num] = set()
         
-        level_data[level_num].append(session_id)
+        level_data[level_num].add(session_id)
     
     # Calculate stats for each level
     YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
@@ -196,9 +198,9 @@ def dashboard_detail(request):
             continue
             
         if level_num not in level_data:
-            level_data[level_num] = []
+            level_data[level_num] = set()
         
-        level_data[level_num].append(session_id)
+        level_data[level_num].add(session_id)
     
     # Calculate stats for each level
     YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
@@ -248,6 +250,114 @@ def dashboard_detail(request):
         "progress_by_topic": progress_by_topic,
         "show_progress_table": True,
         "show_all_content": False
+    })
+
+@login_required
+def measurements_progress(request, level_number):
+    """Show detailed measurements progress with attempt history and graph"""
+    level = get_object_or_404(Level, level_number=level_number)
+    
+    # Check if student has access to this level
+    allowed = student_allowed_levels(request.user)
+    if allowed is not None and not allowed.filter(pk=level.pk).exists():
+        messages.error(request, "You don't have access to this level.")
+        return redirect("maths:dashboard")
+    
+    # Get all student answers for Measurements topic for this level
+    student_answers = StudentAnswer.objects.filter(
+        student=request.user,
+        question__level=level,
+        question__level__topics__name="Measurements"
+    ).select_related('question', 'question__level').order_by('answered_at')
+    
+    # Question limits per year
+    YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
+    question_limit = YEAR_QUESTION_COUNTS.get(level_number, 10)
+    
+    # Get unique session IDs for this level
+    unique_sessions = student_answers.values_list('session_id', flat=True).distinct()
+    unique_sessions = [s for s in unique_sessions if s]  # Filter out empty strings
+    
+    # Build attempt history
+    attempt_history = []
+    for session_id in unique_sessions:
+        session_answers = student_answers.filter(session_id=session_id)
+        
+        # Only count completed attempts
+        if session_answers.count() != question_limit:
+            continue
+        
+        # Calculate points for this attempt
+        first_answer = session_answers.first()
+        if first_answer and first_answer.time_taken_seconds > 0:
+            total_correct = sum(1 for a in session_answers if a.is_correct)
+            total_questions = session_answers.count()
+            time_seconds = first_answer.time_taken_seconds
+            
+            percentage = (total_correct / total_questions) if total_questions else 0
+            final_points = (percentage * 100 * 60) / time_seconds if time_seconds else 0
+            points = round(final_points, 2)
+        else:
+            points = sum(a.points_earned for a in session_answers)
+        
+        # Get attempt date
+        attempt_date = session_answers.first().answered_at if session_answers.exists() else None
+        
+        attempt_history.append({
+            'session_id': session_id,
+            'attempt_number': len(attempt_history) + 1,
+            'points': points,
+            'date': attempt_date
+        })
+    
+    # Sort by date
+    attempt_history.sort(key=lambda x: x['date'] if x['date'] else datetime.min)
+    
+    # Re-number attempts after sorting
+    for i, attempt in enumerate(attempt_history):
+        attempt['attempt_number'] = i + 1
+    
+    # Calculate stats
+    if attempt_history:
+        points_list = [a['points'] for a in attempt_history]
+        stats = {
+            'total_attempts': len(attempt_history),
+            'min_points': min(points_list),
+            'max_points': max(points_list),
+            'avg_points': round(sum(points_list) / len(points_list), 2)
+        }
+        
+        # Prepare data for graph (attempt numbers and points)
+        graph_data = {
+            'attempt_numbers': [a['attempt_number'] for a in attempt_history],
+            'points': points_list,
+            'dates': [a['date'].strftime('%Y-%m-%d') if a['date'] else '' for a in attempt_history]
+        }
+    else:
+        stats = {
+            'total_attempts': 0,
+            'min_points': 0,
+            'max_points': 0,
+            'avg_points': 0
+        }
+        graph_data = {
+            'attempt_numbers': [],
+            'points': [],
+            'dates': []
+        }
+    
+    # Convert graph data to JSON for JavaScript
+    graph_data_json = {
+        'attempt_numbers': json.dumps(graph_data['attempt_numbers']),
+        'points': json.dumps(graph_data['points']),
+        'dates': json.dumps(graph_data['dates'])
+    }
+    
+    return render(request, "maths/measurements_progress.html", {
+        "level": level,
+        "attempt_history": attempt_history,
+        "stats": stats,
+        "graph_data": graph_data_json
     })
 
 @login_required

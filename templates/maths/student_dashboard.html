@@ -214,7 +214,7 @@
                         {% if level.level_number == 2 %}
                             <!-- Year 2: Show Measurements and Take Quiz -->
                             <div class="topic-card">
-                                <a href="{% url 'maths:measurements_progress' level.level_number %}">
+                                <a href="{% url 'maths:measurements_questions' level.level_number %}">
                                     <h4>Measurements</h4>
                                     <p>Year {{ level.level_number }} - Measurements</p>
                                 </a>
@@ -228,7 +228,7 @@
                         {% elif level.level_number == 3 %}
                             <!-- Year 3: Show Measurements and Take Quiz -->
                             <div class="topic-card">
-                                <a href="{% url 'maths:measurements_progress' level.level_number %}">
+                                <a href="{% url 'maths:measurements_questions' level.level_number %}">
                                     <h4>Measurements</h4>
                                     <p>Year {{ level.level_number }} - Measurements</p>
                                 </a>
@@ -256,7 +256,7 @@
                         {% elif level.level_number == 6 %}
                             <!-- Year 6: Show Measurements and Take Quiz -->
                             <div class="topic-card">
-                                <a href="{% url 'maths:measurements_progress' level.level_number %}">
+                                <a href="{% url 'maths:measurements_questions' level.level_number %}">
                                     <h4>Measurements</h4>
                                     <p>Year {{ level.level_number }} - Measurements</p>
                                 </a>

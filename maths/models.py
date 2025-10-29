@@ -97,7 +97,7 @@ class StudentAnswer(models.Model):
     is_correct = models.BooleanField(default=False)
     points_earned = models.PositiveIntegerField(default=0)
     answered_at = models.DateTimeField(auto_now_add=True)
-    session_id = models.CharField(max_length=100, blank=True, help_text="Session identifier for tracking attempts")
+    session_id = models.CharField(max_length=100, blank=True, default="", help_text="Session identifier for tracking attempts")
     time_taken_seconds = models.PositiveIntegerField(default=0, help_text="Time taken for this attempt in seconds")
     
     class Meta:

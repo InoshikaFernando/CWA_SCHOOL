@@ -159,7 +159,6 @@
             <thead>
                 <tr>
                     <th>Topic</th>
-                    <th>Attempts</th>
                     <th>Min Points</th>
                     <th>Max Points</th>
                     <th>Avg Points</th>
@@ -169,7 +168,6 @@
                 {% for item in progress_by_topic %}
                 <tr>
                     <td>{{ item.topic }}</td>
-                    <td>{{ item.attempts }}</td>
                     <td>{{ item.min_points }}</td>
                     <td>{{ item.max_points }}</td>
                     <td>{{ item.avg_points }}</td>

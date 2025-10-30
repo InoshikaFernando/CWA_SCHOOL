@@ -553,6 +553,8 @@ def take_quiz(request, level_number):
     if request.method == "POST":
         score = 0
         total_points = 0
+        # Create a session id for this quiz attempt to track best records
+        session_id = f"quiz-{level_number}-{int(time.time())}-{random.randint(1000, 9999)}"
         
         for question in questions:
             total_points += question.points
@@ -573,13 +575,37 @@ def take_quiz(request, level_number):
                             defaults={
                                 'selected_answer': selected_answer,
                                 'is_correct': is_correct,
-                                'points_earned': question.points if is_correct else 0
+                                'points_earned': question.points if is_correct else 0,
+                                'session_id': session_id,
+                                'time_taken_seconds': 0
                             }
                         )
                     except Answer.DoesNotExist:
                         pass
-        
-        messages.success(request, f"Quiz completed! Score: {score}/{total_points}")
+        # Compute previous best record for this level (by prior sessions)
+        previous_sessions = StudentAnswer.objects.filter(
+            student=request.user,
+            question__level=level
+        ).exclude(session_id=session_id).values_list('session_id', flat=True).distinct()
+
+        previous_best = None
+        for sid in previous_sessions:
+            if not sid:
+                continue
+            s_total = StudentAnswer.objects.filter(
+                student=request.user,
+                question__level=level,
+                session_id=sid
+            ).aggregate(total=Sum('points_earned'))['total'] or 0
+            if previous_best is None or s_total > previous_best:
+                previous_best = s_total
+
+        if previous_best is None:
+            messages.success(request, f"Quiz completed! Score: {score}/{total_points}")
+        elif score > previous_best:
+            messages.success(request, f"🎉 You beat your record! New best record is {score} (previous best was {previous_best}).")
+        else:
+            messages.info(request, f"Quiz completed! Score: {score}/{total_points}. Best record remains {previous_best}.")
         return redirect("maths:level_detail", level_number=level.level_number)
     
     return render(request, "maths/take_quiz.html", {

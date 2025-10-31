@@ -1,5 +1,6 @@
 {% extends "maths/base.html" %}
 {% load practice_extras %}
+{% block title %}Welcome{% endblock %}
 {% block content %}
 <style>
 .accordion {
@@ -51,7 +52,8 @@
 }
 
 .accordion-content.active {
-    max-height: 500px;
+    max-height: 2000px;
+    padding: 20px;
 }
 
 .topics-grid {
@@ -149,38 +151,100 @@
 }
 </style>
 
-<h1>📚 Student Dashboard</h1>
+<h1>Welcome</h1>
 
-{% if show_progress_table and not show_all_content %}
-    {% if progress_by_topic %}
+{% if show_progress_table %}
+    {% if progress_by_level %}
     <div class="progress-table">
-        <h2>📊 Your Progress</h2>
+        <h2>📊 Your Progress by Level</h2>
         <table>
             <thead>
                 <tr>
-                    <th>Topic</th>
-                    <th>Min Points</th>
-                    <th>Max Points</th>
-                    <th>Avg Points</th>
+                    <th>Level</th>
+                    <th>Points</th>
+                    <th>Time</th>
+                    <th>Date & Time</th>
+                    <th>Attempts</th>
                 </tr>
             </thead>
             <tbody>
-                {% for item in progress_by_topic %}
+                {% for item in progress_by_level %}
                 <tr>
-                    <td>{{ item.topic }}</td>
-                    <td>{{ item.min_points }}</td>
-                    <td>{{ item.max_points }}</td>
-                    <td>{{ item.avg_points }}</td>
+                    <td>{{ item.level_name }}</td>
+                    <td>{{ item.best_points }}</td>
+                    <td>{{ item.best_time_seconds|format_time }}</td>
+                    <td>
+                        {% if item.best_date %}
+                            {{ item.best_date|date:"M d, Y H:i" }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td>{{ item.total_attempts }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
     {% else %}
-    <div class="info-box">
-        <p>📊 No progress data yet. Start practicing to see your stats!</p>
-    </div>
+        {% if not show_all_content %}
+        <div class="info-box">
+            <p>📊 No progress data yet. Start practicing to see your stats!</p>
+        </div>
+        {% endif %}
     {% endif %}
+{% endif %}
+
+{% if not show_all_content and show_progress_table and basic_facts_progress %}
+    <div style="margin-top: 50px;">
+        <h2>🧮 Basic Facts Progress</h2>
+        <div class="accordion" style="margin-top: 20px;">
+            {% for subtopic_name, levels_progress in basic_facts_progress.items %}
+                {% if levels_progress %}
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        {% if subtopic_name == "Addition" %}➕
+                        {% elif subtopic_name == "Subtraction" %}➖
+                        {% elif subtopic_name == "Multiplication" %}✖️
+                        {% elif subtopic_name == "Division" %}➗
+                        {% endif %}
+                        {{ subtopic_name }}
+                    </div>
+                    <div class="accordion-content" style="padding: 20px;">
+                        <table class="progress-table" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                            <thead>
+                                <tr>
+                                    <th style="padding: 12px; border: 1px solid #dee2e6; background: #f8f9fa; text-align: left;">Level</th>
+                                    <th style="padding: 12px; border: 1px solid #dee2e6; background: #f8f9fa; text-align: left;">Completed Time</th>
+                                    <th style="padding: 12px; border: 1px solid #dee2e6; background: #f8f9fa; text-align: left;">Points (Max)</th>
+                                    <th style="padding: 12px; border: 1px solid #dee2e6; background: #f8f9fa; text-align: left;">Date & Time</th>
+                                    <th style="padding: 12px; border: 1px solid #dee2e6; background: #f8f9fa; text-align: left;">Attempts</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for progress_data in levels_progress %}
+                                <tr>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold; color: #667eea;">Level {{ progress_data.display_level }}</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6;">{{ progress_data.best_time_seconds|format_time }}</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold; color: #28a745; font-size: 16px;">{{ progress_data.best_points }}</td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6;">
+                                        {% if progress_data.best_date %}
+                                            {{ progress_data.best_date|date:"M d, Y H:i" }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </td>
+                                    <td style="padding: 12px; border: 1px solid #dee2e6; text-align: center;">{{ progress_data.total_attempts }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
 {% endif %}
 
 {% if not show_all_content and show_progress_table %}
@@ -199,6 +263,48 @@
         <p>If you need to join another class, use the <a href="{% url 'maths:join_class' %}">Join class</a> page.</p>
     {% endif %}
 </div>
+
+{% if show_all_content and basic_facts_by_subtopic %}
+<div style="margin: 20px 0; max-width: 800px; margin-left: auto; margin-right: auto;">
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+        <h3 style="color: white; margin: 0 0 20px 0; font-size: 24px; text-align: center;">Basic Facts 🧮</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">
+            {% if basic_facts_by_subtopic.Addition %}
+            <div class="topic-card" style="margin: 0;">
+                <a href="{% url 'maths:basic_facts_subtopic' 'Addition' %}">
+                    <h4 style="font-size: 18px;">➕ Addition</h4>
+                    <p style="font-size: 14px;">{{ basic_facts_by_subtopic.Addition|length }} levels</p>
+                </a>
+            </div>
+            {% endif %}
+            {% if basic_facts_by_subtopic.Subtraction %}
+            <div class="topic-card" style="margin: 0;">
+                <a href="{% url 'maths:basic_facts_subtopic' 'Subtraction' %}">
+                    <h4 style="font-size: 18px;">➖ Subtraction</h4>
+                    <p style="font-size: 14px;">{{ basic_facts_by_subtopic.Subtraction|length }} levels</p>
+                </a>
+            </div>
+            {% endif %}
+            {% if basic_facts_by_subtopic.Multiplication %}
+            <div class="topic-card" style="margin: 0;">
+                <a href="{% url 'maths:basic_facts_subtopic' 'Multiplication' %}">
+                    <h4 style="font-size: 18px;">✖️ Multiplication</h4>
+                    <p style="font-size: 14px;">{{ basic_facts_by_subtopic.Multiplication|length }} levels</p>
+                </a>
+            </div>
+            {% endif %}
+            {% if basic_facts_by_subtopic.Division %}
+            <div class="topic-card" style="margin: 0;">
+                <a href="{% url 'maths:basic_facts_subtopic' 'Division' %}">
+                    <h4 style="font-size: 18px;">➗ Division</h4>
+                    <p style="font-size: 14px;">{{ basic_facts_by_subtopic.Division|length }} levels</p>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <div class="accordion">
     {% for year in sorted_years %}
@@ -285,11 +391,22 @@ function toggleAccordion(header) {
     const content = header.nextElementSibling;
     const isActive = header.classList.contains('active');
     
-    // Close all accordions
-    document.querySelectorAll('.accordion-header').forEach(h => {
-        h.classList.remove('active');
-        h.nextElementSibling.classList.remove('active');
-    });
+    // Close all accordions at the same level
+    const accordion = header.closest('.accordion');
+    if (accordion) {
+        accordion.querySelectorAll('.accordion-header').forEach(h => {
+            if (h !== header) {
+                h.classList.remove('active');
+                h.nextElementSibling.classList.remove('active');
+            }
+        });
+    } else {
+        // Close all accordions if not inside a nested accordion
+        document.querySelectorAll('.accordion-header').forEach(h => {
+            h.classList.remove('active');
+            h.nextElementSibling.classList.remove('active');
+        });
+    }
     
     // Open clicked accordion if it wasn't active
     if (!isActive) {
@@ -297,6 +414,21 @@ function toggleAccordion(header) {
         content.classList.add('active');
     }
 }
+
+function toggleNestedAccordion(header) {
+    const content = header.nextElementSibling;
+    const isActive = header.classList.contains('active');
+    
+    // Toggle only this accordion (for nested accordions)
+    if (!isActive) {
+        header.classList.add('active');
+        content.classList.add('active');
+    } else {
+        header.classList.remove('active');
+        content.classList.remove('active');
+    }
+}
+
 
 // Open first accordion by default
 document.addEventListener('DOMContentLoaded', function() {

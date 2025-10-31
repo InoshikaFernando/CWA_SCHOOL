@@ -1,6 +1,113 @@
 {% extends "maths/base.html" %}
+{% load practice_extras %}
 {% block content %}
-<h1>📝 Quiz - Year {{ level.level_number }}</h1>
+
+{% if completed %}
+<style>
+    .score-container {
+        border-radius: 20px;
+        padding: 40px;
+        text-align: center;
+        color: white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        margin: 50px auto;
+        max-width: 600px;
+        {% if beat_record %}
+        background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        animation: goldPulse 2s ease-in-out infinite;
+        {% else %}
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        {% endif %}
+    }
+    
+    @keyframes goldPulse {
+        0%, 100% {
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+        50% {
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.7);
+        }
+    }
+    
+    .score-title {
+        font-size: 32px;
+        margin-bottom: 20px;
+    }
+    
+    .score-value {
+        font-size: 72px;
+        font-weight: bold;
+        margin: 20px 0;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .score-percentage {
+        font-size: 24px;
+        margin-top: 20px;
+    }
+    
+    .back-button {
+        display: inline-block;
+        margin-top: 30px;
+        padding: 15px 40px;
+        background: white;
+        {% if beat_record %}
+        color: #FFA500;
+        {% else %}
+        color: #667eea;
+        {% endif %}
+        text-decoration: none;
+        border-radius: 30px;
+        font-weight: bold;
+        transition: transform 0.3s;
+    }
+    
+    .back-button:hover {
+        transform: scale(1.05);
+    }
+    
+    .high-score-badge {
+        margin-top: 20px;
+        padding: 15px 20px;
+        background: rgba(255,255,255,0.25);
+        border-radius: 15px;
+        border: 2px solid rgba(255,255,255,0.5);
+        font-size: 26px;
+        font-weight: bold;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+</style>
+
+<div class="score-container">
+    {% if beat_record %}
+    <h1 class="score-title">🏆 NEW HIGH SCORE! 🏆</h1>
+    {% else %}
+    <h1 class="score-title">🎉 Quiz Completed! 🎉</h1>
+    {% endif %}
+    <div class="score-value">{{ total_score }}/{{ total_points }}</div>
+    {% widthratio total_score total_points 100 as percentage %}
+    <div class="score-percentage">{{ percentage }}%</div>
+    <div class="score-percentage">Time: {{ total_time_seconds|format_time }}</div>
+    <div class="score-percentage">Points: {{ final_points }}</div>
+    {% if beat_record %}
+    <div class="high-score-badge">
+        🎉 New High Score! Previous best: {{ previous_best_points }}
+    </div>
+    {% elif is_first_attempt %}
+    <div class="score-percentage" style="margin-top: 20px; padding: 10px; background: rgba(255,255,255,0.2); border-radius: 10px;">
+        ✨ First Attempt!
+    </div>
+    {% else %}
+    <div class="score-percentage" style="margin-top: 20px; padding: 10px; background: rgba(255,255,255,0.2); border-radius: 10px;">
+        Best record: {{ previous_best_points }}
+    </div>
+    {% endif %}
+    <a href="{% url 'maths:dashboard_detail' %}" class="back-button">Back to Dashboard</a>
+</div>
+
+{% else %}
+
+<h1>📝 Quiz - {% if level.level_number >= 100 %}Level {{ level.level_number|basic_facts_level }}{% else %}Year {{ level.level_number }}{% endif %}</h1>
 
 <div class="quiz-container">
     <form method="post">
@@ -8,7 +115,10 @@
         
         <div class="quiz-info">
             <p><strong>Total Questions:</strong> {{ questions|length }}</p>
-            <p><strong>Topics Covered:</strong> All topics for Year {{ level.level_number }}</p>
+            <p><strong>Topics Covered:</strong> {% if level.level_number >= 100 %}Basic Facts{% else %}All topics for Year {{ level.level_number }}{% endif %}</p>
+            {% if level.level_number >= 100 %}
+            <p style="text-align: center; color: #333; font-weight: bold; margin-top: 10px;">⏱️ Time: <span id="live-timer">0s</span></p>
+            {% endif %}
         </div>
         
         {% for question in questions %}
@@ -27,12 +137,22 @@
                 {% endif %}
                 
                 <div class="answer-options">
-                    {% for answer in question.answers.all %}
-                        <label class="answer-option">
-                            <input type="radio" name="question_{{ question.id }}" value="{{ answer.id }}" required>
-                            <span>{{ answer.answer_text }}</span>
-                        </label>
-                    {% endfor %}
+                    {% if question.question_type == 'short_answer' %}
+                        <div class="text-answer">
+                            <input type="text" 
+                                   name="question_{{ question.id }}" 
+                                   placeholder="Enter your answer..." 
+                                   required
+                                   style="width: 100%; padding: 12px; font-size: 16px; border: 2px solid #dee2e6; border-radius: 6px; margin-top: 10px;">
+                        </div>
+                    {% else %}
+                        {% for answer in question.answers.all %}
+                            <label class="answer-option">
+                                <input type="radio" name="question_{{ question.id }}" value="{{ answer.id }}" required>
+                                <span>{{ answer.answer_text }}</span>
+                            </label>
+                        {% endfor %}
+                    {% endif %}
                 </div>
                 
                 {% if question.explanation %}
@@ -190,4 +310,28 @@
         border: 1px solid #c3e6cb;
     }
 </style>
+
+{% if level.level_number >= 100 %}
+<script>
+    // Live timer for Basic Facts - tracks actual elapsed time from page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const timerEl = document.getElementById('live-timer');
+        if (!timerEl) return;
+        
+        const startTime = Date.now();
+        setInterval(function() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            if (minutes > 0) {
+                timerEl.textContent = minutes + 'm ' + seconds + 's';
+            } else {
+                timerEl.textContent = elapsed + 's';
+            }
+        }, 1000);
+    });
+</script>
+{% endif %}
+
+{% endif %}
 {% endblock %}

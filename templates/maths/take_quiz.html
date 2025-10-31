@@ -12,12 +12,12 @@
         box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         margin: 50px auto;
         max-width: 600px;
-        {% if beat_record %}
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .score-container.gold {
         background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
         animation: goldPulse 2s ease-in-out infinite;
-        {% else %}
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        {% endif %}
     }
     
     @keyframes goldPulse {
@@ -51,15 +51,15 @@
         margin-top: 30px;
         padding: 15px 40px;
         background: white;
-        {% if beat_record %}
-        color: #FFA500;
-        {% else %}
         color: #667eea;
-        {% endif %}
         text-decoration: none;
         border-radius: 30px;
         font-weight: bold;
         transition: transform 0.3s;
+    }
+    
+    .back-button.gold {
+        color: #FFA500;
     }
     
     .back-button:hover {
@@ -78,7 +78,7 @@
     }
 </style>
 
-<div class="score-container">
+<div class="score-container{% if beat_record %} gold{% endif %}">
     {% if beat_record %}
     <h1 class="score-title">🏆 NEW HIGH SCORE! 🏆</h1>
     {% else %}
@@ -102,7 +102,7 @@
         Best record: {{ previous_best_points }}
     </div>
     {% endif %}
-    <a href="{% url 'maths:dashboard_detail' %}" class="back-button">Back to Dashboard</a>
+    <a href="{% url 'maths:dashboard_detail' %}" class="back-button{% if beat_record %} gold{% endif %}">Back to Dashboard</a>
 </div>
 
 {% else %}

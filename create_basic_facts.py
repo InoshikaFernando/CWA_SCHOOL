@@ -128,9 +128,19 @@ for level_num, description in place_value_levels:
         level_number=level_num,
         defaults={'title': f"Place Value Facts Level {display_level}: {description}"}
     )
-    # Associate level with Place Value Facts topic
-    level.topics.add(place_value_topic)
-    print(f"{'Created' if created else 'Found'} level {level_num}: {level.title}")
+    # Update title if level already existed but title might be different
+    if not created:
+        level.title = f"Place Value Facts Level {display_level}: {description}"
+        level.save()
+    
+    # Associate level with Place Value Facts topic (ensure it's added even if level existed)
+    if place_value_topic not in level.topics.all():
+        level.topics.add(place_value_topic)
+        print(f"Associated level {level_num} with Place Value Facts")
+    else:
+        print(f"Level {level_num} already associated with Place Value Facts")
+    
+    print(f"{'Created' if created else 'Updated'} level {level_num}: {level.title}")
 
 print("\n✅ Basic Facts structure created successfully!")
 print(f"   - Topic: Basic facts")
@@ -140,4 +150,19 @@ print(f"   - Subtraction levels: {len(subtraction_levels)} (Level numbers 107-11
 print(f"   - Multiplication levels: {len(multiplication_levels)} (Level numbers 114-120)")
 print(f"   - Division levels: {len(division_levels)} (Level numbers 121-127)")
 print(f"   - Place Value Facts levels: {len(place_value_levels)} (Level numbers 128-132)")
+
+# Final verification
+print("\n📊 Verification:")
+place_value_topic_check = Topic.objects.filter(name="Place Value Facts").first()
+if place_value_topic_check:
+    pv_levels = Level.objects.filter(topics=place_value_topic_check, level_number__gte=128, level_number__lte=132)
+    print(f"   ✓ Place Value Facts topic exists")
+    print(f"   ✓ Place Value Facts levels found: {pv_levels.count()} (expected 5)")
+    if pv_levels.count() == 5:
+        print(f"   ✓ All Place Value Facts levels are properly associated!")
+    else:
+        print(f"   ⚠️  Warning: Expected 5 levels but found {pv_levels.count()}")
+        print(f"   Missing levels: {set(range(128, 133)) - set(pv_levels.values_list('level_number', flat=True))}")
+else:
+    print(f"   ⚠️  ERROR: Place Value Facts topic not found!")
 

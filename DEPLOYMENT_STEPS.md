@@ -27,8 +27,8 @@ python create_basic_facts.py
 
 This script will:
 - Create "Basic facts" topic
-- Create subtopics: Addition, Subtraction, Multiplication, Division
-- Create 28 levels (100-127) associated with these subtopics
+- Create subtopics: Addition, Subtraction, Multiplication, Division, Place Value Facts
+- Create 33 levels (100-132) associated with these subtopics
 
 ## Step 4: Verify Basic Facts Were Created
 ```bash
@@ -44,16 +44,22 @@ from maths.models import Level, Topic
 basic_facts_levels = Level.objects.filter(level_number__gte=100)
 print(f"Basic Facts levels found: {basic_facts_levels.count()}")
 
-# Should show 28 levels (100-127)
+# Should show 33 levels (100-132)
 for level in basic_facts_levels:
     topics = level.topics.all()
     print(f"Level {level.level_number}: {[t.name for t in topics]}")
 
 # Check if topics exist
-topics = Topic.objects.filter(name__in=['Addition', 'Subtraction', 'Multiplication', 'Division'])
+topics = Topic.objects.filter(name__in=['Addition', 'Subtraction', 'Multiplication', 'Division', 'Place Value Facts'])
 print(f"\nSubtopics found: {topics.count()}")
 for topic in topics:
     print(f"- {topic.name}")
+
+# Check Place Value Facts specifically
+place_value_topic = Topic.objects.filter(name='Place Value Facts').first()
+if place_value_topic:
+    place_value_levels = Level.objects.filter(topics=place_value_topic, level_number__gte=128)
+    print(f"\nPlace Value Facts levels: {place_value_levels.count()} (should be 5)")
 ```
 
 ## Step 5: Reload Web App

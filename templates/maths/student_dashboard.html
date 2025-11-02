@@ -207,6 +207,7 @@
                         {% elif subtopic_name == "Subtraction" %}➖
                         {% elif subtopic_name == "Multiplication" %}✖️
                         {% elif subtopic_name == "Division" %}➗
+                        {% elif subtopic_name == "Place Value Facts" %}🔢
                         {% endif %}
                         {{ subtopic_name }}
                     </div>
@@ -298,6 +299,14 @@
                 <a href="{% url 'maths:basic_facts_subtopic' 'Division' %}">
                     <h4 style="font-size: 18px;">➗ Division</h4>
                     <p style="font-size: 14px;">{{ basic_facts_by_subtopic.Division|length }} levels</p>
+                </a>
+            </div>
+            {% endif %}
+            {% if basic_facts_by_subtopic|lookup:"Place Value Facts" %}
+            <div class="topic-card" style="margin: 0;">
+                <a href="{% url 'maths:basic_facts_subtopic' 'Place Value Facts' %}">
+                    <h4 style="font-size: 18px;">🔢 Place Value Facts</h4>
+                    <p style="font-size: 14px;">{{ basic_facts_by_subtopic|lookup:"Place Value Facts"|length }} levels</p>
                 </a>
             </div>
             {% endif %}

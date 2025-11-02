@@ -11,12 +11,16 @@ def lookup(dictionary, key):
 def basic_facts_level(level_number):
     """Convert Basic Facts level number (100+) to display level (1+)"""
     if level_number >= 100:
-        # Each subtopic has 7 levels
-        # Addition: 100-106, Subtraction: 107-113, Multiplication: 114-120, Division: 121-127
-        # Calculate which block of 7 we're in, then the offset within that block
-        block_start = ((level_number - 100) // 7) * 7 + 100
-        offset = level_number - block_start
-        return offset + 1
+        if 100 <= level_number <= 106:  # Addition
+            return level_number - 99
+        elif 107 <= level_number <= 113:  # Subtraction
+            return level_number - 106
+        elif 114 <= level_number <= 120:  # Multiplication
+            return level_number - 113
+        elif 121 <= level_number <= 127:  # Division
+            return level_number - 120
+        elif 128 <= level_number <= 132:  # Place Value Facts
+            return level_number - 127
     return level_number
 
 @register.filter

@@ -17,7 +17,7 @@ basic_facts_topic, created = Topic.objects.get_or_create(name="Basic facts")
 print(f"{'Created' if created else 'Found'} topic: Basic facts")
 
 # Create subtopics
-subtopics = ["Addition", "Subtraction", "Multiplication", "Division"]
+subtopics = ["Addition", "Subtraction", "Multiplication", "Division", "Place Value Facts"]
 topic_objs = {}
 for subtopic_name in subtopics:
     topic, created = Topic.objects.get_or_create(name=subtopic_name)
@@ -112,6 +112,26 @@ for level_num, description in division_levels:
     level.topics.add(division_topic)
     print(f"{'Created' if created else 'Found'} level {level_num}: {level.title}")
 
+# Create Place Value Facts levels (starting from level_number 128)
+place_value_levels = [
+    (128, "Combinations for 10 (e.g., 7 + 3 = ?, 4 + ? = 10)"),
+    (129, "Combinations for 100 (e.g., 63 + 37 = 100, 40 + ? = 100)"),
+    (130, "Combinations for 1000"),
+    (131, "Combinations for 10,000"),
+    (132, "Combinations for 100,000"),
+]
+
+place_value_topic = topic_objs["Place Value Facts"]
+for level_num, description in place_value_levels:
+    display_level = level_num - 127  # 128 -> 1, 129 -> 2, etc.
+    level, created = Level.objects.get_or_create(
+        level_number=level_num,
+        defaults={'title': f"Place Value Facts Level {display_level}: {description}"}
+    )
+    # Associate level with Place Value Facts topic
+    level.topics.add(place_value_topic)
+    print(f"{'Created' if created else 'Found'} level {level_num}: {level.title}")
+
 print("\n✅ Basic Facts structure created successfully!")
 print(f"   - Topic: Basic facts")
 print(f"   - Subtopics: {', '.join(subtopics)}")
@@ -119,4 +139,5 @@ print(f"   - Addition levels: {len(addition_levels)} (Level numbers 100-106)")
 print(f"   - Subtraction levels: {len(subtraction_levels)} (Level numbers 107-113)")
 print(f"   - Multiplication levels: {len(multiplication_levels)} (Level numbers 114-120)")
 print(f"   - Division levels: {len(division_levels)} (Level numbers 121-127)")
+print(f"   - Place Value Facts levels: {len(place_value_levels)} (Level numbers 128-132)")
 

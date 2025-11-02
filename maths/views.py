@@ -82,7 +82,7 @@ def dashboard(request):
     basic_facts_by_subtopic = {}
     for level in basic_facts_levels:
         # Get the subtopic (Addition, Subtraction, etc.)
-        subtopics = level.topics.filter(name__in=['Addition', 'Subtraction', 'Multiplication', 'Division'])
+        subtopics = level.topics.filter(name__in=['Addition', 'Subtraction', 'Multiplication', 'Division', 'Place Value Facts'])
         if subtopics.exists():
             subtopic_name = subtopics.first().name
             if subtopic_name not in basic_facts_by_subtopic:
@@ -132,7 +132,7 @@ def dashboard_detail(request):
     # Group Basic Facts levels by subtopic
     basic_facts_by_subtopic = {}
     for level in basic_facts_levels:
-        subtopics = level.topics.filter(name__in=['Addition', 'Subtraction', 'Multiplication', 'Division'])
+        subtopics = level.topics.filter(name__in=['Addition', 'Subtraction', 'Multiplication', 'Division', 'Place Value Facts'])
         if subtopics.exists():
             subtopic_name = subtopics.first().name
             if subtopic_name not in basic_facts_by_subtopic:
@@ -269,6 +269,8 @@ def dashboard_detail(request):
                     display_level = level_num - 113
                 elif 121 <= level_num <= 127:  # Division
                     display_level = level_num - 120
+                elif 128 <= level_num <= 132:  # Place Value Facts
+                    display_level = level_num - 127
                 
                 basic_facts_progress[subtopic_name].append({
                     'display_level': display_level,
@@ -739,6 +741,114 @@ def generate_basic_facts_question(level_num):
             dividend = quotient * divisor
             return f"{dividend} ÷ {divisor} = ?", str(quotient)
     
+    elif 128 <= level_num <= 132:  # Place Value Facts
+        target_values = {128: 10, 129: 100, 130: 1000, 131: 10000, 132: 100000}
+        target = target_values.get(level_num)
+        
+        if target is None:
+            return None, None
+        
+        # Randomly choose question format: 0 = a + b = ?, 1 = a + ? = target, 2 = ? + b = target
+        question_type = random.randint(0, 2)
+        
+        if level_num == 128:  # Combinations for 10
+            if question_type == 0:
+                # a + b = ?
+                a = random.randint(1, 9)
+                b = target - a
+                return f"{a} + {b} = ?", str(target)
+            elif question_type == 1:
+                # a + ? = 10
+                a = random.randint(1, 9)
+                b = target - a
+                return f"{a} + ? = {target}", str(b)
+            else:
+                # ? + b = 10
+                b = random.randint(1, 9)
+                a = target - b
+                return f"? + {b} = {target}", str(a)
+        
+        elif level_num == 129:  # Combinations for 100
+            if question_type == 0:
+                # a + b = ?
+                # Can be simple (e.g., 40 + 60) or complex (e.g., 63 + 37)
+                use_complex = random.choice([True, False])
+                if use_complex:
+                    # Generate numbers that add to 100 with varied digits
+                    a = random.randint(10, 99)
+                    b = target - a
+                    if b < 10 or b > 99:
+                        # Fallback to simple case
+                        a = random.randint(10, 90)
+                        b = target - a
+                else:
+                    # Simple case: multiples of 10
+                    a_tens = random.randint(1, 9)
+                    a = a_tens * 10
+                    b = target - a
+                return f"{a} + {b} = ?", str(target)
+            elif question_type == 1:
+                # a + ? = 100
+                a = random.randint(10, 99)
+                b = target - a
+                return f"{a} + ? = {target}", str(b)
+            else:
+                # ? + b = 100
+                b = random.randint(10, 99)
+                a = target - b
+                return f"? + {b} = {target}", str(a)
+        
+        elif level_num == 130:  # Combinations for 1000
+            if question_type == 0:
+                # a + b = ?
+                a = random.randint(100, 999)
+                b = target - a
+                return f"{a} + {b} = ?", str(target)
+            elif question_type == 1:
+                # a + ? = 1000
+                a = random.randint(100, 999)
+                b = target - a
+                return f"{a} + ? = {target}", str(b)
+            else:
+                # ? + b = 1000
+                b = random.randint(100, 999)
+                a = target - b
+                return f"? + {b} = {target}", str(a)
+        
+        elif level_num == 131:  # Combinations for 10000
+            if question_type == 0:
+                # a + b = ?
+                a = random.randint(1000, 9999)
+                b = target - a
+                return f"{a} + {b} = ?", str(target)
+            elif question_type == 1:
+                # a + ? = 10000
+                a = random.randint(1000, 9999)
+                b = target - a
+                return f"{a} + ? = {target}", str(b)
+            else:
+                # ? + b = 10000
+                b = random.randint(1000, 9999)
+                a = target - b
+                return f"? + {b} = {target}", str(a)
+        
+        elif level_num == 132:  # Combinations for 100000
+            if question_type == 0:
+                # a + b = ?
+                a = random.randint(10000, 99999)
+                b = target - a
+                return f"{a} + {b} = ?", str(target)
+            elif question_type == 1:
+                # a + ? = 100000
+                a = random.randint(10000, 99999)
+                b = target - a
+                return f"{a} + ? = {target}", str(b)
+            else:
+                # ? + b = 100000
+                b = random.randint(10000, 99999)
+                a = target - b
+                return f"? + {b} = {target}", str(a)
+    
     return None, None
 
 class DynamicQuestion:
@@ -757,7 +867,7 @@ class DynamicQuestion:
 def basic_facts_subtopic(request, subtopic_name):
     """Show level selection page for a Basic Facts subtopic"""
     # Validate subtopic name
-    valid_subtopics = ['Addition', 'Subtraction', 'Multiplication', 'Division']
+    valid_subtopics = ['Addition', 'Subtraction', 'Multiplication', 'Division', 'Place Value Facts']
     if subtopic_name not in valid_subtopics:
         messages.error(request, "Invalid subtopic.")
         return redirect("maths:dashboard")
@@ -784,7 +894,8 @@ def basic_facts_subtopic(request, subtopic_name):
         'Addition': '➕',
         'Subtraction': '➖',
         'Multiplication': '✖️',
-        'Division': '➗'
+        'Division': '➗',
+        'Place Value Facts': '🔢'
     }
     
     return render(request, "maths/basic_facts_subtopic.html", {

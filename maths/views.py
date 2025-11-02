@@ -830,6 +830,9 @@ def take_quiz(request, level_number):
         import uuid
         session_id = str(uuid.uuid4())
         
+        # Store question/answer review data for Basic Facts popup
+        question_review_data = [] if is_basic_facts else None
+        
         for question in questions:
             total_points += question.points
             
@@ -843,6 +846,15 @@ def take_quiz(request, level_number):
                 is_correct = (student_answer_normalized == correct_answer_normalized)
                 if is_correct:
                     score += question.points
+                
+                # Store question/answer data for review popup
+                question_review_data.append({
+                    'question_text': question.question_text,
+                    'student_answer': student_answer,
+                    'correct_answer': question.correct_answer,
+                    'is_correct': is_correct,
+                    'points': question.points if is_correct else 0
+                })
                 
                 # For Basic Facts, we don't store in DB, just track in session
                 # We'll handle scoring without creating DB records
@@ -982,7 +994,9 @@ def take_quiz(request, level_number):
                 "final_points": final_points,
                 "previous_best_points": round(previous_best_points, 2) if previous_best_points is not None else None,
                 "beat_record": beat_record,
-                "is_first_attempt": is_first_attempt
+                "is_first_attempt": is_first_attempt,
+                "question_review_data": question_review_data,
+                "is_basic_facts": True
             })
         
         # For regular levels, show messages and redirect

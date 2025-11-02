@@ -584,11 +584,25 @@ def generate_basic_facts_question(level_num):
             a, b = a1 * 10 + a2, b1 * 10 + b2
             return f"{a} + {b} = ?", str(a + b)
         elif level_num == 103:
-            # With carry over
+            # With carry over (units digits sum >= 10)
             a = random.randint(15, 99)
             a_units = a % 10
             b_tens = random.randint(1, 8)
-            b_units = random.randint(max(1, 10 - a_units), 9)
+            # Need b_units such that a_units + b_units >= 10 (requires carry over)
+            # b_units should be >= (10 - a_units) and <= 9
+            min_b_units = max(1, 10 - a_units)
+            max_b_units = 9
+            if min_b_units <= max_b_units:
+                b_units = random.randint(min_b_units, max_b_units)
+            else:
+                # If a_units is 0, we'd need b_units >= 10 which is impossible
+                # Regenerate a so a_units > 0, or use fallback approach
+                # Regenerate a to ensure a_units is not 0
+                while a_units == 0:
+                    a = random.randint(15, 99)
+                    a_units = a % 10
+                min_b_units = max(1, 10 - a_units)
+                b_units = random.randint(min_b_units, 9)
             b = b_tens * 10 + b_units
             return f"{a} + {b} = ?", str(a + b)
         elif level_num == 104:
@@ -612,9 +626,24 @@ def generate_basic_facts_question(level_num):
             b = random.randint(0, a_units)
             return f"{a} - {b} = ?", str(a - b)
         elif level_num == 109:
+            # Subtraction with borrowing (a_units < b_units)
             a = random.randint(10, 99)
             a_units = a % 10
-            b = random.randint(a_units + 1, 9)
+            # b must be > a_units to require borrowing, but <= 9
+            # If a_units is 9, there's no valid b (would need b > 9)
+            # So we ensure a_units < 9, or adjust the range
+            min_b = a_units + 1
+            max_b = 9
+            if min_b <= max_b:
+                b = random.randint(min_b, max_b)
+            else:
+                # If a_units is 9, we can't create a borrowing scenario with single digits
+                # So generate a new 'a' that allows borrowing, or use a fallback
+                # Regenerate a with units digit < 9
+                while a_units >= 9:
+                    a = random.randint(10, 99)
+                    a_units = a % 10
+                b = random.randint(a_units + 1, 9)
             return f"{a} - {b} = ?", str(a - b)
         elif level_num == 110:
             a = random.randint(20, 99)

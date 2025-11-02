@@ -9,7 +9,7 @@ from django.db.models import Q
 import random
 from datetime import datetime
 import json
-from .models import Topic, Level, ClassRoom, Enrollment, CustomUser, Question, Answer, StudentAnswer
+from .models import Topic, Level, ClassRoom, Enrollment, CustomUser, Question, Answer, StudentAnswer, BasicFactsResult
 from .forms import CreateClassForm, StudentSignUpForm, TeacherSignUpForm, TeacherCenterRegistrationForm, IndividualStudentRegistrationForm, StudentBulkRegistrationForm, QuestionForm, AnswerFormSet
 
 def signup_student(request):
@@ -177,12 +177,33 @@ def dashboard_detail(request):
         completed_session_ids = []
         question_limit = YEAR_QUESTION_COUNTS.get(level_num, 10)
         
+        # Initialize topic_name with default value
+        topic_name = "Unknown"
+        level_name = f"Level {level_num}"
+        
         # Get level info
         try:
             level_obj = Level.objects.get(level_number=level_num)
             level_name = f"Level {level_num}" if level_num >= 100 else f"Year {level_num}"
+            
+            # Get topic name
+            if level_num >= 100:
+                # Basic Facts level - get subtopic
+                basic_facts_topics = level_obj.topics.filter(name__in=['Addition', 'Subtraction', 'Multiplication', 'Division', 'Place Value Facts'])
+                if basic_facts_topics.exists():
+                    topic_name = basic_facts_topics.first().name
+                else:
+                    topic_name = "Basic Facts"
+            else:
+                # Regular level - get first topic or "General"
+                topics = level_obj.topics.all()
+                if topics.exists():
+                    topic_name = topics.first().name
+                else:
+                    topic_name = "General"
         except Level.DoesNotExist:
             level_name = f"Level {level_num}"
+            topic_name = "Unknown"
         
         for session_id in session_ids:
             session_answers = student_answers.filter(
@@ -225,6 +246,7 @@ def dashboard_detail(request):
             progress_by_level.append({
                 'level_number': level_num,
                 'level_name': level_name,
+                'topic_name': topic_name,
                 'total_attempts': len(completed_session_ids),
                 'best_points': best_score,
                 'best_time_seconds': best_attempt['time_seconds'],
@@ -237,28 +259,22 @@ def dashboard_detail(request):
     # Sort by level number
     progress_by_level.sort(key=lambda x: x['level_number'])
     
-    # Get Basic Facts progress from session
+    # Get Basic Facts progress from database
     basic_facts_progress = {}
     for subtopic_name, levels in basic_facts_by_subtopic.items():
         basic_facts_progress[subtopic_name] = []
         for level in levels:
             level_num = level.level_number
-            results_key = f"basic_facts_results_{request.user.id}_{level_num}"
-            results_list = request.session.get(results_key, [])
             
-            if results_list:
-                # Get best result
-                best_result = max(results_list, key=lambda x: x['points'])
-                
-                # Fix old format points (divide by 10 if > 100, indicating old format)
-                best_points = best_result['points']
-                if best_points > 100:
-                    best_points = best_points / 10
-                    # Update the stored value for future use - update all entries in the list
-                    for idx, result in enumerate(results_list):
-                        if result.get('points', 0) > 100:
-                            results_list[idx]['points'] = result['points'] / 10
-                    request.session[results_key] = results_list
+            # Get all attempts from database for this level
+            db_results = BasicFactsResult.objects.filter(
+                student=request.user,
+                level=level
+            ).order_by('-points')
+            
+            if db_results.exists():
+                # Get best result (highest points)
+                best_result = db_results.first()
                 
                 display_level = level_num
                 if 100 <= level_num <= 106:  # Addition
@@ -272,14 +288,92 @@ def dashboard_detail(request):
                 elif 128 <= level_num <= 132:  # Place Value Facts
                     display_level = level_num - 127
                 
+                # Count total attempts (unique sessions)
+                total_attempts = db_results.values('session_id').distinct().count()
+                
                 basic_facts_progress[subtopic_name].append({
                     'display_level': display_level,
                     'level_number': level_num,
-                    'best_points': best_points,
-                    'best_time_seconds': best_result['time_taken_seconds'],
-                    'best_date': datetime.fromisoformat(best_result['date']) if isinstance(best_result['date'], str) else best_result['date'],
-                    'total_attempts': len(results_list)
+                    'best_points': float(best_result.points),
+                    'best_time_seconds': best_result.time_taken_seconds,
+                    'best_date': best_result.completed_at,
+                    'total_attempts': total_attempts
                 })
+            else:
+                # Check session for old data (for migration/backward compatibility)
+                results_key = f"basic_facts_results_{request.user.id}_{level_num}"
+                results_list = request.session.get(results_key, [])
+                
+                if results_list:
+                    # Migrate session data to database (one-time migration)
+                    try:
+                        for result_entry in results_list:
+                            # Fix old format points if needed
+                            points = result_entry.get('points', 0)
+                            if points > 100:
+                                points = points / 10
+                            
+                            # Check if this session_id already exists in DB
+                            session_id = result_entry.get('session_id', '')
+                            if session_id and not BasicFactsResult.objects.filter(
+                                student=request.user,
+                                level=level,
+                                session_id=session_id
+                            ).exists():
+                                # Migrate to database
+                                date_str = result_entry.get('date', '')
+                                if isinstance(date_str, str):
+                                    try:
+                                        completed_date = datetime.fromisoformat(date_str)
+                                    except:
+                                        completed_date = datetime.now()
+                                else:
+                                    completed_date = date_str if date_str else datetime.now()
+                                
+                                BasicFactsResult.objects.create(
+                                    student=request.user,
+                                    level=level,
+                                    session_id=session_id,
+                                    score=result_entry.get('score', 0),
+                                    total_points=result_entry.get('total_points', 10),
+                                    time_taken_seconds=result_entry.get('time_taken_seconds', 0),
+                                    points=points,
+                                    completed_at=completed_date
+                                )
+                        
+                        # After migration, get from database again
+                        db_results = BasicFactsResult.objects.filter(
+                            student=request.user,
+                            level=level
+                        ).order_by('-points')
+                        
+                        if db_results.exists():
+                            best_result = db_results.first()
+                            display_level = level_num
+                            if 100 <= level_num <= 106:
+                                display_level = level_num - 99
+                            elif 107 <= level_num <= 113:
+                                display_level = level_num - 106
+                            elif 114 <= level_num <= 120:
+                                display_level = level_num - 113
+                            elif 121 <= level_num <= 127:
+                                display_level = level_num - 120
+                            elif 128 <= level_num <= 132:
+                                display_level = level_num - 127
+                            
+                            total_attempts = db_results.values('session_id').distinct().count()
+                            
+                            basic_facts_progress[subtopic_name].append({
+                                'display_level': display_level,
+                                'level_number': level_num,
+                                'best_points': float(best_result.points),
+                                'best_time_seconds': best_result.time_taken_seconds,
+                                'best_date': best_result.completed_at,
+                                'total_attempts': total_attempts
+                            })
+                    except Exception as e:
+                        # If migration fails, fall back to session display
+                        pass
         
         # Sort by display_level
         basic_facts_progress[subtopic_name].sort(key=lambda x: x['display_level'])
@@ -996,8 +1090,7 @@ def take_quiz(request, level_number):
                     'points': question.points if is_correct else 0
                 })
                 
-                # For Basic Facts, we don't store in DB, just track in session
-                # We'll handle scoring without creating DB records
+                # For Basic Facts, results are stored in database after quiz completion
             elif question.question_type == 'multiple_choice':
                 answer_id = request.POST.get(f'question_{question.id}')
                 if answer_id:
@@ -1022,35 +1115,37 @@ def take_quiz(request, level_number):
                     except Answer.DoesNotExist:
                         pass
         
-        # For Basic Facts, store session results for tracking best scores
+        # For Basic Facts, store results in database for persistent tracking
         if is_basic_facts:
-            # Store result with user ID and level number for persistence
-            basic_facts_results_key = f"basic_facts_results_{request.user.id}_{level_number}"
-            results_list = request.session.get(basic_facts_results_key, [])
-            
             # Calculate points same as measurements, but divide by 10 for Basic Facts
             percentage = (score / total_points) if total_points else 0
             final_points_calc = ((percentage * 100 * 60) / time_taken_seconds) / 10 if time_taken_seconds else 0
+            final_points_calc = round(final_points_calc, 2)
             
+            # Save to database
+            BasicFactsResult.objects.create(
+                student=request.user,
+                level=level,
+                session_id=session_id,
+                score=score,
+                total_points=total_points,
+                time_taken_seconds=time_taken_seconds,
+                points=final_points_calc
+            )
+            
+            # Also keep in session for backward compatibility (optional)
+            basic_facts_results_key = f"basic_facts_results_{request.user.id}_{level_number}"
+            results_list = request.session.get(basic_facts_results_key, [])
             result_entry = {
                 'session_id': session_id,
                 'score': score,
                 'total_points': total_points,
                 'time_taken_seconds': time_taken_seconds,
-                'points': round(final_points_calc, 2),
+                'points': final_points_calc,
                 'date': datetime.now().isoformat()
             }
-            
             results_list.append(result_entry)
             request.session[basic_facts_results_key] = results_list
-            
-            # Also store individual session result for comparison
-            session_results_key = f"quiz_results_{level_number}_{session_id}"
-            request.session[session_results_key] = {
-                'score': score,
-                'total_points': total_points,
-                'time_taken_seconds': time_taken_seconds
-            }
             
             # Clear questions from session
             if session_questions_key in request.session:
@@ -1071,22 +1166,16 @@ def take_quiz(request, level_number):
         
         # Compute previous best record for this level
         if is_basic_facts:
-            # For Basic Facts, check session-based results
-            previous_best_points = None
-            # Look through all session keys for this level
-            for key in list(request.session.keys()):
-                if key.startswith(f"quiz_results_{level_number}_"):
-                    result_data = request.session.get(key, {})
-                    if result_data:
-                        result_score = result_data.get('score', 0)
-                        result_total = result_data.get('total_points', 10)
-                        result_time = result_data.get('time_taken_seconds', 1)
-                        result_percentage = (result_score / result_total) if result_total else 0
-                        # For Basic Facts, divide by 10
-                        result_points = ((result_percentage * 100 * 60) / result_time) / 10 if result_time else 0
-                        
-                        if previous_best_points is None or result_points > previous_best_points:
-                            previous_best_points = result_points
+            # For Basic Facts, check database for previous results (excluding current session)
+            previous_results = BasicFactsResult.objects.filter(
+                student=request.user,
+                level=level
+            ).exclude(session_id=session_id).order_by('-points')
+            
+            if previous_results.exists():
+                previous_best_points = float(previous_results.first().points)
+            else:
+                previous_best_points = None
         else:
             # For regular levels, check database records
             previous_sessions = StudentAnswer.objects.filter(

@@ -106,3 +106,24 @@ class StudentAnswer(models.Model):
     
     def __str__(self):
         return f"{self.student} - {self.question} - {'Correct' if self.is_correct else 'Incorrect'}"
+
+class BasicFactsResult(models.Model):
+    """Store Basic Facts quiz attempts in database for persistent tracking"""
+    student = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="basic_facts_results")
+    level = models.ForeignKey(Level, on_delete=models.CASCADE, related_name="basic_facts_results")
+    session_id = models.CharField(max_length=100, help_text="Session identifier for tracking attempts")
+    score = models.PositiveIntegerField(help_text="Number of correct answers")
+    total_points = models.PositiveIntegerField(help_text="Total possible points")
+    time_taken_seconds = models.PositiveIntegerField(help_text="Time taken for this attempt in seconds")
+    points = models.DecimalField(max_digits=10, decimal_places=2, help_text="Calculated points based on score, time, and percentage")
+    completed_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-completed_at']
+        indexes = [
+            models.Index(fields=['student', 'level']),
+            models.Index(fields=['student', 'level', 'session_id']),
+        ]
+    
+    def __str__(self):
+        return f"{self.student} - Level {self.level.level_number} - {self.points} points ({self.completed_at})"

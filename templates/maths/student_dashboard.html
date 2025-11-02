@@ -161,6 +161,7 @@
             <thead>
                 <tr>
                     <th>Level</th>
+                    <th>Topic</th>
                     <th>Points</th>
                     <th>Time</th>
                     <th>Date & Time</th>
@@ -171,6 +172,7 @@
                 {% for item in progress_by_level %}
                 <tr>
                     <td>{{ item.level_name }}</td>
+                    <td>{{ item.topic_name }}</td>
                     <td>{{ item.best_points }}</td>
                     <td>{{ item.best_time_seconds|format_time }}</td>
                     <td>

@@ -93,113 +93,15 @@ def dashboard(request):
     for subtopic in basic_facts_by_subtopic:
         basic_facts_by_subtopic[subtopic].sort(key=lambda x: x.level_number)
     
-    # Calculate student progress by level
-    from django.db.models import Count, Min, Max, Avg, Sum
-    
-    # Get all student answers for all levels
-    student_answers = StudentAnswer.objects.filter(
-        student=request.user
-    ).select_related('question', 'question__level')
-    
-    # Group by level and session_id to count attempts
-    progress_by_level = []
-    
-    # Get unique combinations of level_number and session_id
-    unique_level_sessions = student_answers.values('question__level__level_number', 'session_id').distinct()
-    
-    # Group by level
-    level_data = {}
-    for item in unique_level_sessions:
-        level_num = item['question__level__level_number']
-        session_id = item['session_id']
-        
-        if not session_id:  # Skip empty session_ids
-            continue
-            
-        if level_num not in level_data:
-            level_data[level_num] = set()
-        
-        level_data[level_num].add(session_id)
-    
-    # Calculate stats for each level
-    YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
-    # For Basic Facts levels, use default of 10 questions
-    for level_num, session_ids in level_data.items():
-        attempts_data = []
-        completed_session_ids = []
-        question_limit = YEAR_QUESTION_COUNTS.get(level_num, 10)
-        
-        # Get level info
-        try:
-            level_obj = Level.objects.get(level_number=level_num)
-            level_name = f"Level {level_num}" if level_num >= 100 else f"Year {level_num}"
-        except Level.DoesNotExist:
-            level_name = f"Level {level_num}"
-        
-        for session_id in session_ids:
-            session_answers = student_answers.filter(
-                session_id=session_id,
-                question__level__level_number=level_num
-            )
-            # Count attempt only if a full quiz was completed for that level
-            if session_answers.count() != question_limit:
-                continue
-            completed_session_ids.append(session_id)
-            
-            # Calculate points using the formula: percentage * 100 * 60 / time_seconds
-            # Get the first answer to get time_taken_seconds and date for the session
-            first_answer = session_answers.first()
-            if first_answer and first_answer.time_taken_seconds > 0:
-                total_correct = sum(1 for a in session_answers if a.is_correct)
-                total_questions = session_answers.count()
-                time_seconds = first_answer.time_taken_seconds
-                
-                percentage = (total_correct / total_questions) if total_questions else 0
-                final_points = (percentage * 100 * 60) / time_seconds if time_seconds else 0
-                attempts_data.append({
-                    'points': round(final_points, 2),
-                    'time_seconds': time_seconds,
-                    'date': first_answer.answered_at
-                })
-            else:
-                # Fallback: just sum points_earned if no time data
-                total_points = sum(a.points_earned for a in session_answers)
-                first_answer_date = first_answer.answered_at if first_answer else None
-                attempts_data.append({
-                    'points': total_points,
-                    'time_seconds': 0,
-                    'date': first_answer_date
-                })
-        
-        if attempts_data:
-            points_list = [a['points'] for a in attempts_data]
-            # Get best score (highest points)
-            best_score = max(points_list)
-            # Get best attempt date
-            best_attempt = max(attempts_data, key=lambda x: x['points'])
-            
-            progress_by_level.append({
-                'level_number': level_num,
-                'level_name': level_name,
-                'total_attempts': len(completed_session_ids),
-                'best_points': best_score,
-                'best_time_seconds': best_attempt['time_seconds'],
-                'best_date': best_attempt['date'],
-                'min_points': min(points_list),
-                'max_points': max(points_list),
-                'avg_points': round(sum(points_list) / len(points_list), 1)
-            })
-    
-    # Sort by level number
-    progress_by_level.sort(key=lambda x: x['level_number'])
+    # Note: Progress calculation removed from home page - only shown on /dashboard/ page
     
     return render(request, "maths/student_dashboard.html", {
         "levels_by_year": levels_by_year,
         "sorted_years": sorted_years,
         "basic_facts_by_subtopic": basic_facts_by_subtopic,
         "has_class": Enrollment.objects.filter(student=request.user).exists(),
-        "progress_by_level": progress_by_level,
-        "show_progress_table": True,
+        "progress_by_level": [],
+        "show_progress_table": False,
         "show_all_content": True
     })
 

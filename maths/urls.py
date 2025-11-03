@@ -22,4 +22,5 @@ urlpatterns = [
     path("level/<int:level_number>/measurements/", views.measurements_questions, name="measurements_questions"),
     path("level/<int:level_number>/measurements-progress/", views.measurements_progress, name="measurements_progress"),
     path("basic-facts/<str:subtopic_name>/", views.basic_facts_subtopic, name="basic_facts_subtopic"),
+    path("profile/", views.user_profile, name="user_profile"),
 ]

@@ -7,6 +7,9 @@ def generate_class_code():
 
 class CustomUser(AbstractUser):
     is_teacher = models.BooleanField(default=False)
+    date_of_birth = models.DateField(null=True, blank=True, help_text="Date of birth")
+    country = models.CharField(max_length=100, blank=True, help_text="Country")
+    region = models.CharField(max_length=100, blank=True, help_text="Region/State/Province")
 
     def __str__(self):
         return self.username

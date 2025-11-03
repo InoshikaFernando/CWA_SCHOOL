@@ -1,5 +1,5 @@
 ﻿from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login
+from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -10,7 +10,7 @@ import random
 from datetime import datetime
 import json
 from .models import Topic, Level, ClassRoom, Enrollment, CustomUser, Question, Answer, StudentAnswer, BasicFactsResult
-from .forms import CreateClassForm, StudentSignUpForm, TeacherSignUpForm, TeacherCenterRegistrationForm, IndividualStudentRegistrationForm, StudentBulkRegistrationForm, QuestionForm, AnswerFormSet
+from .forms import CreateClassForm, StudentSignUpForm, TeacherSignUpForm, TeacherCenterRegistrationForm, IndividualStudentRegistrationForm, StudentBulkRegistrationForm, QuestionForm, AnswerFormSet, UserProfileForm, UserPasswordChangeForm
 
 def signup_student(request):
     if request.method == "POST":
@@ -613,6 +613,37 @@ def join_class(request):
         except ClassRoom.DoesNotExist:
             messages.error(request, "Invalid class code")
     return render(request, "maths/join_class.html")
+
+@login_required
+def user_profile(request):
+    """User profile page for viewing and editing profile information"""
+    user = request.user
+    profile_form = UserProfileForm(instance=user)
+    password_form = UserPasswordChangeForm(user=user)
+    
+    if request.method == "POST":
+        action = request.POST.get('action')
+        
+        if action == 'update_profile':
+            profile_form = UserProfileForm(request.POST, instance=user)
+            if profile_form.is_valid():
+                profile_form.save()
+                messages.success(request, "Profile updated successfully!")
+                return redirect("maths:user_profile")
+        
+        elif action == 'change_password':
+            password_form = UserPasswordChangeForm(user=user, data=request.POST)
+            if password_form.is_valid():
+                password_form.save()
+                update_session_auth_hash(request, password_form.user)
+                messages.success(request, "Password changed successfully!")
+                return redirect("maths:user_profile")
+    
+    return render(request, "maths/user_profile.html", {
+        "profile_form": profile_form,
+        "password_form": password_form,
+        "user": user
+    })
 
 @login_required
 def add_question(request, level_number):

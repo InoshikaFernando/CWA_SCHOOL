@@ -4,8 +4,12 @@ from .models import CustomUser, Topic, Level, ClassRoom, Enrollment, BasicFactsR
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
-    fieldsets = (*UserAdmin.fieldsets, ("Role", {"fields": ("is_teacher",)}))
-    list_display = ("username", "email", "is_staff", "is_teacher")
+    fieldsets = (
+        *UserAdmin.fieldsets,
+        ("Personal Information", {"fields": ("date_of_birth", "country", "region")}),
+        ("Role", {"fields": ("is_teacher",)})
+    )
+    list_display = ("username", "email", "is_staff", "is_teacher", "country", "region")
 
 @admin.register(BasicFactsResult)
 class BasicFactsResultAdmin(admin.ModelAdmin):

@@ -1,5 +1,6 @@
 ﻿from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 from .models import CustomUser, ClassRoom, Question, Answer
 
 class TeacherSignUpForm(UserCreationForm):
@@ -126,3 +127,44 @@ class AnswerFormSet(forms.BaseFormSet):
                 form.fields['order'].initial = len(self.forms)
 
 AnswerFormSet = forms.formset_factory(AnswerForm, extra=4, formset=AnswerFormSet)
+
+class UserProfileForm(forms.ModelForm):
+    """Form for editing user profile information"""
+    class Meta:
+        model = CustomUser
+        fields = ('date_of_birth', 'country', 'region', 'email', 'first_name', 'last_name')
+        widgets = {
+            'date_of_birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'country': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your country'}),
+            'region': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter your region/state/province'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'date_of_birth': 'Date of Birth',
+            'country': 'Country',
+            'region': 'Region/State/Province',
+            'email': 'Email Address',
+            'first_name': 'First Name',
+            'last_name': 'Last Name',
+        }
+
+class UserPasswordChangeForm(PasswordChangeForm):
+    """Form for changing user password with custom styling"""
+    old_password = forms.CharField(
+        label="Current Password",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        required=True
+    )
+    new_password1 = forms.CharField(
+        label="New Password",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        required=True,
+        help_text="Your password must contain at least 8 characters."
+    )
+    new_password2 = forms.CharField(
+        label="Confirm New Password",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        required=True
+    )

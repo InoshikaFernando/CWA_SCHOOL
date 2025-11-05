@@ -1,4 +1,123 @@
-# Deployment Steps for Basic Facts
+# Deployment Steps for PythonAnywhere
+
+## Standard Deployment Checklist (After Committing to Git)
+
+### Step 1: Pull Latest Code on PythonAnywhere
+```bash
+# SSH into PythonAnywhere or use Bash Console
+cd /home/yourusername/path/to/your/project
+
+# Pull the latest changes from git
+git pull origin main
+
+# Or if using a different branch
+git pull origin <your-branch>
+```
+
+### Step 2: Activate Virtual Environment (if using one)
+```bash
+# If you have a virtual environment
+source /home/yourusername/.virtualenvs/yourvenv/bin/activate
+
+# Or if venv is in project directory
+source venv/bin/activate
+```
+
+### Step 3: Install/Update Dependencies (if requirements.txt changed)
+```bash
+pip install -r requirements.txt
+```
+
+### Step 4: Run Database Migrations (if models changed)
+```bash
+# Create new migration files (only if you haven't already)
+python manage.py makemigrations
+
+# Apply migrations to database
+python manage.py migrate
+```
+
+### Step 5: Collect Static Files (if CSS/JS changed)
+```bash
+python manage.py collectstatic --noinput
+```
+
+### Step 6: Reload Web App
+- Go to PythonAnywhere Dashboard → **Web** tab
+- Click the green **Reload** button for your web app
+- Wait for reload to complete (usually 10-30 seconds)
+
+### Step 7: Clear Browser Cache (Optional but Recommended)
+- Hard refresh: `Ctrl+Shift+F5` (Windows) or `Cmd+Shift+R` (Mac)
+- Or use incognito/private window to test
+
+---
+
+## Special Cases
+
+### If You Added New Database Models or Fields
+Follow Step 4 above, then verify:
+```bash
+python manage.py shell
+```
+```python
+from maths.models import YourNewModel
+# Test that model exists and works
+YourNewModel.objects.all()
+```
+
+### If You Added New Basic Facts Topics/Levels
+```bash
+# Run the Basic Facts creation script
+python create_basic_facts.py
+```
+
+### If You Changed Static Files (CSS/JS)
+Follow Step 5 above (collectstatic), then Step 6 (reload).
+
+---
+
+## Quick Deployment Command (All-in-One)
+
+Run this in PythonAnywhere bash console:
+```bash
+cd /home/yourusername/path/to/your/project
+git pull origin main
+source venv/bin/activate  # if using venv
+pip install -r requirements.txt  # if requirements changed
+python manage.py migrate
+python manage.py collectstatic --noinput
+```
+
+Then **reload your web app** from the PythonAnywhere Web tab.
+
+---
+
+## Troubleshooting
+
+### Template Changes Not Showing
+1. Verify file was pulled: `cat templates/maths/base.html | head -20`
+2. Reload web app (Step 6)
+3. Clear browser cache (hard refresh)
+4. Check for syntax errors in template
+
+### Database Errors After Migration
+```bash
+# Check migration status
+python manage.py showmigrations
+
+# If stuck, try fake migration (use with caution)
+python manage.py migrate --fake
+```
+
+### Static Files Not Loading
+1. Check `STATIC_URL` and `STATIC_ROOT` in `settings.py`
+2. Run `collectstatic` again
+3. Verify static files path in PythonAnywhere Web tab settings
+
+---
+
+## Basic Facts Deployment (Legacy)
 
 ## Issue: Basic Facts Panel Not Showing on PythonAnywhere
 

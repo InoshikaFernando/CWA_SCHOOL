@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>{% block title %}Maths Practice{% endblock %}</title>
-    <!-- Template version: 2.0 - New tabbed navigation -->
+    <!-- Template version: 2.1 - Sticky navigation with z-index -->
     <style>
         * {
             margin: 0;
@@ -21,6 +21,10 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             padding: 0;
             margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            width: 100%;
         }
         
         .nav-container {

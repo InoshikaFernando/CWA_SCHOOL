@@ -90,7 +90,41 @@
             padding: 8px 12px;
         }
         
+        .time-display {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            margin-left: auto;
+            margin-right: 10px;
+        }
+        
+        .time-display-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .time-display-item span {
+            font-weight: 600;
+        }
+        
         @media (max-width: 768px) {
+            .time-display {
+                order: -1;
+                width: 100%;
+                justify-content: center;
+                margin: 10px 0 0 0;
+            }
+            
+            .nav-container {
+                flex-wrap: wrap;
+            }
             .nav-container {
                 flex-direction: column;
                 padding: 10px;
@@ -114,6 +148,18 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="{% url 'maths:dashboard' %}" class="nav-brand">🧮 Maths Room</a>
+            {% if user.is_authenticated and not user.is_teacher %}
+            <div class="time-display" id="timeDisplay">
+                <div class="time-display-item">
+                    <span>📅 Today:</span>
+                    <span id="dailyTime">0h 0m</span>
+                </div>
+                <div class="time-display-item">
+                    <span>📊 Week:</span>
+                    <span id="weeklyTime">0h 0m</span>
+                </div>
+            </div>
+            {% endif %}
             <ul class="nav-tabs">
                 {% if user.is_authenticated %}
                     <li class="nav-tab {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
@@ -158,5 +204,72 @@
         </div>
     </nav>
     {% block content %}{% endblock %}
+    
+    {% if user.is_authenticated and not user.is_teacher %}
+    <script>
+        // Time display functionality - shows time from completed activities
+        let currentDailySeconds = 0;
+        let currentWeeklySeconds = 0;
+        let updateInterval = null;
+        const UPDATE_FREQUENCY = 10; // Update from server every 10 seconds
+        
+        // Format seconds to readable time
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            return `${hours}h ${minutes}m ${secs}s`;
+        }
+        
+        // Update time display
+        function updateTimeDisplay(dailySeconds, weeklySeconds) {
+            const dailyEl = document.getElementById('dailyTime');
+            const weeklyEl = document.getElementById('weeklyTime');
+            if (dailyEl) dailyEl.textContent = formatTime(dailySeconds);
+            if (weeklyEl) weeklyEl.textContent = formatTime(weeklySeconds);
+            // Store current values
+            currentDailySeconds = dailySeconds;
+            currentWeeklySeconds = weeklySeconds;
+        }
+        
+        // Fetch time from server (calculated from activities)
+        function fetchTimeFromServer() {
+            fetch('{% url "maths:update_time_log" %}', {
+                method: 'GET',
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateTimeDisplay(data.daily_seconds, data.weekly_seconds);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching time log:', error);
+            });
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get initial time from server
+            fetchTimeFromServer();
+            
+            // Update from server periodically (time only changes when activities complete)
+            updateInterval = setInterval(fetchTimeFromServer, UPDATE_FREQUENCY * 1000);
+        });
+        
+        // Refresh time when page becomes visible (in case activities completed in another tab)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                fetchTimeFromServer();
+            }
+        });
+        
+        // Refresh time when window gets focus
+        window.addEventListener('focus', function() {
+            fetchTimeFromServer();
+        });
+    </script>
+    {% endif %}
 </body>
 </html>

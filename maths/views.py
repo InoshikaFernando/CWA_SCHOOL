@@ -4,12 +4,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db import transaction
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 import time
 from django.db.models import Q
 import random
 from datetime import datetime
 import json
-from .models import Topic, Level, ClassRoom, Enrollment, CustomUser, Question, Answer, StudentAnswer, BasicFactsResult
+from .models import Topic, Level, ClassRoom, Enrollment, CustomUser, Question, Answer, StudentAnswer, BasicFactsResult, TimeLog
 from .forms import CreateClassForm, StudentSignUpForm, TeacherSignUpForm, TeacherCenterRegistrationForm, IndividualStudentRegistrationForm, StudentBulkRegistrationForm, QuestionForm, AnswerFormSet, UserProfileForm, UserPasswordChangeForm
 
 def signup_student(request):
@@ -645,6 +647,115 @@ def user_profile(request):
         "user": user
     })
 
+def get_or_create_time_log(user):
+    """Get or create TimeLog for user and handle resets"""
+    time_log, created = TimeLog.objects.get_or_create(student=user)
+    if created:
+        # Initialize with current date/week
+        from django.utils import timezone
+        now = timezone.now()
+        time_log.last_reset_date = now.date()
+        time_log.last_reset_week = now.isocalendar()[1]
+        time_log.save()
+    else:
+        # Check and reset if needed
+        time_log.reset_daily_if_needed()
+        time_log.reset_weekly_if_needed()
+    return time_log
+
+def update_time_log_from_activities(user):
+    """Update TimeLog by summing time from all completed activities"""
+    from django.utils import timezone
+    from django.db.models import Sum
+    from datetime import timedelta
+    
+    time_log = get_or_create_time_log(user)
+    
+    # Get today's date for filtering
+    today = timezone.now().date()
+    
+    # Get current week (ISO week number)
+    now = timezone.now()
+    current_week = now.isocalendar()[1]
+    
+    # Sum time from StudentAnswer records (regular quizzes and measurements)
+    # Only count completed sessions (where time_taken_seconds > 0)
+    daily_student_answers = StudentAnswer.objects.filter(
+        student=user,
+        answered_at__date=today,
+        time_taken_seconds__gt=0
+    ).values('session_id', 'time_taken_seconds').distinct('session_id')
+    
+    # For daily: sum unique session times (each session represents one activity)
+    daily_time_from_student_answers = 0
+    seen_sessions = set()
+    for answer in StudentAnswer.objects.filter(
+        student=user,
+        answered_at__date=today,
+        time_taken_seconds__gt=0
+    ).order_by('session_id', 'answered_at'):
+        if answer.session_id and answer.session_id not in seen_sessions:
+            seen_sessions.add(answer.session_id)
+            daily_time_from_student_answers += answer.time_taken_seconds
+    
+    # For weekly: same logic but for current week
+    weekly_time_from_student_answers = 0
+    seen_weekly_sessions = set()
+    # Get start of week (Monday)
+    days_since_monday = now.weekday()
+    week_start = now.date() - timedelta(days=days_since_monday)
+    
+    for answer in StudentAnswer.objects.filter(
+        student=user,
+        answered_at__date__gte=week_start,
+        time_taken_seconds__gt=0
+    ).order_by('session_id', 'answered_at'):
+        if answer.session_id and answer.session_id not in seen_weekly_sessions:
+            seen_weekly_sessions.add(answer.session_id)
+            weekly_time_from_student_answers += answer.time_taken_seconds
+    
+    # Sum time from BasicFactsResult records
+    daily_basic_facts = BasicFactsResult.objects.filter(
+        student=user,
+        completed_at__date=today
+    ).values('session_id').annotate(
+        session_time=Sum('time_taken_seconds')
+    ).aggregate(total=Sum('time_taken_seconds'))['total'] or 0
+    
+    weekly_basic_facts = BasicFactsResult.objects.filter(
+        student=user,
+        completed_at__date__gte=week_start
+    ).values('session_id').annotate(
+        session_time=Sum('time_taken_seconds')
+    ).aggregate(total=Sum('time_taken_seconds'))['total'] or 0
+    
+    # Update TimeLog with total time from activities
+    time_log.daily_total_seconds = daily_time_from_student_answers + daily_basic_facts
+    time_log.weekly_total_seconds = weekly_time_from_student_answers + weekly_basic_facts
+    time_log.save(update_fields=['daily_total_seconds', 'weekly_total_seconds', 'last_activity'])
+    
+    return time_log
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def update_time_log(request):
+    """AJAX endpoint to get current time log (calculated from activities)"""
+    if not request.user.is_authenticated or request.user.is_teacher:
+        return JsonResponse({'error': 'Not authorized'}, status=401)
+    
+    try:
+        # Recalculate time from activities
+        time_log = update_time_log_from_activities(request.user)
+        
+        # Always return current time calculated from activities
+        return JsonResponse({
+            'success': True,
+            'daily_seconds': time_log.daily_total_seconds,
+            'weekly_seconds': time_log.weekly_total_seconds
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
 @login_required
 def add_question(request, level_number):
     """Add a new question to a specific level"""
@@ -1164,6 +1275,10 @@ def take_quiz(request, level_number):
                 points=final_points_calc
             )
             
+            # Update time log from activities
+            if not request.user.is_teacher:
+                update_time_log_from_activities(request.user)
+            
             # Also keep in session for backward compatibility (optional)
             basic_facts_results_key = f"basic_facts_results_{request.user.id}_{level_number}"
             results_list = request.session.get(basic_facts_results_key, [])
@@ -1185,6 +1300,10 @@ def take_quiz(request, level_number):
         # Clear timer from session
         if timer_session_key in request.session:
             del request.session[timer_session_key]
+        
+        # Update time log from activities (for both Basic Facts and regular quizzes)
+        if not request.user.is_teacher:
+            update_time_log_from_activities(request.user)
         
         # Calculate points using the formula: percentage * 100 * 60 / time_seconds
         # For Basic Facts, divide by 10
@@ -1451,6 +1570,10 @@ def measurements_questions(request, level_number):
         
         # Store time_taken_seconds for all answers in this session
         student_answers.update(time_taken_seconds=total_time_seconds)
+        
+        # Update time log from activities
+        if not request.user.is_teacher:
+            update_time_log_from_activities(request.user)
         
         # Clear timer and question list for next attempt
         if timer_session_key in request.session:

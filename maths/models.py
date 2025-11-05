@@ -130,3 +130,42 @@ class BasicFactsResult(models.Model):
     
     def __str__(self):
         return f"{self.student} - Level {self.level.level_number} - {self.points} points ({self.completed_at})"
+
+class TimeLog(models.Model):
+    """Track daily and weekly time spent by students on the app"""
+    student = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="time_log")
+    daily_total_seconds = models.PositiveIntegerField(default=0, help_text="Total seconds spent today")
+    weekly_total_seconds = models.PositiveIntegerField(default=0, help_text="Total seconds spent this week")
+    last_reset_date = models.DateField(auto_now=True, help_text="Last date when daily time was reset")
+    last_reset_week = models.IntegerField(default=0, help_text="ISO week number of last weekly reset")
+    last_activity = models.DateTimeField(auto_now=True, help_text="Last time activity was recorded")
+    
+    class Meta:
+        ordering = ['-last_activity']
+    
+    def __str__(self):
+        return f"{self.student.username} - Daily: {self.daily_total_seconds}s, Weekly: {self.weekly_total_seconds}s"
+    
+    def reset_daily_if_needed(self):
+        """Reset daily time if it's past midnight"""
+        from django.utils import timezone
+        today = timezone.now().date()
+        if self.last_reset_date < today:
+            self.daily_total_seconds = 0
+            self.last_reset_date = today
+            self.save(update_fields=['daily_total_seconds', 'last_reset_date'])
+    
+    def reset_weekly_if_needed(self):
+        """Reset weekly time if it's past Sunday midnight (Monday 00:00)"""
+        from django.utils import timezone
+        now = timezone.now()
+        current_week = now.isocalendar()[1]  # ISO week number
+        current_year = now.year
+        
+        # Check if we need to reset (new week)
+        # Week resets on Monday (weekday 0) at midnight
+        if self.last_reset_week != current_week:
+            # Week has changed, reset weekly total
+            self.weekly_total_seconds = 0
+            self.last_reset_week = current_week
+            self.save(update_fields=['weekly_total_seconds', 'last_reset_week'])

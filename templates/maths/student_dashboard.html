@@ -327,11 +327,17 @@
                 <div class="topics-grid">
                     {% for level in levels_by_year|lookup:year %}
                         {% if level.level_number == 2 %}
-                            <!-- Year 2: Show Measurements and Take Quiz -->
+                            <!-- Year 2: Show Measurements, Place Values, and Take Quiz -->
                             <div class="topic-card">
                                 <a href="{% url 'maths:measurements_questions' level.level_number %}">
                                     <h4>Measurements</h4>
                                     <p>Year {{ level.level_number }} - Measurements</p>
+                                </a>
+                            </div>
+                            <div class="topic-card">
+                                <a href="{% url 'maths:place_values_questions' level.level_number %}">
+                                    <h4>Place Values</h4>
+                                    <p>Year {{ level.level_number }} - Place Values</p>
                                 </a>
                             </div>
                             <div class="topic-card">

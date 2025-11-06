@@ -22,8 +22,10 @@ def setup_measurements_topic():
     """Create Measurements topic and associate with Year 6"""
     
     # Get or create the "Measurements" topic
-    measurements_topic, created = Topic.objects.get_or_create(name="Measurements")
-    if created:
+    # Handle case where multiple topics with same name exist
+    measurements_topic = Topic.objects.filter(name="Measurements").first()
+    if not measurements_topic:
+        measurements_topic = Topic.objects.create(name="Measurements")
         print(f"[OK] Created topic: Measurements")
     else:
         print(f"[INFO] Topic already exists: Measurements")

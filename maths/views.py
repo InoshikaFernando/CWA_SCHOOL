@@ -192,6 +192,17 @@ def dashboard_detail(request):
             topic_name = "Measurements"
         elif any(pattern in question_text_lower for pattern in ['numerator', 'denominator', 'fraction']):
             topic_name = "Fractions"
+        elif (question_text_lower.startswith('evaluate:') or 
+              question_text_lower.startswith('calculate:') or 
+              question_text_lower.startswith('find the missing number:') or
+              question_text_lower.startswith('i think of a number') or
+              question_text_lower.startswith('using the digits') or
+              question_text_lower.startswith('write down what') or
+              'bodmas' in question_text_lower or
+              'pemdas' in question_text_lower or
+              'bidmas' in question_text_lower or
+              '_____' in first_question.question_text) and not any(pattern in question_text_lower for pattern in ['cm', 'centimeter', 'meter', 'kilometer', 'width', 'height', 'length', 'area', 'perimeter', 'volume', 'measure']):
+            topic_name = "BODMAS/PEMDAS"
         else:
             # Try to get from level topics
             try:
@@ -262,6 +273,40 @@ def dashboard_detail(request):
                     Q(question__question_text__icontains='numerator') |
                     Q(question__question_text__icontains='denominator') |
                     Q(question__question_text__icontains='fraction')
+                )
+            elif topic_name == "BODMAS/PEMDAS":
+                session_answers = session_answers.filter(
+                    Q(question__question_text__istartswith='evaluate:') |
+                    Q(question__question_text__istartswith='calculate:') |
+                    Q(question__question_text__istartswith='find the missing number:') |
+                    Q(question__question_text__istartswith='i think of a number') |
+                    Q(question__question_text__istartswith='using the digits') |
+                    Q(question__question_text__istartswith='write down what') |
+                    Q(question__question_text__icontains='bodmas') |
+                    Q(question__question_text__icontains='pemdas') |
+                    Q(question__question_text__icontains='bidmas') |
+                    Q(question__question_text__icontains='_____')
+                ).exclude(
+                    Q(question__question_text__icontains='cm') |
+                    Q(question__question_text__icontains='centimeter') |
+                    Q(question__question_text__icontains='meter') |
+                    Q(question__question_text__icontains='kilometer') |
+                    Q(question__question_text__icontains='width') |
+                    Q(question__question_text__icontains='height') |
+                    Q(question__question_text__icontains='length') |
+                    Q(question__question_text__icontains='area') |
+                    Q(question__question_text__icontains='perimeter') |
+                    Q(question__question_text__icontains='volume') |
+                    Q(question__question_text__icontains='measure') |
+                    Q(question__question_text__icontains='numerator') |
+                    Q(question__question_text__icontains='denominator') |
+                    Q(question__question_text__icontains='fraction') |
+                    Q(question__question_text__icontains='complete the following sequence') |
+                    Q(question__question_text__icontains='counting on') |
+                    Q(question__question_text__icontains='counting back') |
+                    Q(question__question_text__icontains='skip counting') |
+                    Q(question__question_text__icontains='tens and ones') |
+                    Q(question__question_text__icontains='how many tens')
                 )
             
             # Only count full attempts (completed all questions for that topic/level)
@@ -2488,6 +2533,342 @@ def fractions_questions(request, level_number):
         "checked": checked,
         "selected_answer": selected_answer,
         "is_text_answer": is_text_answer,
+        "is_last_question": question_number == len(all_questions),
+        "elapsed_seconds": elapsed_seconds
+    })
+
+@login_required
+def bodmas_questions(request, level_number):
+    """Show BODMAS/PEMDAS questions one by one - similar to fractions_questions"""
+    # Import the fractions_questions view logic but filter for BODMAS questions
+    level = get_object_or_404(Level, level_number=level_number)
+    
+    # Check if student has access to this level
+    allowed = student_allowed_levels(request.user)
+    if allowed is not None and not allowed.filter(pk=level.pk).exists():
+        messages.error(request, "You don't have access to this level.")
+        return redirect("maths:dashboard")
+    
+    # Get BODMAS/PEMDAS topic
+    bodmas_topic = Topic.objects.filter(name="BODMAS/PEMDAS").first()
+    if not bodmas_topic:
+        messages.error(request, "BODMAS/PEMDAS topic not found.")
+        return redirect("maths:dashboard")
+    
+    # Get all BODMAS/PEMDAS questions for this level
+    # Use strict whitelist - only include questions that match BODMAS patterns
+    # BODMAS questions typically start with: "Evaluate:", "Calculate:", "Find the missing number:", 
+    # "I think of a number", "Using the digits", or contain BODMAS/PEMDAS/BIDMAS
+    all_questions_query = Question.objects.filter(level=level).filter(
+        Q(question_text__istartswith='evaluate:') |
+        Q(question_text__istartswith='calculate:') |
+        Q(question_text__istartswith='find the missing number:') |
+        Q(question_text__istartswith='i think of a number') |
+        Q(question_text__istartswith='using the digits') |
+        Q(question_text__istartswith='write down what') |
+        Q(question_text__icontains='bodmas') |
+        Q(question_text__icontains='pemdas') |
+        Q(question_text__icontains='bidmas') |
+        Q(question_text__icontains='_____')  # Missing number pattern
+    ).exclude(
+        # Exclude measurement questions (even if they match patterns above)
+        Q(question_text__icontains='cm') |
+        Q(question_text__icontains='centimeter') |
+        Q(question_text__icontains='meter') |
+        Q(question_text__icontains='kilometer') |
+        Q(question_text__icontains='liter') |
+        Q(question_text__icontains='gram') |
+        Q(question_text__icontains='kilogram') |
+        Q(question_text__icontains='width') |
+        Q(question_text__icontains='height') |
+        Q(question_text__icontains='length') |
+        Q(question_text__icontains='area') |
+        Q(question_text__icontains='perimeter') |
+        Q(question_text__icontains='volume') |
+        Q(question_text__icontains='measure') |
+        Q(question_text__icontains='unit would you use') |
+        Q(question_text__icontains='ruler') |
+        Q(question_text__icontains='scale') |
+        # Exclude fraction questions
+        Q(question_text__icontains='numerator') |
+        Q(question_text__icontains='denominator') |
+        Q(question_text__icontains='fraction') |
+        # Exclude place value questions
+        Q(question_text__icontains='complete the following sequence') |
+        Q(question_text__icontains='counting on') |
+        Q(question_text__icontains='counting back') |
+        Q(question_text__icontains='skip counting') |
+        Q(question_text__icontains='tens and ones') |
+        Q(question_text__icontains='how many tens')
+    )
+    
+    # Question limits per year
+    YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
+    question_limit = YEAR_QUESTION_COUNTS.get(level.level_number, 10)
+    
+    # Get current question number from URL parameter (default to 1)
+    question_number = int(request.GET.get('q', 1))
+    
+    # Start timer on first question load and create session
+    timer_session_key = "bodmas_timer_start"
+    questions_session_key = "bodmas_question_ids"
+    timer_start = request.session.get(timer_session_key)
+    
+    # Clear session if questions don't match BODMAS patterns (safety check)
+    if question_number == 1 and timer_start:
+        existing_question_ids = request.session.get(questions_session_key, [])
+        if existing_question_ids:
+            existing_questions = Question.objects.filter(id__in=existing_question_ids, level=level)
+            # Check if questions are NOT BODMAS questions
+            invalid_questions = existing_questions.exclude(
+                Q(question_text__istartswith='evaluate:') |
+                Q(question_text__istartswith='calculate:') |
+                Q(question_text__istartswith='find the missing number:') |
+                Q(question_text__istartswith='i think of a number') |
+                Q(question_text__istartswith='using the digits') |
+                Q(question_text__istartswith='write down what') |
+                Q(question_text__icontains='bodmas') |
+                Q(question_text__icontains='pemdas') |
+                Q(question_text__icontains='bidmas') |
+                Q(question_text__icontains='_____')
+            ).filter(
+                Q(question_text__icontains='cm') |
+                Q(question_text__icontains='centimeter') |
+                Q(question_text__icontains='meter') |
+                Q(question_text__icontains='kilometer') |
+                Q(question_text__icontains='width') |
+                Q(question_text__icontains='height') |
+                Q(question_text__icontains='length') |
+                Q(question_text__icontains='area') |
+                Q(question_text__icontains='perimeter') |
+                Q(question_text__icontains='volume') |
+                Q(question_text__icontains='measure') |
+                Q(question_text__icontains='numerator') |
+                Q(question_text__icontains='denominator') |
+                Q(question_text__icontains='fraction') |
+                Q(question_text__icontains='complete the following sequence') |
+                Q(question_text__icontains='counting on') |
+                Q(question_text__icontains='counting back') |
+                Q(question_text__icontains='skip counting') |
+                Q(question_text__icontains='tens and ones') |
+                Q(question_text__icontains='how many tens')
+            )
+            if invalid_questions.exists():
+                if timer_session_key in request.session:
+                    del request.session[timer_session_key]
+                if questions_session_key in request.session:
+                    del request.session[questions_session_key]
+                if 'current_attempt_id' in request.session:
+                    del request.session['current_attempt_id']
+                timer_start = None
+    
+    if question_number == 1 and not timer_start:
+        request.session[timer_session_key] = time.time()
+        import uuid
+        request.session['current_attempt_id'] = str(uuid.uuid4())
+        
+        all_questions_list = list(all_questions_query)
+        if len(all_questions_list) > question_limit:
+            selected_questions = random.sample(all_questions_list, question_limit)
+        else:
+            selected_questions = all_questions_list
+        
+        random.shuffle(selected_questions)
+        request.session[questions_session_key] = [q.id for q in selected_questions]
+    
+    question_ids = request.session.get(questions_session_key, [])
+    
+    if question_ids:
+        all_questions = []
+        for qid in question_ids:
+            try:
+                question = Question.objects.get(id=qid, level=level)
+                # Check if it's a BODMAS question using strict whitelist
+                q_text_lower = question.question_text.lower()
+                is_bodmas = (
+                    q_text_lower.startswith('evaluate:') or
+                    q_text_lower.startswith('calculate:') or
+                    q_text_lower.startswith('find the missing number:') or
+                    q_text_lower.startswith('i think of a number') or
+                    q_text_lower.startswith('using the digits') or
+                    q_text_lower.startswith('write down what') or
+                    'bodmas' in q_text_lower or
+                    'pemdas' in q_text_lower or
+                    'bidmas' in q_text_lower or
+                    '_____' in question.question_text  # Missing number pattern
+                )
+                # Exclude measurement, fraction, and place value questions
+                is_not_bodmas = (
+                    'cm' in q_text_lower or
+                    'centimeter' in q_text_lower or
+                    'meter' in q_text_lower or
+                    'kilometer' in q_text_lower or
+                    'liter' in q_text_lower or
+                    'gram' in q_text_lower or
+                    'kilogram' in q_text_lower or
+                    'width' in q_text_lower or
+                    'height' in q_text_lower or
+                    'length' in q_text_lower or
+                    'area' in q_text_lower or
+                    'perimeter' in q_text_lower or
+                    'volume' in q_text_lower or
+                    'measure' in q_text_lower or
+                    'unit would you use' in q_text_lower or
+                    'ruler' in q_text_lower or
+                    'scale' in q_text_lower or
+                    'numerator' in q_text_lower or
+                    'denominator' in q_text_lower or
+                    'fraction' in q_text_lower or
+                    'complete the following sequence' in q_text_lower or
+                    'counting on' in q_text_lower or
+                    'counting back' in q_text_lower or
+                    'skip counting' in q_text_lower or
+                    'tens and ones' in q_text_lower or
+                    'how many tens' in q_text_lower
+                )
+                if is_bodmas and not is_not_bodmas:
+                    all_questions.append(question)
+            except Question.DoesNotExist:
+                continue
+        
+        if len(all_questions) != len(question_ids):
+            if timer_session_key in request.session:
+                del request.session[timer_session_key]
+            if questions_session_key in request.session:
+                del request.session[questions_session_key]
+            if 'current_attempt_id' in request.session:
+                del request.session['current_attempt_id']
+            return redirect(f"{request.path}?q=1")
+    else:
+        all_questions = []
+    
+    if request.method == "POST":
+        action = request.POST.get('action')
+        
+        if action == 'check_answer':
+            question_id = request.POST.get('question_id')
+            answer_id = request.POST.get('answer_id')
+            text_answer = request.POST.get('text_answer')
+            
+            if question_id:
+                try:
+                    question = Question.objects.get(id=question_id, level=level)
+                    
+                    if answer_id:
+                        answer = Answer.objects.get(id=answer_id, question=question)
+                        attempt_id = request.session.get('current_attempt_id', '')
+                        student_answer, created = StudentAnswer.objects.update_or_create(
+                            student=request.user,
+                            question=question,
+                            defaults={
+                                'selected_answer': answer,
+                                'is_correct': answer.is_correct,
+                                'points_earned': question.points if answer.is_correct else 0,
+                                'session_id': attempt_id
+                            }
+                        )
+                        return redirect(f"{request.path}?q={question_number}&checked=1&answer_id={answer_id}")
+                    
+                    elif text_answer and question.question_type == 'short_answer':
+                        attempt_id = request.session.get('current_attempt_id', '')
+                        student_answer, created = StudentAnswer.objects.update_or_create(
+                            student=request.user,
+                            question=question,
+                            defaults={
+                                'text_answer': text_answer,
+                                'is_correct': True,
+                                'points_earned': question.points,
+                                'session_id': attempt_id
+                            }
+                        )
+                        return redirect(f"{request.path}?q={question_number}&checked=1&text_answer={text_answer}")
+                    
+                except (Question.DoesNotExist, Answer.DoesNotExist):
+                    messages.error(request, "Invalid question or answer.")
+        
+        elif action == 'next_question':
+            next_question = question_number + 1
+            if next_question <= len(all_questions):
+                return redirect(f"{request.path}?q={next_question}")
+            else:
+                return redirect(f"{request.path}?completed=1")
+    
+    completed = request.GET.get('completed') == '1'
+    
+    if completed:
+        attempt_id = request.session.get('current_attempt_id', '')
+        student_answers = StudentAnswer.objects.filter(
+            student=request.user,
+            question__level=level,
+            session_id=attempt_id
+        )
+        total_score = sum(answer.points_earned for answer in student_answers)
+        total_points = sum(q.points for q in all_questions)
+        now_ts = time.time()
+        start_ts = request.session.get(timer_session_key) or now_ts
+        total_time_seconds = max(1, int(now_ts - start_ts))
+        
+        student_answers.update(time_taken_seconds=total_time_seconds)
+        
+        if not request.user.is_teacher:
+            update_time_log_from_activities(request.user)
+        
+        if timer_session_key in request.session:
+            del request.session[timer_session_key]
+        if questions_session_key in request.session:
+            del request.session[questions_session_key]
+        if 'current_attempt_id' in request.session:
+            del request.session['current_attempt_id']
+        
+        return render(request, 'maths/measurements_questions.html', {
+            'level': level,
+            'topic': bodmas_topic,
+            'completed': True,
+            'total_score': total_score,
+            'total_points': total_points,
+            'total_questions': len(all_questions),
+            'total_time_seconds': total_time_seconds,
+            'correct_count': sum(1 for answer in student_answers if answer.is_correct)
+        })
+    
+    if not all_questions or question_number > len(all_questions):
+        messages.error(request, "Invalid question number.")
+        return redirect("maths:dashboard")
+    
+    current_question = all_questions[question_number - 1]
+    answers = current_question.answers.all()
+    
+    checked = request.GET.get('checked') == '1'
+    answer_id = request.GET.get('answer_id')
+    text_answer = request.GET.get('text_answer')
+    selected_answer = None
+    is_text_answer = False
+    
+    if checked:
+        if answer_id:
+            try:
+                selected_answer = Answer.objects.get(id=answer_id, question=current_question)
+            except Answer.DoesNotExist:
+                pass
+        elif text_answer:
+            is_text_answer = True
+            selected_answer = text_answer
+    
+    if timer_start:
+        elapsed_seconds = int(time.time() - timer_start)
+    else:
+        elapsed_seconds = 0
+    
+    return render(request, 'maths/measurements_questions.html', {
+        'level': level,
+        'topic': bodmas_topic,
+        'current_question': current_question,
+        'answers': answers,
+        'question_number': question_number,
+        'total_questions': len(all_questions),
+        'checked': checked,
+        'selected_answer': selected_answer,
+        'is_text_answer': is_text_answer,
         "is_last_question": question_number == len(all_questions),
         "elapsed_seconds": elapsed_seconds
     })

@@ -35,10 +35,10 @@ def copy_questions_with_answers(source_level, target_level, copy_images=True):
     source_questions = Question.objects.filter(level=source_level)
     
     if not source_questions.exists():
-        print(f"❌ No questions found for level {source_level.level_number}")
+        print(f"[ERROR] No questions found for level {source_level.level_number}")
         return
     
-    print(f"📋 Found {source_questions.count()} questions in Year {source_level.level_number}")
+    print(f"[INFO] Found {source_questions.count()} questions in Year {source_level.level_number}")
     
     copied_count = 0
     skipped_count = 0
@@ -66,7 +66,7 @@ def copy_questions_with_answers(source_level, target_level, copy_images=True):
                 existing = existing_questions.first() if existing_questions.exists() else None
         
         if existing:
-            print(f"  ⏭️  Question already exists in Year {target_level.level_number}: {source_question.question_text[:50]}...")
+            print(f"  [SKIP] Question already exists in Year {target_level.level_number}: {source_question.question_text[:50]}...")
             skipped_count += 1
             continue
         
@@ -97,9 +97,9 @@ def copy_questions_with_answers(source_level, target_level, copy_images=True):
                 
                 # Extract filename for display
                 filename = os.path.basename(image_name)
-                print(f"  📷 Reusing image: {filename}")
+                print(f"  [IMAGE] Reusing image: {filename}")
             except Exception as e:
-                print(f"  ⚠️  Error setting image: {e}")
+                print(f"  [WARNING] Error setting image: {e}")
         
         # Copy all answers for this question
         source_answers = Answer.objects.filter(question=source_question)
@@ -111,13 +111,13 @@ def copy_questions_with_answers(source_level, target_level, copy_images=True):
                 order=source_answer.order
             )
         
-        print(f"  ✅ Copied: {source_question.question_text[:50]}... ({source_answers.count()} answers)")
+        print(f"  [OK] Copied: {source_question.question_text[:50]}... ({source_answers.count()} answers)")
         copied_count += 1
     
-    print(f"\n📊 Summary:")
-    print(f"   ✅ Copied: {copied_count} questions")
-    print(f"   ⏭️  Skipped: {skipped_count} questions (already exist)")
-    print(f"   📝 Total: {source_questions.count()} questions processed")
+    print(f"\n[SUMMARY]")
+    print(f"   [OK] Copied: {copied_count} questions")
+    print(f"   [SKIP] Skipped: {skipped_count} questions (already exist)")
+    print(f"   [INFO] Total: {source_questions.count()} questions processed")
 
 def main():
     """Main function to copy year 6 questions to year 7"""
@@ -133,48 +133,48 @@ def main():
     level_7 = Level.objects.filter(level_number=7).first()
     
     if not level_6:
-        print("❌ Error: Year 6 level not found!")
+        print("[ERROR] Year 6 level not found!")
         return
     
     if not level_7:
-        print("❌ Error: Year 7 level not found!")
+        print("[ERROR] Year 7 level not found!")
         return
     
-    print(f"🔄 Copying questions from Year {level_6.level_number} to Year {level_7.level_number}")
+    print(f"[INFO] Copying questions from Year {level_6.level_number} to Year {level_7.level_number}")
     print(f"   Source: {level_6}")
     print(f"   Target: {level_7}\n")
     
     # Determine if we should copy images
     if args.no_images:
         copy_images = False
-        print("   ⚠️  Will skip images (questions will have no images)")
+        print("   [WARNING] Will skip images (questions will have no images)")
     elif args.yes:
         # Non-interactive mode: default to including images
         copy_images = True
-        print("   ✅ Will reuse same image files (no duplication)")
+        print("   [OK] Will reuse same image files (no duplication)")
     else:
         # Interactive mode: ask user
-        print("ℹ️  Year 6 measurement questions include images (diagrams, rulers, etc.)")
+        print("[INFO] Year 6 measurement questions include images (diagrams, rulers, etc.)")
         copy_images_input = input("   Include images for Year 7? (yes/no, default=yes): ").strip().lower()
         copy_images = copy_images_input != 'no'
         if copy_images:
-            print("   ✅ Will reuse same image files (no duplication)")
+            print("   [OK] Will reuse same image files (no duplication)")
         else:
-            print("   ⚠️  Will skip images (questions will have no images)")
+            print("   [WARNING] Will skip images (questions will have no images)")
     
     print()
     
     # Confirm before proceeding (unless --yes flag is used)
     if not args.yes:
-        response = input("⚠️  This will copy all Year 6 questions to Year 7. Continue? (yes/no): ")
+        response = input("[WARNING] This will copy all Year 6 questions to Year 7. Continue? (yes/no): ")
         if response.lower() != 'yes':
-            print("❌ Operation cancelled.")
+            print("[ERROR] Operation cancelled.")
             return
     
     # Copy questions
     copy_questions_with_answers(level_6, level_7, copy_images=copy_images)
     
-    print("\n✅ Done! All Year 6 measurement questions have been copied to Year 7.")
+    print("\n[OK] Done! All Year 6 measurement questions have been copied to Year 7.")
     print("   Remember to reload your web app on PythonAnywhere after deploying this change.")
 
 if __name__ == "__main__":

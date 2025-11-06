@@ -23,6 +23,7 @@ urlpatterns = [
     path("level/<int:level_number>/measurements-progress/", views.measurements_progress, name="measurements_progress"),
     path("level/<int:level_number>/place-values/", views.place_values_questions, name="place_values_questions"),
     path("level/<int:level_number>/fractions/", views.fractions_questions, name="fractions_questions"),
+    path("level/<int:level_number>/bodmas/", views.bodmas_questions, name="bodmas_questions"),
     path("basic-facts/<str:subtopic_name>/", views.basic_facts_subtopic, name="basic_facts_subtopic"),
     path("profile/", views.user_profile, name="user_profile"),
     path("api/update-time-log/", views.update_time_log, name="update_time_log"),

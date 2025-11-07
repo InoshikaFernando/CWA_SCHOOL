@@ -363,6 +363,9 @@ def add_fractions_questions(fractions_topic, level_3):
             # Update existing question
             question = existing
             question.explanation = q_data.get("explanation", "")
+            # Ensure topic is set
+            if not question.topic:
+                question.topic = fractions_topic
             question.save()
             
             # Delete old answers to replace with correct ones
@@ -374,6 +377,7 @@ def add_fractions_questions(fractions_topic, level_3):
             # Create new question
             question = Question.objects.create(
                 level=level_3,
+                topic=fractions_topic,  # Set topic directly on question
                 question_text=q_data["question_text"],
                 question_type='multiple_choice',
                 difficulty=1,
@@ -395,7 +399,10 @@ def add_fractions_questions(fractions_topic, level_3):
             else:
                 print(f"      ⚠️  Image not found: {full_image_path}")
         
-        # Associate with Fractions topic
+        # Ensure question has topic set and level has topic associated
+        if not question.topic:
+            question.topic = fractions_topic
+            question.save()
         question.level.topics.add(fractions_topic)
         
         # Create answers - mix correct and wrong answers

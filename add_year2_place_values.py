@@ -689,13 +689,20 @@ def add_place_values_questions(place_values_topic, level_2):
         ).first()
         
         if existing:
-            print(f"  ⏭️  Question {i} already exists, skipping...")
+            # Update topic if not set
+            if not existing.topic:
+                existing.topic = place_values_topic
+                existing.save()
+                print(f"  [UPDATE] Question {i}: Set topic to Place Values")
+            else:
+                print(f"  [SKIP] Question {i} already exists, skipping...")
             skipped_count += 1
             continue
         
         # Create question
         question = Question.objects.create(
             level=level_2,
+            topic=place_values_topic,  # Set topic directly on question
             question_text=q_data["question_text"],
             question_type='multiple_choice',
             difficulty=1,
@@ -703,7 +710,10 @@ def add_place_values_questions(place_values_topic, level_2):
             explanation=q_data["explanation"]
         )
         
-        # Associate with Place Values topic
+        # Ensure question has topic set and level has topic associated
+        if not question.topic:
+            question.topic = place_values_topic
+            question.save()
         question.level.topics.add(place_values_topic)
         
         # Create answers - mix correct and wrong answers

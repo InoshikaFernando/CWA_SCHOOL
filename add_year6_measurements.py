@@ -229,6 +229,211 @@ def add_measurements_questions(measurements_topic, level_6):
             "explanation": "Add all side lengths shown to get the perimeter.",
             "image_path": "questions/year6/measurements/image13.png",
         },
+        {
+            "question_text": "What is the volume of the spacecraft? (use π = 22/7)",
+            "question_type": "short_answer",
+            "correct_answer": "4 x 22 x 7 x 7 m3",
+            "wrong_answers": ["22 X 7 X 7 X 7 m3", "5 x 22 x 7 x 7 m3", "1/3 x 7 x 49 + 22 x 21 x 14 m3", "3/4 x 22 x 49 + 22 x 14 x 20 cm3"],  # Not used for short_answer
+            "explanation": "Volume for the corn is 1/3πR²h and volume of cylinder is πR²h",
+            "image_path": "questions/year6/measurements/image23.png",
+        },
+        {
+            "question_text": "Which is longer and by how many millimetres: 1.24 m or 1458 mm?",
+            "question_type": "multiple_choice",
+            "correct_answer": "1458 mm by 218 mm",
+            "wrong_answers": ["1.24 m by 218 mm", "1458 mm by 120 mm", "1.24 m by 200 mm"],
+            "explanation": "Convert 1.24 m to mm: 1.24 × 1000 = 1240 mm. Compare: 1458 mm - 1240 mm = 218 mm. So 1458 mm is longer by 218 mm.",
+        },
+        {
+            "question_text": "Find the circumference of this circle.",
+            "question_type": "multiple_choice",
+            "correct_answer": "About 44 cm",
+            "wrong_answers": ["About 28 cm", "About 88 cm", "About 14 cm"],
+            "explanation": "Circumference = π × diameter = π × 14 ≈ 43.98 cm ≈ 44 cm.",
+            "image_path": "questions/year6/measurements/image7.png",
+        },
+        {
+            "question_text": "Find the circumference of this circle.",
+            "question_type": "multiple_choice",
+            "correct_answer": "About 69 mm",
+            "wrong_answers": ["About 44 mm", "About 22 mm", "About 90 mm"],
+            "explanation": "Circumference = π × diameter = π × 22 mm ≈ 69.12 mm.",
+            "image_path": "questions/year6/measurements/image8.png",
+        },
+        {
+            "question_text": "Find the circumference of this circle.",
+            "question_type": "multiple_choice",
+            "correct_answer": "About 38 cm",
+            "wrong_answers": ["About 24 cm", "About 12 cm", "About 44 cm"],
+            "explanation": "Radius = 6 cm, diameter = 12 cm. Circumference = π × d ≈ 3.14 × 12 = 37.68 cm ≈ 38 cm.",
+            "image_path": "questions/year6/measurements/image9.png",
+        },
+        {
+            "question_text": "Find the circumference of this circle.",
+            "question_type": "multiple_choice",
+            "correct_answer": "About 94 cm",
+            "wrong_answers": ["About 45 cm", "About 30 cm", "About 75 cm"],
+            "explanation": "Radius = 15 cm, circumference = 2πr ≈ 2 × 3.14 × 15 = 94.2 cm ≈ 94 cm.",
+            "image_path": "questions/year6/measurements/image10.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image5.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image6.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image7.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image8.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image9.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image10.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image11.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image12.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image13.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image14.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image15.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image16.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image17.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image18.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image19.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image20.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image21.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image22.png",
+        },
+        {
+            "question_text": "Which metric unit would be most appropriate for measuring the distance around the school?",
+            "question_type": "multiple_choice",
+            "correct_answer": "kilometers",
+            "wrong_answers": ["meters", "centimeters", "millimeters", "hectometers"],
+            "explanation": "The distance around a school perimeter is typically measured in kilometers.",
+        },
+        {
+            "question_text": "Which metric unit would be most appropriate for measuring the distance between two cities?",
+            "question_type": "multiple_choice",
+            "correct_answer": "kilometers",
+            "wrong_answers": ["meters", "centimeters", "millimeters", "decimeters"],
+            "explanation": "Distances between cities are measured in kilometers.",
+        },
     ]
     
     print(f"\n[INFO] Processing {len(questions_data)} Measurements questions for Year 6...\n")
@@ -268,8 +473,15 @@ def add_measurements_questions(measurements_topic, level_6):
             # Update explanation if changed
             if question.explanation != q_data.get("explanation", ""):
                 question.explanation = q_data.get("explanation", "")
-                question.save()
                 question_updated = True
+            
+            # Ensure topic is set
+            if not question.topic:
+                question.topic = measurements_topic
+                question_updated = True
+            
+            if question_updated:
+                question.save()
             
             # Check if answers need updating
             existing_answers = Answer.objects.filter(question=question)
@@ -337,6 +549,7 @@ def add_measurements_questions(measurements_topic, level_6):
             # Create new question
             question = Question.objects.create(
                 level=level_6,
+                topic=measurements_topic,  # Set topic directly on question
                 question_text=q_data["question_text"],
                 question_type=q_data["question_type"],
                 difficulty=1,
@@ -358,7 +571,10 @@ def add_measurements_questions(measurements_topic, level_6):
             else:
                 print(f"      [WARNING] Image not found: {full_image_path}")
         
-        # Associate with Measurements topic
+        # Ensure question has topic set and level has topic associated
+        if not question.topic:
+            question.topic = measurements_topic
+            question.save()
         question.level.topics.add(measurements_topic)
         
         # Create/update answers if question was created or updated

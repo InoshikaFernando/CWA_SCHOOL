@@ -387,11 +387,17 @@
                                 </a>
                             </div>
                         {% elif level.level_number == 6 %}
-                            <!-- Year 6: Show Measurements and Take Quiz -->
+                            <!-- Year 6: Show Measurements, BODMAS/PEMDAS and Take Quiz -->
                             <div class="topic-card">
                                 <a href="{% url 'maths:measurements_questions' level.level_number %}">
                                     <h4>Measurements</h4>
                                     <p>Year {{ level.level_number }} - Measurements</p>
+                                </a>
+                            </div>
+                            <div class="topic-card">
+                                <a href="{% url 'maths:bodmas_questions' level.level_number %}">
+                                    <h4>BODMAS/PEMDAS</h4>
+                                    <p>Year {{ level.level_number }} - Order of Operations</p>
                                 </a>
                             </div>
                             <div class="topic-card">

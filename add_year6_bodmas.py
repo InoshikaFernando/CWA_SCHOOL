@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
-Add "BODMAS/PEMDAS" topic for Year 5 and all associated questions
-This script creates the topic, associates it with Year 5, and adds BODMAS questions
+Add "BODMAS/PEMDAS" topic for Year 6 and all associated questions
+This script creates the topic, associates it with Year 6, and adds BODMAS questions
 """
 import os
 import sys
@@ -14,102 +14,43 @@ django.setup()
 from maths.models import Level, Topic, Question, Answer
 
 def setup_bodmas_topic():
-    """Create BODMAS/PEMDAS topic and associate with Year 5"""
+    """Create BODMAS/PEMDAS topic and associate with Year 6"""
     
     # Get or create the "BODMAS/PEMDAS" topic
-    bodmas_topic, created = Topic.objects.get_or_create(name="BODMAS/PEMDAS")
-    if created:
+    # Handle case where multiple topics with same name exist
+    bodmas_topic = Topic.objects.filter(name="BODMAS/PEMDAS").first()
+    if not bodmas_topic:
+        bodmas_topic = Topic.objects.create(name="BODMAS/PEMDAS")
         print(f"[OK] Created topic: BODMAS/PEMDAS")
     else:
         print(f"[INFO] Topic already exists: BODMAS/PEMDAS")
     
-    # Get Year 5 level
-    level_5 = Level.objects.filter(level_number=5).first()
+    # Get Year 6 level
+    level_6 = Level.objects.filter(level_number=6).first()
     
-    if not level_5:
-        print("[ERROR] Year 5 level not found!")
+    if not level_6:
+        print("[ERROR] Year 6 level not found!")
         return None
     
-    print(f"[INFO] Found Year 5: {level_5}")
+    print(f"[INFO] Found Year 6: {level_6}")
     
     # Check if BODMAS/PEMDAS is already associated
-    if level_5.topics.filter(name="BODMAS/PEMDAS").exists():
-        print("[INFO] Year 5 already has BODMAS/PEMDAS topic associated.")
-        print(f"   Current topics for Year 5: {', '.join([t.name for t in level_5.topics.all()])}")
+    if level_6.topics.filter(name="BODMAS/PEMDAS").exists():
+        print("[INFO] Year 6 already has BODMAS/PEMDAS topic associated.")
+        print(f"   Current topics for Year 6: {', '.join([t.name for t in level_6.topics.all()])}")
     else:
-        # Associate BODMAS/PEMDAS topic with Year 5
-        level_5.topics.add(bodmas_topic)
-        print(f"[OK] Successfully associated BODMAS/PEMDAS topic with Year 5")
-        print(f"   Year 5 now has topics: {', '.join([t.name for t in level_5.topics.all()])}")
+        # Associate BODMAS/PEMDAS topic with Year 6
+        level_6.topics.add(bodmas_topic)
+        print(f"[OK] Successfully associated BODMAS/PEMDAS topic with Year 6")
+        print(f"   Year 6 now has topics: {', '.join([t.name for t in level_6.topics.all()])}")
     
-    return bodmas_topic, level_5
+    return bodmas_topic, level_6
 
-def add_bodmas_questions(bodmas_topic, level_5):
-    """Add BODMAS/PEMDAS questions for Year 5"""
+def add_bodmas_questions(bodmas_topic, level_6):
+    """Add BODMAS/PEMDAS questions for Year 6"""
     
     # Define questions - BODMAS/PEMDAS evaluation questions
     questions_data = [
-        {
-            "question_text": "Evaluate: 4 + 5 × 2",
-            "correct_answer": "14",
-            "wrong_answers": ["18", "13", "10"],
-            "explanation": "Using BODMAS: Multiplication comes before addition. 5 × 2 = 10, then 4 + 10 = 14."
-        },
-        {
-            "question_text": "Evaluate: 9 - 6 + 3",
-            "correct_answer": "6",
-            "wrong_answers": ["0", "12", "3"],
-            "explanation": "Using BODMAS: Addition and subtraction have the same precedence, so we work left to right. 9 - 6 = 3, then 3 + 3 = 6."
-        },
-        {
-            "question_text": "Evaluate: 16 - 32 + 12",
-            "correct_answer": "-4",
-            "wrong_answers": ["-28", "20", "4"],
-            "explanation": "Using BODMAS: Addition and subtraction have the same precedence, so we work left to right. 16 - 32 = -16, then -16 + 12 = -4."
-        },
-        {
-            "question_text": "Evaluate: 96 + (2 + 4 + 2)",
-            "correct_answer": "104",
-            "wrong_answers": ["98", "102", "106"],
-            "explanation": "Using BODMAS: Brackets come first. (2 + 4 + 2) = 8, then 96 + 8 = 104."
-        },
-        {
-            "question_text": "Evaluate: 14 + √81 + 9",
-            "correct_answer": "32",
-            "wrong_answers": ["23", "41", "26"],
-            "explanation": "Using BODMAS: Square root comes before addition. √81 = 9, then 14 + 9 + 9 = 32."
-        },
-        # Missing number questions
-        {
-            "question_text": "2568 + _____ = 3981",
-            "correct_answer": "1413",
-            "wrong_answers": ["1313", "1513", "1403"],
-            "explanation": "To find the missing number, subtract 2568 from 3981. 3981 - 2568 = 1413."
-        },
-        {
-            "question_text": "1095 - _____ = 564",
-            "correct_answer": "531",
-            "wrong_answers": ["521", "541", "511"],
-            "explanation": "To find the missing number, subtract 564 from 1095. 1095 - 564 = 531."
-        },
-        {
-            "question_text": "_____ × 15 = 405",
-            "correct_answer": "27",
-            "wrong_answers": ["25", "29", "23"],
-            "explanation": "To find the missing number, divide 405 by 15. 405 ÷ 15 = 27."
-        },
-        {
-            "question_text": "_____ ÷ 16 = 102",
-            "correct_answer": "1632",
-            "wrong_answers": ["1622", "1642", "1612"],
-            "explanation": "To find the missing number, multiply 102 by 16. 102 × 16 = 1632."
-        },
-        {
-            "question_text": "_____ - 852 = 1098",
-            "correct_answer": "1950",
-            "wrong_answers": ["1940", "1960", "1930"],
-            "explanation": "To find the missing number, add 852 to 1098. 1098 + 852 = 1950."
-        },
         # Word problems - finding original number
         {
             "question_text": "I add 2, then multiply it by 5. The result is 40. What was the number I thought of?",
@@ -154,19 +95,6 @@ def add_bodmas_questions(bodmas_topic, level_5):
             "wrong_answers": ["4", "8", "5"],
             "explanation": "Let the number be x. Then 6x - 4 = 3x + 14. Solving: 6x - 3x = 14 + 4, so 3x = 18, therefore x = 6."
         },
-        # Calculation and evaluation questions
-        {
-            "question_text": "Calculate: 4506 + 1347",
-            "correct_answer": "5853",
-            "wrong_answers": ["5753", "5953", "5843"],
-            "explanation": "Adding: 4506 + 1347 = 5853"
-        },
-        {
-            "question_text": "Calculate: 9875 - 4678",
-            "correct_answer": "5197",
-            "wrong_answers": ["5097", "5297", "5207"],
-            "explanation": "Subtracting: 9875 - 4678 = 5197"
-        },
         {
             "question_text": "Evaluate: 4² + 3³",
             "correct_answer": "43",
@@ -178,12 +106,6 @@ def add_bodmas_questions(bodmas_topic, level_5):
             "correct_answer": "76",
             "wrong_answers": ["75", "77", "74"],
             "explanation": "Dividing: 456 ÷ 6 = 76"
-        },
-        {
-            "question_text": "Calculate: 92 × 132",
-            "correct_answer": "12144",
-            "wrong_answers": ["12044", "12244", "12134"],
-            "explanation": "Multiplying: 92 × 132 = 12144"
         },
         {
             "question_text": "Evaluate: √100 + 2²",
@@ -221,18 +143,6 @@ def add_bodmas_questions(bodmas_topic, level_5):
             "explanation": "One solution is 6 × 8 ÷ 4 = 48 ÷ 4 = 12. This uses all three digits (4, 6, 8) exactly once."
         },
         {
-            "question_text": "Find the missing number: 1308 + _____ = 5667",
-            "correct_answer": "4359",
-            "wrong_answers": ["4259", "4459", "4349"],
-            "explanation": "To find the missing number, subtract 1308 from 5667. 5667 - 1308 = 4359."
-        },
-        {
-            "question_text": "Find the missing number: 1452 - _____ = 657",
-            "correct_answer": "795",
-            "wrong_answers": ["785", "805", "794"],
-            "explanation": "To find the missing number, subtract 657 from 1452. 1452 - 657 = 795."
-        },
-        {
             "question_text": "I think of a number. I add 48 and then divide by 3. Finally, I square root my answer and the result is 9. What number am I thinking of?",
             "correct_answer": "195",
             "wrong_answers": ["189", "171", "207"],
@@ -252,7 +162,7 @@ def add_bodmas_questions(bodmas_topic, level_5):
         },
     ]
     
-    print(f"\n[INFO] Adding {len(questions_data)} BODMAS/PEMDAS questions for Year 5...\n")
+    print(f"\n[INFO] Adding {len(questions_data)} BODMAS/PEMDAS questions for Year 6...\n")
     
     created_count = 0
     updated_count = 0
@@ -260,7 +170,7 @@ def add_bodmas_questions(bodmas_topic, level_5):
     for i, q_data in enumerate(questions_data, 1):
         # Check if question already exists
         existing = Question.objects.filter(
-            level=level_5,
+            level=level_6,
             question_text=q_data["question_text"]
         ).first()
         
@@ -281,7 +191,7 @@ def add_bodmas_questions(bodmas_topic, level_5):
         else:
             # Create new question
             question = Question.objects.create(
-                level=level_5,
+                level=level_6,
                 topic=bodmas_topic,  # Set topic directly on question
                 question_text=q_data["question_text"],
                 question_type='multiple_choice',
@@ -319,15 +229,15 @@ def add_bodmas_questions(bodmas_topic, level_5):
     print(f"\n[SUMMARY]")
     print(f"   [OK] Created: {created_count} questions")
     print(f"   [UPDATE] Updated: {updated_count} questions")
-    print(f"\n[OK] All questions are associated with BODMAS/PEMDAS topic for Year 5")
+    print(f"\n[OK] All questions are associated with BODMAS/PEMDAS topic for Year 6")
 
 if __name__ == "__main__":
-    print("[INFO] Setting up BODMAS/PEMDAS topic for Year 5...\n")
+    print("[INFO] Setting up BODMAS/PEMDAS topic for Year 6...\n")
     result = setup_bodmas_topic()
     
     if result:
-        bodmas_topic, level_5 = result
+        bodmas_topic, level_6 = result
         print("\n" + "="*60)
-        add_bodmas_questions(bodmas_topic, level_5)
+        add_bodmas_questions(bodmas_topic, level_6)
         print("\n[OK] Done!")
 

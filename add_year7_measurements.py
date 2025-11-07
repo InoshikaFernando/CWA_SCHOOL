@@ -1,182 +1,472 @@
 #!/usr/bin/env python
 """
-Copy all Year 6 measurement questions to Year 7
-This script duplicates questions and answers from level 6 to level 7.
-Images are reused (shared) rather than duplicated.
-
-Usage:
-    python copy_year6_to_year7_measurements.py [--yes] [--no-images]
-    
-    --yes: Skip confirmation prompts (non-interactive mode)
-    --no-images: Don't copy/reuse images
+Add/Update "Measurements" questions for Year 7
+This script can be run multiple times - it will:
+- Add new questions if they don't exist
+- Update answers if they've changed
+- Skip questions that are already up-to-date
 """
 import os
 import sys
 import django
-import argparse
+import random
 
-# Setup Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cwa_school.settings')
 django.setup()
 
-from maths.models import Level, Question, Answer
+from maths.models import Level, Topic, Question, Answer
 from django.core.files import File
+from django.conf import settings
 
-def copy_questions_with_answers(source_level, target_level, copy_images=True):
-    """Copy all questions from source_level to target_level, including answers and images
+def setup_measurements_topic():
+    """Create Measurements topic and associate with Year 7"""
     
-    Args:
-        source_level: Level to copy questions from (Year 6)
-        target_level: Level to copy questions to (Year 7)
-        copy_images: If True, copy image files. If False, skip images (questions will have no images).
-    """
+    # Get or create the "Measurements" topic
+    # Handle case where multiple topics with same name exist
+    measurements_topic = Topic.objects.filter(name="Measurements").first()
+    if not measurements_topic:
+        measurements_topic = Topic.objects.create(name="Measurements")
+        print(f"[OK] Created topic: Measurements")
+    else:
+        print(f"[INFO] Topic already exists: Measurements")
     
-    # Get all questions from year 6
-    source_questions = Question.objects.filter(level=source_level)
-    
-    if not source_questions.exists():
-        print(f"[ERROR] No questions found for level {source_level.level_number}")
-        return
-    
-    print(f"[INFO] Found {source_questions.count()} questions in Year {source_level.level_number}")
-    
-    copied_count = 0
-    skipped_count = 0
-    
-    for source_question in source_questions:
-        # Check if exact same question already exists (by text AND image)
-        # Note: We allow copying questions with same text but different images
-        existing_questions = Question.objects.filter(
-            level=target_level,
-            question_text=source_question.question_text
-        )
-        
-        # If question has an image, check if one with same text AND same image path exists
-        if source_question.image:
-            source_image_name = source_question.image.name
-            existing = None
-            for q in existing_questions:
-                if q.image and q.image.name == source_image_name:
-                    existing = q
-                    break
-        else:
-            # If no image, check if any existing question has no image
-            existing = existing_questions.filter(image__isnull=True).first()
-            if not existing:
-                existing = existing_questions.first() if existing_questions.exists() else None
-        
-        if existing:
-            print(f"  [SKIP] Question already exists in Year {target_level.level_number}: {source_question.question_text[:50]}...")
-            skipped_count += 1
-            continue
-        
-        # Create new question for year 7
-        new_question = Question.objects.create(
-            level=target_level,
-            question_text=source_question.question_text,
-            question_type=source_question.question_type,
-            difficulty=source_question.difficulty,
-            points=source_question.points,
-            explanation=source_question.explanation,
-            # Note: image will be copied separately
-        )
-        
-        # Reuse image if it exists (share the same image file, don't duplicate)
-        # NOTE: Year 6 measurement questions use images (stored in media/questions/year6/measurements/)
-        # Instead of copying the file, we'll reuse the same image file path for Year 7 questions
-        if copy_images and source_question.image:
-            try:
-                # Get the relative path (name) of the image (e.g., 'questions/year6/measurements/image1.png')
-                # This is stored relative to MEDIA_ROOT in Django
-                image_name = source_question.image.name
-                
-                # Assign the same image to the new question (reuse the file, don't copy)
-                # Django will just reference the same file path
-                new_question.image = source_question.image
-                new_question.save(update_fields=['image'])
-                
-                # Extract filename for display
-                filename = os.path.basename(image_name)
-                print(f"  [IMAGE] Reusing image: {filename}")
-            except Exception as e:
-                print(f"  [WARNING] Error setting image: {e}")
-        
-        # Copy all answers for this question
-        source_answers = Answer.objects.filter(question=source_question)
-        for source_answer in source_answers:
-            Answer.objects.create(
-                question=new_question,
-                answer_text=source_answer.answer_text,
-                is_correct=source_answer.is_correct,
-                order=source_answer.order
-            )
-        
-        print(f"  [OK] Copied: {source_question.question_text[:50]}... ({source_answers.count()} answers)")
-        copied_count += 1
-    
-    print(f"\n[SUMMARY]")
-    print(f"   [OK] Copied: {copied_count} questions")
-    print(f"   [SKIP] Skipped: {skipped_count} questions (already exist)")
-    print(f"   [INFO] Total: {source_questions.count()} questions processed")
-
-def main():
-    """Main function to copy year 6 questions to year 7"""
-    
-    # Parse command-line arguments
-    parser = argparse.ArgumentParser(description='Copy Year 6 measurement questions to Year 7')
-    parser.add_argument('--yes', action='store_true', help='Skip confirmation prompts (non-interactive mode)')
-    parser.add_argument('--no-images', action='store_true', help='Don\'t copy/reuse images')
-    args = parser.parse_args()
-    
-    # Get level 6 and level 7
-    level_6 = Level.objects.filter(level_number=6).first()
+    # Get Year 7 level
     level_7 = Level.objects.filter(level_number=7).first()
-    
-    if not level_6:
-        print("[ERROR] Year 6 level not found!")
-        return
     
     if not level_7:
         print("[ERROR] Year 7 level not found!")
-        return
+        return None
     
-    print(f"[INFO] Copying questions from Year {level_6.level_number} to Year {level_7.level_number}")
-    print(f"   Source: {level_6}")
-    print(f"   Target: {level_7}\n")
+    print(f"[INFO] Found Year 7: {level_7}")
     
-    # Determine if we should copy images
-    if args.no_images:
-        copy_images = False
-        print("   [WARNING] Will skip images (questions will have no images)")
-    elif args.yes:
-        # Non-interactive mode: default to including images
-        copy_images = True
-        print("   [OK] Will reuse same image files (no duplication)")
+    # Check if Measurements is already associated
+    if level_7.topics.filter(name="Measurements").exists():
+        print("[INFO] Year 7 already has Measurements topic associated.")
+        print(f"   Current topics for Year 7: {', '.join([t.name for t in level_7.topics.all()])}")
     else:
-        # Interactive mode: ask user
-        print("[INFO] Year 6 measurement questions include images (diagrams, rulers, etc.)")
-        copy_images_input = input("   Include images for Year 7? (yes/no, default=yes): ").strip().lower()
-        copy_images = copy_images_input != 'no'
-        if copy_images:
-            print("   [OK] Will reuse same image files (no duplication)")
+        # Associate Measurements topic with Year 7
+        level_7.topics.add(measurements_topic)
+        print(f"[OK] Successfully associated Measurements topic with Year 7")
+        print(f"   Year 7 now has topics: {', '.join([t.name for t in level_7.topics.all()])}")
+    
+    return measurements_topic, level_7
+
+def add_measurements_questions(measurements_topic, level_7):
+    """Add/Update Measurements questions for Year 7"""
+    
+    # Define all questions - edit this section to add/modify questions
+    # NOTE: Questions are identified by exact question_text match and image if provided
+    # To add a new question: Add it to this list
+    # To modify a question: Change the data here and re-run the script
+    questions_data = [
+        {
+            "question_text": "Which is longer and by how many millimetres: 1.24 m or 1458 mm?",
+            "question_type": "multiple_choice",
+            "correct_answer": "1458 mm by 218 mm",
+            "wrong_answers": ["1.24 m by 218 mm", "1458 mm by 120 mm", "1.24 m by 200 mm"],
+            "explanation": "Convert 1.24 m to mm: 1.24 × 1000 = 1240 mm. Compare: 1458 mm - 1240 mm = 218 mm. So 1458 mm is longer by 218 mm.",
+        },
+        {
+            "question_text": "Find the circumference of this circle.",
+            "question_type": "multiple_choice",
+            "correct_answer": "About 44 cm",
+            "wrong_answers": ["About 28 cm", "About 88 cm", "About 14 cm"],
+            "explanation": "Circumference = π × diameter = π × 14 ≈ 43.98 cm ≈ 44 cm.",
+            "image_path": "questions/year6/measurements/image7.png",
+        },
+        {
+            "question_text": "Find the circumference of this circle.",
+            "question_type": "multiple_choice",
+            "correct_answer": "About 44 cm",
+            "wrong_answers": ["About 28 cm", "About 88 cm", "About 14 cm"],
+            "explanation": "Circumference = π × diameter = π × 14 ≈ 43.98 cm ≈ 44 cm.",
+            "image_path": "questions/year6/measurements/image7.png",
+        },
+        {
+            "question_text": "Find the circumference of this circle.",
+            "question_type": "multiple_choice",
+            "correct_answer": "About 69 mm",
+            "wrong_answers": ["About 44 mm", "About 22 mm", "About 90 mm"],
+            "explanation": "Circumference = π × diameter = π × 22 mm ≈ 69.12 mm.",
+            "image_path": "questions/year6/measurements/image8.png",
+        },
+        {
+            "question_text": "Find the circumference of this circle.",
+            "question_type": "multiple_choice",
+            "correct_answer": "About 38 cm",
+            "wrong_answers": ["About 24 cm", "About 12 cm", "About 44 cm"],
+            "explanation": "Radius = 6 cm, diameter = 12 cm. Circumference = π × d ≈ 3.14 × 12 = 37.68 cm ≈ 38 cm.",
+            "image_path": "questions/year6/measurements/image9.png",
+        },
+        {
+            "question_text": "Find the circumference of this circle.",
+            "question_type": "multiple_choice",
+            "correct_answer": "About 94 cm",
+            "wrong_answers": ["About 45 cm", "About 30 cm", "About 75 cm"],
+            "explanation": "Radius = 15 cm, circumference = 2πr ≈ 2 × 3.14 × 15 = 94.2 cm ≈ 94 cm.",
+            "image_path": "questions/year6/measurements/image10.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image5.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image6.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image7.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image8.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image9.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image10.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image11.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image12.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image13.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image14.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image15.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image16.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image17.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image18.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image19.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image20.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image21.png",
+        },
+        {
+            "question_text": "Calculate the area of this shape.",
+            "question_type": "short_answer",
+            "correct_answer": "",  # No answer provided in database
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Calculate the area using the appropriate formula for the shape.",
+            "image_path": "questions/year6/measurements/image22.png",
+        },
+        {
+            "question_text": "What is the volume of the spacecraft? (use π = 22/7)",
+            "question_type": "short_answer",
+            "correct_answer": "4 x 22 x 7 x 7 m3",
+            "wrong_answers": [],  # Not used for short_answer
+            "explanation": "Volume for the corn is 1/3πR²h and volume of cylinder is πR²h",
+            "image_path": "questions/image23.png",
+        },
+        {
+            "question_text": "Which metric unit would be most appropriate for measuring the distance around the school?",
+            "question_type": "multiple_choice",
+            "correct_answer": "kilometers",
+            "wrong_answers": ["meters", "centimeters", "millimeters", "hectometers"],
+            "explanation": "The distance around a school perimeter is typically measured in kilometers.",
+        },
+        {
+            "question_text": "Which metric unit would be most appropriate for measuring the distance between two cities?",
+            "question_type": "multiple_choice",
+            "correct_answer": "kilometers",
+            "wrong_answers": ["meters", "centimeters", "millimeters", "decimeters"],
+            "explanation": "Distances between cities are measured in kilometers.",
+        },
+    ]
+    
+    print(f"\n[INFO] Processing {len(questions_data)} Measurements questions for Year 7...\n")
+    
+    created_count = 0
+    updated_count = 0
+    skipped_count = 0
+    
+    for i, q_data in enumerate(questions_data, 1):
+        # Check if question already exists (by exact text match and image if provided)
+        query = Question.objects.filter(
+            level=level_7,
+            question_text=q_data["question_text"]
+        )
+        
+        # If image_path is specified, also match by image
+        if "image_path" in q_data and q_data["image_path"]:
+            image_name = os.path.basename(q_data["image_path"])
+            # Try to find by exact image path first
+            existing = query.filter(image=q_data["image_path"]).first()
+            if not existing:
+                # Fallback: match by image filename (handles different path formats)
+                for q in query:
+                    if q.image and (image_name in q.image.name or q.image.name.endswith(image_name)):
+                        existing = q
+                        break
+            if not existing:
+                # Last resort: just get first match
+                existing = query.first()
         else:
-            print("   [WARNING] Will skip images (questions will have no images)")
+            existing = query.first()
+        
+        if existing:
+            question = existing
+            question_updated = False
+            
+            # Update explanation if changed
+            if question.explanation != q_data.get("explanation", ""):
+                question.explanation = q_data.get("explanation", "")
+                question_updated = True
+            
+            # Ensure topic is set
+            if not question.topic:
+                question.topic = measurements_topic
+                question_updated = True
+            
+            if question_updated:
+                question.save()
+            
+            # Check if answers need updating
+            existing_answers = Answer.objects.filter(question=question)
+            existing_correct = existing_answers.filter(is_correct=True).first()
+            
+            # For multiple choice: check if correct answer matches
+            if q_data["question_type"] == "multiple_choice":
+                correct_answer_text = q_data.get("correct_answer", "")
+                wrong_answers = q_data.get("wrong_answers", [])
+                
+                # Check if correct answer exists and matches
+                if correct_answer_text:
+                    if not existing_correct or existing_correct.answer_text != correct_answer_text:
+                        # Answers need updating
+                        Answer.objects.filter(question=question).delete()
+                        question_updated = True
+                    else:
+                        # Check wrong answers count
+                        existing_wrong = existing_answers.filter(is_correct=False)
+                        existing_wrong_texts = set(a.answer_text for a in existing_wrong)
+                        expected_wrong_texts = set(wrong_answers)
+                        
+                        if existing_wrong_texts != expected_wrong_texts:
+                            # Wrong answers changed, update all
+                            Answer.objects.filter(question=question).delete()
+                            question_updated = True
+            
+            # For short answer: check if correct answer exists and matches
+            elif q_data["question_type"] == "short_answer":
+                correct_answer_text = q_data.get("correct_answer", "").strip()
+                
+                if correct_answer_text:
+                    # Only update if answer is provided and different
+                    if not existing_correct or existing_correct.answer_text != correct_answer_text:
+                        # Delete old answers and create new one
+                        Answer.objects.filter(question=question).delete()
+                        question_updated = True
+                else:
+                    # No answer provided in data, skip updating answers
+                    if existing_answers.exists():
+                        print(f"  [SKIP] Question {i}: Already has answers, skipping answer update (no answer in data)")
+                        skipped_count += 1
+                        continue
+            
+            if question_updated:
+                print(f"  [UPDATE] Question {i}: Updating...")
+                updated_count += 1
+            else:
+                # Check if answers exist - if not, we need to create them
+                if not Answer.objects.filter(question=question).exists():
+                    correct_answer = q_data.get("correct_answer", "").strip()
+                    if correct_answer or (q_data["question_type"] == "multiple_choice" and q_data.get("correct_answer")):
+                        question_updated = True
+                        print(f"  [UPDATE] Question {i}: Missing answers, will add them...")
+                        updated_count += 1
+                    else:
+                        print(f"  [SKIP] Question {i}: No changes needed and no answer provided")
+                        skipped_count += 1
+                        continue
+                else:
+                    print(f"  [SKIP] Question {i}: No changes needed")
+                    skipped_count += 1
+                    continue
+        else:
+            # Create new question
+            question = Question.objects.create(
+                level=level_7,
+                topic=measurements_topic,  # Set topic directly on question
+                question_text=q_data["question_text"],
+                question_type=q_data["question_type"],
+                difficulty=1,
+                points=1,
+                explanation=q_data.get("explanation", "")
+            )
+            print(f"  [CREATE] Question {i}: Created new question")
+            created_count += 1
+            question_updated = True
+        
+        # Set image path to reference Year 6 images (don't copy, just use the path)
+        if "image_path" in q_data and q_data["image_path"]:
+            image_path = q_data["image_path"]
+            # Just set the image path directly without copying the file
+            # This references the Year 6 image path
+            question.image.name = image_path
+            question.save()
+            print(f"      [IMAGE] Set image path to Year 6: {image_path}")
+        
+        # Ensure question has topic set and level has topic associated
+        if not question.topic:
+            question.topic = measurements_topic
+            question.save()
+        question.level.topics.add(measurements_topic)
+        
+        # Create/update answers if question was created or updated
+        if question_updated:
+            # Delete existing answers if updating (only if we're actually updating)
+            if existing and Answer.objects.filter(question=question).exists():
+                Answer.objects.filter(question=question).delete()
+            
+            # Create answers
+            if q_data["question_type"] == "multiple_choice":
+                correct_answer_text = q_data.get("correct_answer", "")
+                wrong_answers = q_data.get("wrong_answers", [])
+                
+                if correct_answer_text:
+                    # Mix correct and wrong answers
+                    all_answers = [correct_answer_text] + wrong_answers
+                    random.shuffle(all_answers)
+                    
+                    order = 0
+                    for answer_text in all_answers:
+                        is_correct = (answer_text == correct_answer_text)
+                        Answer.objects.create(
+                            question=question,
+                            answer_text=answer_text,
+                            is_correct=is_correct,
+                            order=order
+                        )
+                        order += 1
+                    print(f"      [ANSWERS] Created {len(all_answers)} answer(s)")
+            
+            elif q_data["question_type"] == "short_answer":
+                correct_answer_text = q_data.get("correct_answer", "").strip()
+                
+                if correct_answer_text:
+                    Answer.objects.create(
+                        question=question,
+                        answer_text=correct_answer_text,
+                        is_correct=True,
+                        order=0
+                    )
+                    print(f"      [ANSWERS] Created answer: {correct_answer_text}")
+                else:
+                    print(f"      [WARNING] No answer provided for short_answer question")
     
-    print()
-    
-    # Confirm before proceeding (unless --yes flag is used)
-    if not args.yes:
-        response = input("[WARNING] This will copy all Year 6 questions to Year 7. Continue? (yes/no): ")
-        if response.lower() != 'yes':
-            print("[ERROR] Operation cancelled.")
-            return
-    
-    # Copy questions
-    copy_questions_with_answers(level_6, level_7, copy_images=copy_images)
-    
-    print("\n[OK] Done! All Year 6 measurement questions have been copied to Year 7.")
-    print("   Remember to reload your web app on PythonAnywhere after deploying this change.")
+    print(f"\n[SUMMARY]")
+    print(f"   [CREATE] Created: {created_count} questions")
+    print(f"   [UPDATE] Updated: {updated_count} questions")
+    print(f"   [SKIP] Skipped: {skipped_count} questions")
+    print(f"\n[OK] All questions are associated with Measurements topic for Year 7")
 
 if __name__ == "__main__":
-    main()
-
+    print("[INFO] Setting up Measurements topic for Year 7...\n")
+    result = setup_measurements_topic()
+    
+    if result:
+        measurements_topic, level_7 = result
+        print("\n" + "="*60)
+        add_measurements_questions(measurements_topic, level_7)
+        print("\n[OK] Done!")

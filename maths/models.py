@@ -65,6 +65,7 @@ class Question(models.Model):
     ]
     
     level = models.ForeignKey(Level, on_delete=models.CASCADE, related_name="questions")
+    topic = models.ForeignKey(Topic, on_delete=models.SET_NULL, null=True, blank=True, related_name="questions", help_text="Topic this question belongs to (e.g., BODMAS/PEMDAS, Measurements, Fractions)")
     question_text = models.TextField()
     question_type = models.CharField(max_length=20, choices=QUESTION_TYPES, default='multiple_choice')
     difficulty = models.PositiveIntegerField(default=1, help_text="1=Easy, 2=Medium, 3=Hard")

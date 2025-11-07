@@ -150,7 +150,7 @@ def dashboard_detail(request):
     # Get all student answers for all levels
     student_answers = StudentAnswer.objects.filter(
         student=request.user
-    ).select_related('question', 'question__level')
+    ).select_related('question', 'question__level', 'question__topic')
     
     # Group by level, topic, and session_id to count attempts
     # This allows us to show separate entries for Measurements and Place Values
@@ -160,60 +160,26 @@ def dashboard_detail(request):
     # We need to determine topic from question patterns
     YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
     
-    # Group by level and session first
-    unique_level_sessions = student_answers.values('question__level__level_number', 'session_id').distinct()
+    # Group by level, topic, and session together
+    # This ensures each unique combination gets its own entry
+    # Filter out answers without topics first
+    student_answers_with_topics = student_answers.filter(question__topic__isnull=False)
     
-    # Group by level and session, then determine topic from questions
+    unique_level_topic_sessions = student_answers_with_topics.values(
+        'question__level__level_number', 
+        'question__topic__name',
+        'session_id'
+    ).distinct()
+    
+    # Group by level and topic combination
     level_topic_data = {}
-    for item in unique_level_sessions:
+    for item in unique_level_topic_sessions:
         level_num = item['question__level__level_number']
+        topic_name = item['question__topic__name']
         session_id = item['session_id']
         
-        if not session_id:  # Skip empty session_ids
+        if not session_id or not topic_name:  # Skip empty session_ids or topics
             continue
-        
-        # Get questions for this session to determine topic
-        session_answers = student_answers.filter(
-            session_id=session_id,
-            question__level__level_number=level_num
-        )
-        
-        if not session_answers.exists():
-            continue
-        
-        # Determine topic from question patterns
-        first_question = session_answers.first().question
-        question_text_lower = first_question.question_text.lower()
-        
-        # Determine topic based on question content
-        if any(pattern in question_text_lower for pattern in ['complete the following sequence', 'counting on', 'counting back', 'skip counting', 'tens and ones', 'how many tens']):
-            topic_name = "Place Values"
-        elif any(pattern in question_text_lower for pattern in ['measure', 'length', 'width', 'height', 'centimeter', 'meter', 'kilometer', 'liter', 'unit would you use']):
-            topic_name = "Measurements"
-        elif any(pattern in question_text_lower for pattern in ['numerator', 'denominator', 'fraction']):
-            topic_name = "Fractions"
-        elif (question_text_lower.startswith('evaluate:') or 
-              question_text_lower.startswith('calculate:') or 
-              question_text_lower.startswith('find the missing number:') or
-              question_text_lower.startswith('i think of a number') or
-              question_text_lower.startswith('using the digits') or
-              question_text_lower.startswith('write down what') or
-              'bodmas' in question_text_lower or
-              'pemdas' in question_text_lower or
-              'bidmas' in question_text_lower or
-              '_____' in first_question.question_text) and not any(pattern in question_text_lower for pattern in ['cm', 'centimeter', 'meter', 'kilometer', 'width', 'height', 'length', 'area', 'perimeter', 'volume', 'measure']):
-            topic_name = "BODMAS/PEMDAS"
-        else:
-            # Try to get from level topics
-            try:
-                level_obj = Level.objects.get(level_number=level_num)
-                topics = level_obj.topics.all()
-                if topics.exists():
-                    topic_name = topics.first().name
-                else:
-                    topic_name = "General"
-            except Level.DoesNotExist:
-                topic_name = "General"
         
         # Create unique key for level + topic combination
         key = (level_num, topic_name)
@@ -225,7 +191,6 @@ def dashboard_detail(request):
     for (level_num, topic_name), session_ids in level_topic_data.items():
         attempts_data = []
         completed_session_ids = []
-        question_limit = YEAR_QUESTION_COUNTS.get(level_num, 10)
         
         # Get level info
         try:
@@ -235,82 +200,32 @@ def dashboard_detail(request):
             level_name = f"Level {level_num}"
             topic_name = "Unknown"
         
+        # Get the actual number of questions available for this topic/level
+        try:
+            topic_obj = Topic.objects.get(name=topic_name)
+            available_questions = Question.objects.filter(
+                level=level_obj,
+                topic=topic_obj
+            ).count()
+        except (Topic.DoesNotExist, Level.DoesNotExist):
+            available_questions = 0
+        
+        # Use the minimum of: standard limit OR all available questions
+        standard_limit = YEAR_QUESTION_COUNTS.get(level_num, 10)
+        question_limit = min(available_questions, standard_limit) if available_questions > 0 else standard_limit
+        
         for session_id in session_ids:
-            session_answers = student_answers.filter(
+            # Filter by level, topic, and session_id directly
+            session_answers = student_answers_with_topics.filter(
                 session_id=session_id,
-                question__level__level_number=level_num
+                question__level__level_number=level_num,
+                question__topic__name=topic_name
             )
             
-            # Filter to only questions matching this topic
-            if topic_name == "Place Values":
-                session_answers = session_answers.filter(
-                    Q(question__question_text__icontains='complete the following sequence') |
-                    Q(question__question_text__icontains='counting on') |
-                    Q(question__question_text__icontains='counting back') |
-                    Q(question__question_text__icontains='skip counting') |
-                    Q(question__question_text__icontains='tens and ones') |
-                    Q(question__question_text__icontains='How many tens')
-                ).exclude(
-                    Q(question__question_text__icontains='Which unit would you use') |
-                    Q(question__question_text__icontains='measure the length') |
-                    Q(question__question_text__icontains='centimeter') |
-                    Q(question__question_text__icontains='meter') |
-                    Q(question__question_text__icontains='kilometer')
-                )
-            elif topic_name == "Measurements":
-                session_answers = session_answers.filter(
-                    Q(question__question_text__icontains='measure') |
-                    Q(question__question_text__icontains='length') |
-                    Q(question__question_text__icontains='width') |
-                    Q(question__question_text__icontains='height') |
-                    Q(question__question_text__icontains='centimeter') |
-                    Q(question__question_text__icontains='meter') |
-                    Q(question__question_text__icontains='kilometer') |
-                    Q(question__question_text__icontains='unit would you use')
-                )
-            elif topic_name == "Fractions":
-                session_answers = session_answers.filter(
-                    Q(question__question_text__icontains='numerator') |
-                    Q(question__question_text__icontains='denominator') |
-                    Q(question__question_text__icontains='fraction')
-                )
-            elif topic_name == "BODMAS/PEMDAS":
-                session_answers = session_answers.filter(
-                    Q(question__question_text__istartswith='evaluate:') |
-                    Q(question__question_text__istartswith='calculate:') |
-                    Q(question__question_text__istartswith='find the missing number:') |
-                    Q(question__question_text__istartswith='i think of a number') |
-                    Q(question__question_text__istartswith='using the digits') |
-                    Q(question__question_text__istartswith='write down what') |
-                    Q(question__question_text__icontains='bodmas') |
-                    Q(question__question_text__icontains='pemdas') |
-                    Q(question__question_text__icontains='bidmas') |
-                    Q(question__question_text__icontains='_____')
-                ).exclude(
-                    Q(question__question_text__icontains='cm') |
-                    Q(question__question_text__icontains='centimeter') |
-                    Q(question__question_text__icontains='meter') |
-                    Q(question__question_text__icontains='kilometer') |
-                    Q(question__question_text__icontains='width') |
-                    Q(question__question_text__icontains='height') |
-                    Q(question__question_text__icontains='length') |
-                    Q(question__question_text__icontains='area') |
-                    Q(question__question_text__icontains='perimeter') |
-                    Q(question__question_text__icontains='volume') |
-                    Q(question__question_text__icontains='measure') |
-                    Q(question__question_text__icontains='numerator') |
-                    Q(question__question_text__icontains='denominator') |
-                    Q(question__question_text__icontains='fraction') |
-                    Q(question__question_text__icontains='complete the following sequence') |
-                    Q(question__question_text__icontains='counting on') |
-                    Q(question__question_text__icontains='counting back') |
-                    Q(question__question_text__icontains='skip counting') |
-                    Q(question__question_text__icontains='tens and ones') |
-                    Q(question__question_text__icontains='how many tens')
-                )
-            
             # Only count full attempts (completed all questions for that topic/level)
-            if session_answers.count() < question_limit:
+            # Require either the standard limit OR all available questions, whichever is minimum
+            answer_count = session_answers.count()
+            if answer_count < question_limit:
                 continue
             completed_session_ids.append(session_id)
             
@@ -2556,50 +2471,10 @@ def bodmas_questions(request, level_number):
         return redirect("maths:dashboard")
     
     # Get all BODMAS/PEMDAS questions for this level
-    # Use strict whitelist - only include questions that match BODMAS patterns
-    # BODMAS questions typically start with: "Evaluate:", "Calculate:", "Find the missing number:", 
-    # "I think of a number", "Using the digits", or contain BODMAS/PEMDAS/BIDMAS
-    all_questions_query = Question.objects.filter(level=level).filter(
-        Q(question_text__istartswith='evaluate:') |
-        Q(question_text__istartswith='calculate:') |
-        Q(question_text__istartswith='find the missing number:') |
-        Q(question_text__istartswith='i think of a number') |
-        Q(question_text__istartswith='using the digits') |
-        Q(question_text__istartswith='write down what') |
-        Q(question_text__icontains='bodmas') |
-        Q(question_text__icontains='pemdas') |
-        Q(question_text__icontains='bidmas') |
-        Q(question_text__icontains='_____')  # Missing number pattern
-    ).exclude(
-        # Exclude measurement questions (even if they match patterns above)
-        Q(question_text__icontains='cm') |
-        Q(question_text__icontains='centimeter') |
-        Q(question_text__icontains='meter') |
-        Q(question_text__icontains='kilometer') |
-        Q(question_text__icontains='liter') |
-        Q(question_text__icontains='gram') |
-        Q(question_text__icontains='kilogram') |
-        Q(question_text__icontains='width') |
-        Q(question_text__icontains='height') |
-        Q(question_text__icontains='length') |
-        Q(question_text__icontains='area') |
-        Q(question_text__icontains='perimeter') |
-        Q(question_text__icontains='volume') |
-        Q(question_text__icontains='measure') |
-        Q(question_text__icontains='unit would you use') |
-        Q(question_text__icontains='ruler') |
-        Q(question_text__icontains='scale') |
-        # Exclude fraction questions
-        Q(question_text__icontains='numerator') |
-        Q(question_text__icontains='denominator') |
-        Q(question_text__icontains='fraction') |
-        # Exclude place value questions
-        Q(question_text__icontains='complete the following sequence') |
-        Q(question_text__icontains='counting on') |
-        Q(question_text__icontains='counting back') |
-        Q(question_text__icontains='skip counting') |
-        Q(question_text__icontains='tens and ones') |
-        Q(question_text__icontains='how many tens')
+    # Filter by level and topic directly - much simpler!
+    all_questions_query = Question.objects.filter(
+        level=level,
+        topic=bodmas_topic
     )
     
     # Question limits per year
@@ -2614,45 +2489,16 @@ def bodmas_questions(request, level_number):
     questions_session_key = "bodmas_question_ids"
     timer_start = request.session.get(timer_session_key)
     
-    # Clear session if questions don't match BODMAS patterns (safety check)
+    # Clear session if questions don't belong to BODMAS topic (safety check)
     if question_number == 1 and timer_start:
         existing_question_ids = request.session.get(questions_session_key, [])
         if existing_question_ids:
-            existing_questions = Question.objects.filter(id__in=existing_question_ids, level=level)
-            # Check if questions are NOT BODMAS questions
-            invalid_questions = existing_questions.exclude(
-                Q(question_text__istartswith='evaluate:') |
-                Q(question_text__istartswith='calculate:') |
-                Q(question_text__istartswith='find the missing number:') |
-                Q(question_text__istartswith='i think of a number') |
-                Q(question_text__istartswith='using the digits') |
-                Q(question_text__istartswith='write down what') |
-                Q(question_text__icontains='bodmas') |
-                Q(question_text__icontains='pemdas') |
-                Q(question_text__icontains='bidmas') |
-                Q(question_text__icontains='_____')
-            ).filter(
-                Q(question_text__icontains='cm') |
-                Q(question_text__icontains='centimeter') |
-                Q(question_text__icontains='meter') |
-                Q(question_text__icontains='kilometer') |
-                Q(question_text__icontains='width') |
-                Q(question_text__icontains='height') |
-                Q(question_text__icontains='length') |
-                Q(question_text__icontains='area') |
-                Q(question_text__icontains='perimeter') |
-                Q(question_text__icontains='volume') |
-                Q(question_text__icontains='measure') |
-                Q(question_text__icontains='numerator') |
-                Q(question_text__icontains='denominator') |
-                Q(question_text__icontains='fraction') |
-                Q(question_text__icontains='complete the following sequence') |
-                Q(question_text__icontains='counting on') |
-                Q(question_text__icontains='counting back') |
-                Q(question_text__icontains='skip counting') |
-                Q(question_text__icontains='tens and ones') |
-                Q(question_text__icontains='how many tens')
-            )
+            # Check if questions belong to BODMAS topic
+            invalid_questions = Question.objects.filter(
+                id__in=existing_question_ids,
+                level=level
+            ).exclude(topic=bodmas_topic)
+            
             if invalid_questions.exists():
                 if timer_session_key in request.session:
                     del request.session[timer_session_key]
@@ -2690,6 +2536,8 @@ def bodmas_questions(request, level_number):
                     q_text_lower.startswith('calculate:') or
                     q_text_lower.startswith('find the missing number:') or
                     q_text_lower.startswith('i think of a number') or
+                    q_text_lower.startswith('i add') or
+                    q_text_lower.startswith('i multiply') or
                     q_text_lower.startswith('using the digits') or
                     q_text_lower.startswith('write down what') or
                     'bodmas' in q_text_lower or
@@ -2740,7 +2588,21 @@ def bodmas_questions(request, level_number):
                 del request.session['current_attempt_id']
             return redirect(f"{request.path}?q=1")
     else:
-        all_questions = []
+        # No session exists - initialize it now
+        if not timer_start:
+            request.session[timer_session_key] = time.time()
+            import uuid
+            request.session['current_attempt_id'] = str(uuid.uuid4())
+        
+        all_questions_list = list(all_questions_query)
+        if len(all_questions_list) > question_limit:
+            selected_questions = random.sample(all_questions_list, question_limit)
+        else:
+            selected_questions = all_questions_list
+        
+        random.shuffle(selected_questions)
+        request.session[questions_session_key] = [q.id for q in selected_questions]
+        all_questions = selected_questions
     
     if request.method == "POST":
         action = request.POST.get('action')
@@ -2752,7 +2614,7 @@ def bodmas_questions(request, level_number):
             
             if question_id:
                 try:
-                    question = Question.objects.get(id=question_id, level=level)
+                    question = Question.objects.get(id=question_id, level=level, topic=bodmas_topic)
                     
                     if answer_id:
                         answer = Answer.objects.get(id=answer_id, question=question)

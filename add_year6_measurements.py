@@ -175,7 +175,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Find the perimeter of each of these shapes.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "25.6 cm",  
             "wrong_answers": ["25.7 cm", "24.6 cm", "26.6 cm"],  # Not used for short_answer
             "explanation": "Add all side lengths shown to get the perimeter.",
@@ -183,7 +183,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Find the perimeter of each of these shapes.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "38.1 cm", 
             "wrong_answers": ["38.2 cm", "37.1 cm", "39.1 cm"],  # Not used for short_answer
             "explanation": "Add all side lengths shown to get the perimeter.",
@@ -191,7 +191,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Find the perimeter of each of these shapes.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "42 cm",  
             "wrong_answers": ["43 cm", "41 cm", "44 cm"],  # Not used for short_answer
             "explanation": "Add all side lengths shown to get the perimeter.",
@@ -199,7 +199,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Find the perimeter of each of these shapes.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "28.2 cm",  
             "wrong_answers": ["28.3 cm", "28.1 cm", "28.4 cm"],  # Not used for short_answer
             "explanation": "Add all side lengths shown to get the perimeter.",
@@ -207,7 +207,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Find the perimeter of each of these shapes.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "16.07 cm",  
             "wrong_answers": ["7.07 cm", "28.29 cm", "14.14 cm"],  # Not used for short_answer
             "explanation": "Add all side lengths shown to get the perimeter.",
@@ -215,7 +215,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Find the perimeter of each of these shapes.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "356.29 mm",  
             "wrong_answers": ["540.57 mm", "270.29 mm", "313.29 mm"],  # Not used for short_answer
             "explanation": "Add all side lengths shown to get the perimeter.",
@@ -223,7 +223,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Find the perimeter of each of these shapes.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "45.43 m",  
             "wrong_answers": ["62.86 m", "31.43 m", "37.43 m"],  # Not used for short_answer
             "explanation": "Add all side lengths shown to get the perimeter.",
@@ -231,7 +231,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "What is the volume of the spacecraft? (use π = 22/7)",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "4 x 22 x 7 x 7 m3",
             "wrong_answers": ["22 X 7 X 7 X 7 m3", "5 x 22 x 7 x 7 m3", "1/3 x 7 x 49 + 22 x 21 x 14 m3", "3/4 x 22 x 49 + 22 x 14 x 20 cm3"],  # Not used for short_answer
             "explanation": "Volume for the corn is 1/3πR²h and volume of cylinder is πR²h",
@@ -278,7 +278,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Calculate the area of this shape.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "154 cm²",  # No answer provided in database
             "wrong_answers": ["44 cm²", "49 cm²", "144 cm²"],  # Not used for short_answer
             "explanation": "Calculate the area using the appropriate formula for the shape.",
@@ -286,7 +286,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Calculate the area of this shape.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "380.29 cm²",  # No answer provided in database
             "wrong_answers": ["69.14 cm²", "69.14 cm", "375.14 cm³"],  # Not used for short_answer
             "explanation": "Calculate the area using the appropriate formula for the shape.",
@@ -294,7 +294,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Calculate the area of this shape.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "113.14 cm²",  # No answer provided in database
             "wrong_answers": ["37.71 cm", "39.14 cm³", "113.14 cm²"],  # Not used for short_answer
             "explanation": "Calculate the area using the appropriate formula for the shape.",
@@ -302,7 +302,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Calculate the area of this shape.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "707.14 cm²",  # No answer provided in database
             "wrong_answers": ["94.29 cm²", "94.29 cm", "984.29 cm³"],  # Not used for short_answer
             "explanation": "Calculate the area using the appropriate formula for the shape.",
@@ -310,7 +310,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Calculate the area of this shape.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "15.91 cm²",  # No answer provided in database
             "wrong_answers": ["63.64 cm", "24.91 cm³", "53.64 cm²"],  # Not used for short_answer
             "explanation": "Calculate the area using the appropriate formula for the shape.",
@@ -318,7 +318,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Calculate the area of this shape.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "2905.57 mm²",  # No answer provided in database
             "wrong_answers": ["5811.14 mm²", "6905.57 mm", "2905.57 cm³"],  # Not used for short_answer
             "explanation": "Calculate the area using the appropriate formula for the shape.",
@@ -326,7 +326,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Calculate the area of this shape.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "102 m²",  # No answer provided in database
             "wrong_answers": ["78.57 m", "24 m²", "102 cm³"],  # Not used for short_answer
             "explanation": "Calculate the area using the appropriate formula for the shape.",
@@ -334,7 +334,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Calculate the area of this shape.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "14.4 cm²",  # No answer provided in database
             "wrong_answers": ["14.4 m", "7.2 cm³", "7.2 m²"],  # Not used for short_answer
             "explanation": "Calculate the area using the appropriate formula for the shape.",
@@ -342,7 +342,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Calculate the area of this shape.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "27 m²",  # No answer provided in database
             "wrong_answers": ["27 cm²", "24 cm³", "24 m³"],  # Not used for short_answer
             "explanation": "Calculate the area using the appropriate formula for the shape.",
@@ -350,7 +350,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Calculate the area of this shape.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "48 cm²",  # No answer provided in database
             "wrong_answers": ["14 m", "14 cm³", "48 m²"],  # Not used for short_answer
             "explanation": "Calculate the area using the appropriate formula for the shape.",
@@ -358,7 +358,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Calculate the area of this shape.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "58.5 cm²",  # No answer provided in database
             "wrong_answers": ["15.5 m³", "58.5 cm³", "48 m²"],  # Not used for short_answer
             "explanation": "Calculate the area using the appropriate formula for the shape.",
@@ -366,7 +366,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Calculate the area of this shape.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "33 m²",  # No answer provided in database
             "wrong_answers": ["66 m²", "66 cm³", "33 m³"],  # Not used for short_answer
             "explanation": "Calculate the area using the appropriate formula for the shape.",
@@ -374,7 +374,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Calculate the area of this shape.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "54 m²",  # No answer provided in database
             "wrong_answers": ["108 m²", "108 cm³", "54 m³"],  # Not used for short_answer
             "explanation": "Calculate the area using the appropriate formula for the shape.",
@@ -382,7 +382,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Calculate the area of this shape.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "10.5 m²",  # No answer provided in database
             "wrong_answers": ["10.5 cm²", "21 m³", "21 m²"],  # Not used for short_answer
             "explanation": "Calculate the area using the appropriate formula for the shape.",
@@ -390,7 +390,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Calculate the area of this shape.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "152 m²",  # No answer provided in database
             "wrong_answers": ["160 m²", "152 cm³", "160 cm³"],  # Not used for short_answer
             "explanation": "Calculate the area using the appropriate formula for the shape.",
@@ -398,7 +398,7 @@ def add_measurements_questions(measurements_topic, level_6):
         },
         {
             "question_text": "Calculate the area of this shape.",
-            "question_type": "short_answer",
+            "question_type": "multiple_choice",
             "correct_answer": "120 m²",  # No answer provided in database
             "wrong_answers": ["120 cm²", "180 m²", "180 cm³"],  # Not used for short_answer
             "explanation": "Calculate the area using the appropriate formula for the shape.",

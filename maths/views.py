@@ -197,16 +197,20 @@ def dashboard_detail(request):
             level_obj = Level.objects.get(level_number=level_num)
             level_name = f"Level {level_num}" if level_num >= 100 else f"Year {level_num}"
         except Level.DoesNotExist:
+            level_obj = None
             level_name = f"Level {level_num}"
             topic_name = "Unknown"
         
         # Get the actual number of questions available for this topic/level
         try:
-            topic_obj = Topic.objects.get(name=topic_name)
-            available_questions = Question.objects.filter(
-                level=level_obj,
-                topic=topic_obj
-            ).count()
+            if level_obj is None:
+                available_questions = 0
+            else:
+                topic_obj = Topic.objects.get(name=topic_name)
+                available_questions = Question.objects.filter(
+                    level=level_obj,
+                    topic=topic_obj
+                ).count()
         except (Topic.DoesNotExist, Level.DoesNotExist):
             available_questions = 0
         

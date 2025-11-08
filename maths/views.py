@@ -206,12 +206,18 @@ def dashboard_detail(request):
             if level_obj is None:
                 available_questions = 0
             else:
-                topic_obj = Topic.objects.get(name=topic_name)
-                available_questions = Question.objects.filter(
-                    level=level_obj,
-                    topic=topic_obj
-                ).count()
-        except (Topic.DoesNotExist, Level.DoesNotExist):
+                # Use filter().first() to handle duplicate topic names
+                topic_obj = Topic.objects.filter(name=topic_name).first()
+                if topic_obj:
+                    available_questions = Question.objects.filter(
+                        level=level_obj,
+                        topic=topic_obj
+                    ).count()
+                else:
+                    available_questions = 0
+        except (Topic.DoesNotExist, Level.DoesNotExist, Exception) as e:
+            # Handle any exceptions including MultipleObjectsReturned (shouldn't happen with filter().first())
+            # but catch it just in case
             available_questions = 0
         
         # Use the minimum of: standard limit OR all available questions

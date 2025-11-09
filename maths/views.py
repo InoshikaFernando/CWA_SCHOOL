@@ -1482,32 +1482,15 @@ def measurements_questions(request, level_number):
     questions_session_key = "measurements_question_ids"
     timer_start = request.session.get(timer_session_key)
     
-    # Clear session if questions don't match Measurements patterns (safety check)
+    # Clear session if questions don't match Measurements topic (safety check)
     if question_number == 1 and timer_start:
-        # Validate existing session questions are still Measurements questions
+        # Validate existing session questions are still Measurements questions (check by topic)
         existing_question_ids = request.session.get(questions_session_key, [])
         if existing_question_ids:
-            existing_questions = Question.objects.filter(id__in=existing_question_ids, level=level)
-            # Check if any question doesn't match Measurements pattern
-            invalid_questions = existing_questions.exclude(
-                Q(question_text__icontains='measure') |
-                Q(question_text__icontains='length') |
-                Q(question_text__icontains='width') |
-                Q(question_text__icontains='height') |
-                Q(question_text__icontains='centimeter') |
-                Q(question_text__icontains='meter') |
-                Q(question_text__icontains='kilometer') |
-                Q(question_text__icontains='unit would you use')
-            ).filter(
-                Q(question_text__icontains='complete the following sequence') |
-                Q(question_text__icontains='counting on') |
-                Q(question_text__icontains='counting back') |
-                Q(question_text__icontains='skip counting') |
-                Q(question_text__icontains='tens and ones') |
-                Q(question_text__icontains='How many tens')
-            )
-            if invalid_questions.exists():
-                # Clear session and start fresh
+            existing_questions = Question.objects.filter(id__in=existing_question_ids, level=level, topic=measurements_topic)
+            # Check if all questions have the Measurements topic
+            if existing_questions.count() != len(existing_question_ids):
+                # Some questions don't have the Measurements topic - clear session and start fresh
                 if timer_session_key in request.session:
                     del request.session[timer_session_key]
                 if questions_session_key in request.session:
@@ -1539,35 +1522,13 @@ def measurements_questions(request, level_number):
     question_ids = request.session.get(questions_session_key, [])
     
     # Convert to list and maintain the order from session
-    # Validate that all questions are Measurements questions
+    # Validate that all questions are Measurements questions (check by topic)
     if question_ids:
         all_questions = []
         for qid in question_ids:
             try:
-                question = Question.objects.get(id=qid, level=level)
-                # Verify this is a Measurements question
-                is_measurement = (
-                    'measure' in question.question_text.lower() or
-                    'length' in question.question_text.lower() or
-                    'width' in question.question_text.lower() or
-                    'height' in question.question_text.lower() or
-                    'centimeter' in question.question_text.lower() or
-                    'meter' in question.question_text.lower() or
-                    'kilometer' in question.question_text.lower() or
-                    'liter' in question.question_text.lower() or
-                    'unit would you use' in question.question_text.lower()
-                )
-                # Exclude Place Values questions
-                is_place_value = (
-                    'complete the following sequence' in question.question_text.lower() or
-                    'counting on' in question.question_text.lower() or
-                    'counting back' in question.question_text.lower() or
-                    'skip counting' in question.question_text.lower() or
-                    'tens and ones' in question.question_text.lower() or
-                    'how many tens' in question.question_text.lower()
-                )
-                if is_measurement and not is_place_value:
-                    all_questions.append(question)
+                question = Question.objects.get(id=qid, level=level, topic=measurements_topic)
+                all_questions.append(question)
             except Question.DoesNotExist:
                 continue
         

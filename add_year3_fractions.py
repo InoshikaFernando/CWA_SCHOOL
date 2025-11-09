@@ -393,11 +393,12 @@ def add_fractions_questions(fractions_topic, level_3):
             # Check if image file exists
             full_image_path = os.path.join(settings.MEDIA_ROOT, image_path)
             if os.path.exists(full_image_path):
-                with open(full_image_path, 'rb') as f:
-                    question.image.save(os.path.basename(image_path), File(f), save=True)
-                print(f"      📷 Added/updated image: {image_path}")
+                # Set image path directly without copying the file
+                question.image.name = image_path
+                question.save()
+                print(f"      [IMAGE] Set image path: {image_path}")
             else:
-                print(f"      ⚠️  Image not found: {full_image_path}")
+                print(f"      [WARNING] Image not found: {full_image_path}")
         
         # Ensure question has topic set and level has topic associated
         if not question.topic:

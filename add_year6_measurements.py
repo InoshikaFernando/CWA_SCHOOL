@@ -545,16 +545,22 @@ def add_measurements_questions(measurements_topic, level_6):
             question_updated = True
         
         # Add/update image if specified - use existing file, don't copy
+        # Always set the image path if specified (file may exist in production even if not locally)
         if "image_path" in q_data and q_data["image_path"]:
             image_path = q_data["image_path"]
-            full_image_path = os.path.join(settings.MEDIA_ROOT, image_path)
-            if os.path.exists(full_image_path):
-                # Set image path directly without copying the file
+            # Check if image path needs updating
+            current_image = question.image.name if question.image else None
+            if current_image != image_path:
                 question.image.name = image_path
                 question.save()
-                print(f"      [IMAGE] Set image path: {image_path}")
+                print(f"      [IMAGE] Updated image path: {current_image or 'None'} -> {image_path}")
             else:
-                print(f"      [WARNING] Image not found: {full_image_path}")
+                print(f"      [IMAGE] Image path already set: {image_path}")
+            
+            # Optional: Warn if file doesn't exist locally (but still set the path)
+            full_image_path = os.path.join(settings.MEDIA_ROOT, image_path)
+            if not os.path.exists(full_image_path):
+                print(f"      [INFO] Image file not found locally (may exist in production): {full_image_path}")
         
         # Ensure question has topic set and level has topic associated
         if not question.topic:

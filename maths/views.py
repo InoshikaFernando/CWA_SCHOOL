@@ -1464,28 +1464,10 @@ def measurements_questions(request, level_number):
         measurements_topic = Topic.objects.create(name="Measurements")
     
     # Get all measurements questions for this level
-    # Filter to only include measurement questions and exclude Place Values questions
-    all_questions_query = Question.objects.filter(level=level).filter(
-        Q(question_text__icontains='measure') |
-        Q(question_text__icontains='length') |
-        Q(question_text__icontains='width') |
-        Q(question_text__icontains='height') |
-        Q(question_text__icontains='centimeter') |
-        Q(question_text__icontains='meter') |
-        Q(question_text__icontains='kilometer') |
-        Q(question_text__icontains='liter') |
-        Q(question_text__icontains='gram') |
-        Q(question_text__icontains='kilogram') |
-        Q(question_text__icontains='unit would you use') |
-        Q(question_text__icontains='ruler') |
-        Q(question_text__icontains='scale')
-    ).exclude(
-        Q(question_text__icontains='complete the following sequence') |
-        Q(question_text__icontains='counting on') |
-        Q(question_text__icontains='counting back') |
-        Q(question_text__icontains='skip counting') |
-        Q(question_text__icontains='tens and ones') |
-        Q(question_text__icontains='How many tens')
+    # Use topic field directly instead of text pattern matching
+    all_questions_query = Question.objects.filter(
+        level=level,
+        topic=measurements_topic
     )
     
     # Question limits per year
@@ -1639,13 +1621,16 @@ def measurements_questions(request, level_number):
                     elif text_answer and question.question_type == 'short_answer':
                         # Short answer question - for now, always mark as correct
                         # In a real system, you'd implement text matching logic
+                        # Save student answer with session ID (same as multiple choice)
+                        attempt_id = request.session.get('current_attempt_id', '')
                         student_answer, created = StudentAnswer.objects.update_or_create(
                             student=request.user,
                             question=question,
                             defaults={
                                 'text_answer': text_answer,
                                 'is_correct': True,  # For demo purposes, always correct
-                                'points_earned': question.points
+                                'points_earned': question.points,
+                                'session_id': attempt_id
                             }
                         )
                         

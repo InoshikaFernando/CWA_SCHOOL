@@ -80,6 +80,216 @@ def add_finance_questions(finance_topic, level_3):
             "wrong_answers": ["$1.20", "$2", "$1.80"],
             "explanation": "$5.00 - $3.50 = $1.50. Subtract the cost from the amount paid to find the change.",
         },
+        {
+            "question_text": "You have two $2 coins and one 50c coin.\n\nHow much money do you have in total?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$4.50",
+            "wrong_answers": ["$5", "$3.50", "$2.50"],
+            "explanation": "$2 + $2 + $0.50 = $4.50. Add the coins together."
+        },
+        {
+            "question_text": "A sandwich costs $4. You pay with a $10 note.\n\nHow much change will you get?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$6",
+            "wrong_answers": ["$5", "$4", "$7"],
+            "explanation": "$10 - $4 = $6. Subtract the price from the amount paid."
+        },
+        {
+            "question_text": "Which of these is worth the most?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$5 note",
+            "wrong_answers": ["$2 coin", "50c coin", "$1 coin"],
+            "explanation": "$5 is more than $2, $1, or 50c."
+        },
+        {
+            "question_text": "You buy a toy for $6.50 and give the shopkeeper $10.\n\nWhat is your change?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$3.50",
+            "wrong_answers": ["$4", "$2.50", "$3"],
+            "explanation": "$10.00 - $6.50 = $3.50."
+        },
+        {
+            "question_text": "Which coins could you use to make $2?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$1 + $1",
+            "wrong_answers": ["50c + 20c + 20c", "50c + 50c + 20c + 10c", "$1 + 50c"],
+            "explanation": "$1 + $1 = $2 exactly."
+        },
+        {
+            "question_text": "A pencil costs $1.50. You have $5.\n\nHow many pencils can you buy?",
+            "question_type": "multiple_choice",
+            "correct_answer": "3",
+            "wrong_answers": ["2", "4", "5"],
+            "explanation": "$1.50 × 3 = $4.50, which is less than $5. Four pencils would cost $6, too much."
+        },
+        {
+            "question_text": "You have 4 coins: 20c, 50c, $1, and $2.\n\nHow much money do you have?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$3.70",
+            "wrong_answers": ["$3.50", "$2.70", "$4"],
+            "explanation": "$2 + $1 + $0.50 + $0.20 = $3.70."
+        },
+        {
+            "question_text": "A comic costs $4. You give $5.\n\nWhat coin could you get as change?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$1 coin",
+            "wrong_answers": ["50c coin", "$2 coin", "20c coin"],
+            "explanation": "$5 - $4 = $1, so you get a $1 coin back."
+        },
+        {
+            "question_text": "Which group of coins makes $1.50?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$1 + 50c",
+            "wrong_answers": ["50c + 50c + 20c + 20c", "$1 + 20c + 20c", "50c + 20c + 10c"],
+            "explanation": "$1 + 50c = $1.50."
+        },
+        {
+            "question_text": "You have $10. You spend $3 on lunch and $4 on a drink.\n\nHow much money do you have left?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$3",
+            "wrong_answers": ["$2", "$4", "$3.50"],
+            "explanation": "$10 - $3 - $4 = $3."
+        },
+        {
+            "question_text": "Liam buys a chocolate bar for $2.80 and a drink for $1.20.\n\nHow much does he spend in total?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$4.00",
+            "wrong_answers": ["$3.50", "$4.50", "$5.00"],
+            "explanation": "$2.80 + $1.20 = $4.00."
+        },
+        {
+            "question_text": "A sandwich costs $3.50 and a juice box costs $2.\n\nHow much do both items cost together?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$5.50",
+            "wrong_answers": ["$6", "$4.50", "$5"],
+            "explanation": "$3.50 + $2.00 = $5.50."
+        },
+        {
+            "question_text": "Emma has $10. She buys a toy for $6.75.\n\nHow much money does she have left?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$3.25",
+            "wrong_answers": ["$4", "$2.50", "$3"],
+            "explanation": "$10.00 - $6.75 = $3.25."
+        },
+        {
+            "question_text": "A packet of stickers costs $4.20. You pay with a $5 note.\n\nHow much change should you get?",
+            "question_type": "multiple_choice",
+            "correct_answer": "80c",
+            "wrong_answers": ["70c", "90c", "$1"],
+            "explanation": "$5.00 - $4.20 = $0.80 (80 cents)."
+        },
+        {
+            "question_text": "A muffin costs $2.40 and a smoothie costs $4.60.\n\nYou pay with a $10 note. How much change do you get?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$3.00",
+            "wrong_answers": ["$2.50", "$3.50", "$4"],
+            "explanation": "$2.40 + $4.60 = $7.00. Then $10 - $7 = $3.00."
+        },
+        {
+            "question_text": "You buy 3 apples that cost 60c each.\n\nHow much do you pay altogether?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$1.80",
+            "wrong_answers": ["$1.60", "$2", "$1.50"],
+            "explanation": "60c × 3 = 180c = $1.80."
+        },
+        {
+            "question_text": "A toy car costs $8.50. You have $10.\n\nDo you have enough money, and if yes, how much change will you get?",
+            "question_type": "multiple_choice",
+            "correct_answer": "Yes, $1.50 change",
+            "wrong_answers": ["No, not enough money", "Yes, 50c change", "Yes, $2 change"],
+            "explanation": "$10.00 - $8.50 = $1.50, so you have enough and get $1.50 change."
+        },
+        {
+            "question_text": "Noah buys a comic for $3.80 and a pen for $1.20.\n\nHe pays with a $5 note. What is his change?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$0.00 (no change)",
+            "wrong_answers": ["$1", "50c", "$0.20"],
+            "explanation": "$3.80 + $1.20 = $5.00 exactly, so no change."
+        },
+        {
+            "question_text": "A cupcake costs $2.25. You buy two.\n\nHow much do you spend?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$4.50",
+            "wrong_answers": ["$5", "$4", "$3.50"],
+            "explanation": "$2.25 × 2 = $4.50."
+        },
+        {
+            "question_text": "You buy a ball for $6. You have $10. Then you buy an ice block for $2.\n\nHow much money do you have left?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$2",
+            "wrong_answers": ["$4", "$3", "$1"],
+            "explanation": "$6 + $2 = $8 spent. $10 - $8 = $2 left."
+        },
+        {
+            "question_text": "You have two $1 coins and three 50c coins.\n\nHow much money do you have altogether?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$3.50",
+            "wrong_answers": ["$3", "$2.50", "$4"],
+            "explanation": "$1 + $1 + 50c + 50c + 50c = $3.50."
+        },
+        {
+            "question_text": "Which group of coins makes $2?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$1 + $1",
+            "wrong_answers": ["50c + 50c + 50c + 20c", "$1 + 50c + 20c + 20c", "50c + 20c + 20c + 10c"],
+            "explanation": "$1 + $1 = $2 exactly."
+        },
+        {
+            "question_text": "You have a $5 note, a $2 coin, and a $1 coin.\n\nHow much do you have in total?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$8",
+            "wrong_answers": ["$7", "$6", "$9"],
+            "explanation": "$5 + $2 + $1 = $8."
+        },
+        {
+            "question_text": "Which coins could you use to make $1.20?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$1 coin + 20c coin",
+            "wrong_answers": ["50c + 50c + 20c", "$1 + 50c", "50c + 20c + 10c + 10c"],
+            "explanation": "$1 + 20c = $1.20."
+        },
+        {
+            "question_text": "You have 4 coins: 20c, 20c, 50c, and $1.\n\nHow much money is that?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$1.90",
+            "wrong_answers": ["$1.70", "$1.80", "$2"],
+            "explanation": "$1 + 50c + 20c + 20c = $1.90."
+        },
+        {
+            "question_text": "You buy a drink for $3.40 and pay with a $5 note.\n\nHow much change will you get?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$1.60",
+            "wrong_answers": ["$2", "$1.50", "$1.40"],
+            "explanation": "$5.00 - $3.40 = $1.60."
+        },
+        {
+            "question_text": "A book costs $8. You give the shopkeeper $10.\n\nWhat is your change?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$2",
+            "wrong_answers": ["$1", "$3", "$2.50"],
+            "explanation": "$10 - $8 = $2."
+        },
+        {
+            "question_text": "You have $10. You buy a toy for $6.75 and a drink for $2.25.\n\nHow much do you have left?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$1",
+            "wrong_answers": ["$0.75", "$1.25", "$1.50"],
+            "explanation": "$6.75 + $2.25 = $9.00. $10 - $9 = $1 left."
+        },
+        {
+            "question_text": "A sandwich costs $4.80. You pay with a $10 note.\n\nHow much change do you get?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$5.20",
+            "wrong_answers": ["$6", "$4.80", "$5"],
+            "explanation": "$10.00 - $4.80 = $5.20."
+        },
+        {
+            "question_text": "You buy a muffin for $2.50 and a cookie for $1.80.\n\nIf you pay with a $5 note, how much change will you get?",
+            "question_type": "multiple_choice",
+            "correct_answer": "$0.70",
+            "wrong_answers": ["$0.60", "$1", "$0.80"],
+            "explanation": "$2.50 + $1.80 = $4.30. $5 - $4.30 = $0.70."
+        }
     ]
     
     print(f"\n[INFO] Processing {len(questions_data)} Finance questions for Year 3...\n")

@@ -1619,10 +1619,18 @@ def measurements_questions(request, level_number):
         student_answers = StudentAnswer.objects.filter(
             student=request.user,
             question__level=level,
+            question__topic=measurements_topic,
             session_id=attempt_id
         )
         total_score = sum(answer.points_earned for answer in student_answers)
-        total_points = sum(q.points for q in all_questions)
+        # Use the questions from the session (the ones actually selected for this attempt)
+        # This ensures we only count the selected questions (e.g., 20), not all available questions
+        total_points = sum(q.points for q in all_questions) if all_questions else 0
+        # Fallback: if all_questions is empty, calculate from answered questions
+        if total_points == 0 and student_answers.exists():
+            answered_question_ids = student_answers.values_list('question_id', flat=True).distinct()
+            answered_questions = Question.objects.filter(id__in=answered_question_ids, level=level, topic=measurements_topic)
+            total_points = sum(q.points for q in answered_questions)
         now_ts = time.time()
         start_ts = request.session.get(timer_session_key) or now_ts
         total_time_seconds = max(1, int(now_ts - start_ts))
@@ -1651,7 +1659,8 @@ def measurements_questions(request, level_number):
         attempt_id = request.session.get('current_attempt_id', '')
         previous_sessions = StudentAnswer.objects.filter(
             student=request.user,
-            question__level=level
+            question__level=level,
+            question__topic=measurements_topic
         ).exclude(session_id=attempt_id).values_list('session_id', flat=True).distinct()
 
         previous_best_points = None
@@ -1661,6 +1670,7 @@ def measurements_questions(request, level_number):
             session_answers = StudentAnswer.objects.filter(
                 student=request.user,
                 question__level=level,
+                question__topic=measurements_topic,
                 session_id=sid
             )
             if not session_answers.exists():

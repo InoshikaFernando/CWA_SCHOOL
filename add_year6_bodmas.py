@@ -160,6 +160,96 @@ def add_bodmas_questions(bodmas_topic, level_6):
             "wrong_answers": ["4", "6", "3"],
             "explanation": "Let the number be x. Then 4x - 2 = 2x + 8. Solving: 4x - 2x = 8 + 2, so 2x = 10, therefore x = 5."
         },
+        {
+            "question_text": "I think of a number. I double it, add 15, and the result is 41. What was the number I thought of?",
+            "correct_answer": "13",
+            "wrong_answers": ["14", "12", "11"],
+            "explanation": "Work backwards: 41 - 15 = 26, then 26 ÷ 2 = 13. So the original number was 13."
+        },
+        {
+            "question_text": "I multiply a number by 5, then subtract 8. The result is 32. What was the number I thought of?",
+            "correct_answer": "8",
+            "wrong_answers": ["7", "9", "6"],
+            "explanation": "Work backwards: 32 + 8 = 40, then 40 ÷ 5 = 8. So the original number was 8."
+        },
+        {
+            "question_text": "I triple a number, then add 6. The result is the same as doubling the number and adding 14. What number am I thinking of?",
+            "correct_answer": "8",
+            "wrong_answers": ["6", "7", "9"],
+            "explanation": "Let the number be x. Then 3x + 6 = 2x + 14. Solving gives x = 8."
+        },
+        {
+            "question_text": "Evaluate: (5 + 3) × 4",
+            "correct_answer": "32",
+            "wrong_answers": ["17", "20", "12"],
+            "explanation": "Brackets first: (5 + 3) = 8, then 8 × 4 = 32."
+        },
+        {
+            "question_text": "Calculate: 18 ÷ 3 × 2",
+            "correct_answer": "12",
+            "wrong_answers": ["3", "9", "6"],
+            "explanation": "Division and multiplication are done left to right. 18 ÷ 3 = 6, then 6 × 2 = 12."
+        },
+        {
+            "question_text": "Evaluate: (12 - 4)² ÷ 8",
+            "correct_answer": "8",
+            "wrong_answers": ["10", "6", "12"],
+            "explanation": "Brackets first: (12 - 4) = 8. Then 8² = 64, and 64 ÷ 8 = 8."
+        },
+        {
+            "question_text": "Evaluate: 5 × (9 - 3) + 2²",
+            "correct_answer": "34",
+            "wrong_answers": ["42", "32", "30"],
+            "explanation": "Brackets first: (9 - 3) = 6. Then 5 × 6 = 30, and 2² = 4. Finally 30 + 4 = 34."
+        },
+        {
+            "question_text": "I think of a number. If I divide it by 4 and then add 7, the result is 12. What was the number I thought of?",
+            "correct_answer": "20",
+            "wrong_answers": ["16", "24", "12"],
+            "explanation": "Work backwards: 12 - 7 = 5, then 5 × 4 = 20. So the number was 20."
+        },
+        {
+            "question_text": "Calculate: 3 × (6 + 2) - 4²",
+            "correct_answer": "8",
+            "wrong_answers": ["20", "16", "10"],
+            "explanation": "Brackets first: (6 + 2) = 8. Then 3 × 8 = 24, and 4² = 16. Finally 24 - 16 = 8."
+        },
+        {
+            "question_text": "Evaluate: 2³ + (10 - 4) × 2",
+            "correct_answer": "20",
+            "wrong_answers": ["18", "22", "24"],
+            "explanation": "Powers first: 2³ = 8. Brackets next: (10 - 4) = 6. Then 6 × 2 = 12. Finally 8 + 12 = 20."
+        },
+        {
+            "question_text": "I think of a number. If I add 9, multiply by 2, and subtract 5, I get 31. What was the number I thought of?",
+            "correct_answer": "9",
+            "wrong_answers": ["8", "10", "12"],
+            "explanation": "Work backwards: 31 + 5 = 36, then 36 ÷ 2 = 18, then 18 - 9 = 9. So the number was 9."
+        },
+        {
+            "question_text": "Calculate: (3 + 5) × (2 + 6)",
+            "correct_answer": "64",
+            "wrong_answers": ["32", "48", "56"],
+            "explanation": "Brackets first: (3 + 5) = 8 and (2 + 6) = 8. Then 8 × 8 = 64."
+        },
+        {
+            "question_text": "Evaluate: (9 - 3)² ÷ 9",
+            "correct_answer": "4",
+            "wrong_answers": ["6", "2", "9"],
+            "explanation": "Brackets first: (9 - 3) = 6. Then 6² = 36. Finally 36 ÷ 9 = 4."
+        },
+        {
+            "question_text": "I think of a number. I multiply it by 5, then divide by 2, and finally subtract 10. The result is 15. What was the number I thought of?",
+            "correct_answer": "10",
+            "wrong_answers": ["8", "12", "15"],
+            "explanation": "Work backwards: 15 + 10 = 25, then 25 × 2 = 50, then 50 ÷ 5 = 10."
+        },
+        {
+            "question_text": "Evaluate: 10 + (6 × 3) - 4²",
+            "correct_answer": "12",
+            "wrong_answers": ["14", "18", "10"],
+            "explanation": "Brackets first: (6 × 3) = 18. Then powers: 4² = 16. Finally 10 + 18 - 16 = 12."
+        },
     ]
     
     print(f"\n[INFO] Adding {len(questions_data)} BODMAS/PEMDAS questions for Year 6...\n")

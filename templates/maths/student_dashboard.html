@@ -347,7 +347,7 @@
                                 </a>
                             </div>
                         {% elif level.level_number == 3 %}
-                            <!-- Year 3: Show Measurements, Fractions, and Take Quiz -->
+                            <!-- Year 3: Show Measurements, Fractions, Finance, and Take Quiz -->
                             <div class="topic-card">
                                 <a href="{% url 'maths:measurements_questions' level.level_number %}">
                                     <h4>Measurements</h4>
@@ -358,6 +358,12 @@
                                 <a href="{% url 'maths:fractions_questions' level.level_number %}">
                                     <h4>Fractions</h4>
                                     <p>Year {{ level.level_number }} - Fractions</p>
+                                </a>
+                            </div>
+                            <div class="topic-card">
+                                <a href="{% url 'maths:finance_questions' level.level_number %}">
+                                    <h4>Finance</h4>
+                                    <p>Year {{ level.level_number }} - Finance</p>
                                 </a>
                             </div>
                             <div class="topic-card">

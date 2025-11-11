@@ -2701,3 +2701,315 @@ def bodmas_questions(request, level_number):
         "elapsed_seconds": elapsed_seconds
     })
 
+@login_required
+def finance_questions(request, level_number):
+    """Show Finance questions one by one"""
+    level = get_object_or_404(Level, level_number=level_number)
+    
+    # Check if student has access to this level
+    allowed = student_allowed_levels(request.user)
+    if allowed is not None and not allowed.filter(pk=level.pk).exists():
+        messages.error(request, "You don't have access to this level.")
+        return redirect("maths:dashboard")
+    
+    # Get Finance topic
+    finance_topic = Topic.objects.filter(name="Finance").first()
+    if not finance_topic:
+        finance_topic = Topic.objects.create(name="Finance")
+    
+    # Get all Finance questions for this level
+    # Use topic field directly instead of text pattern matching
+    all_questions_query = Question.objects.filter(
+        level=level,
+        topic=finance_topic
+    )
+    
+    # Question limits per year
+    YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
+    question_limit = YEAR_QUESTION_COUNTS.get(level.level_number, 10)
+    
+    # Get current question number from URL parameter (default to 1)
+    question_number = int(request.GET.get('q', 1))
+    
+    # Start timer on first question load and create session
+    timer_session_key = "finance_timer_start"
+    questions_session_key = "finance_question_ids"
+    timer_start = request.session.get(timer_session_key)
+    
+    # Clear session if questions don't match Finance topic (safety check)
+    if question_number == 1 and timer_start:
+        # Validate existing session questions are still Finance questions (check by topic)
+        existing_question_ids = request.session.get(questions_session_key, [])
+        if existing_question_ids:
+            existing_questions = Question.objects.filter(id__in=existing_question_ids, level=level, topic=finance_topic)
+            # Check if all questions have the Finance topic
+            if existing_questions.count() != len(existing_question_ids):
+                # Some questions don't have the Finance topic - clear session and start fresh
+                if timer_session_key in request.session:
+                    del request.session[timer_session_key]
+                if questions_session_key in request.session:
+                    del request.session[questions_session_key]
+                if 'current_attempt_id' in request.session:
+                    del request.session['current_attempt_id']
+                timer_start = None
+    
+    if question_number == 1 and not timer_start:
+        request.session[timer_session_key] = time.time()
+        # Generate a unique session ID for this attempt
+        import uuid
+        request.session['current_attempt_id'] = str(uuid.uuid4())
+        
+        # Select random questions for this attempt
+        all_questions_list = list(all_questions_query)
+        if len(all_questions_list) > question_limit:
+            selected_questions = random.sample(all_questions_list, question_limit)
+        else:
+            selected_questions = all_questions_list
+        
+        # Randomize the order
+        random.shuffle(selected_questions)
+        
+        # Store question IDs in session
+        request.session[questions_session_key] = [q.id for q in selected_questions]
+    
+    # Get question IDs from session
+    question_ids = request.session.get(questions_session_key, [])
+    
+    # Convert to list and maintain the order from session
+    # Validate that all questions are Finance questions (check by topic)
+    if question_ids:
+        all_questions = []
+        for qid in question_ids:
+            try:
+                question = Question.objects.get(id=qid, level=level, topic=finance_topic)
+                all_questions.append(question)
+            except Question.DoesNotExist:
+                continue
+        
+        # If we filtered out questions, clear session and start fresh
+        if len(all_questions) != len(question_ids):
+            if timer_session_key in request.session:
+                del request.session[timer_session_key]
+            if questions_session_key in request.session:
+                del request.session[questions_session_key]
+            if 'current_attempt_id' in request.session:
+                del request.session['current_attempt_id']
+            # Redirect to question 1 with fresh questions
+            return redirect(f"{request.path}?q=1")
+    else:
+        # Fallback if no session
+        all_questions = []
+    
+    # Handle form submission
+    if request.method == "POST":
+        action = request.POST.get('action')
+        
+        if action == 'check_answer':
+            question_id = request.POST.get('question_id')
+            answer_id = request.POST.get('answer_id')
+            text_answer = request.POST.get('text_answer')
+            
+            if question_id:
+                try:
+                    question = Question.objects.get(id=question_id, level=level, topic=finance_topic)
+                    
+                    if answer_id:
+                        # Multiple choice or true/false question
+                        answer = Answer.objects.get(id=answer_id, question=question)
+                        
+                        # Save student answer with session ID
+                        attempt_id = request.session.get('current_attempt_id', '')
+                        student_answer, created = StudentAnswer.objects.update_or_create(
+                            student=request.user,
+                            question=question,
+                            defaults={
+                                'selected_answer': answer,
+                                'is_correct': answer.is_correct,
+                                'points_earned': question.points if answer.is_correct else 0,
+                                'session_id': attempt_id
+                            }
+                        )
+                        
+                        # Redirect to show result
+                        return redirect(f"{request.path}?q={question_number}&checked=1&answer_id={answer_id}")
+                    
+                    elif text_answer and question.question_type == 'short_answer':
+                        # Short answer question - for now, always mark as correct
+                        # In a real system, you'd implement text matching logic
+                        # Save student answer with session ID (same as multiple choice)
+                        attempt_id = request.session.get('current_attempt_id', '')
+                        student_answer, created = StudentAnswer.objects.update_or_create(
+                            student=request.user,
+                            question=question,
+                            defaults={
+                                'text_answer': text_answer,
+                                'is_correct': True,  # For demo purposes, always correct
+                                'points_earned': question.points,
+                                'session_id': attempt_id
+                            }
+                        )
+                        
+                        # Redirect to show result
+                        return redirect(f"{request.path}?q={question_number}&checked=1&text_answer={text_answer}")
+                    
+                except (Question.DoesNotExist, Answer.DoesNotExist):
+                    messages.error(request, "Invalid question or answer.")
+        
+        elif action == 'next_question':
+            # Move to next question
+            next_question = question_number + 1
+            if next_question <= len(all_questions):
+                return redirect(f"{request.path}?q={next_question}")
+            else:
+                # All questions completed - show score
+                return redirect(f"{request.path}?completed=1")
+    
+    # Check if completed
+    completed = request.GET.get('completed') == '1'
+    
+    if completed:
+        # Calculate total score and time taken
+        attempt_id = request.session.get('current_attempt_id', '')
+        student_answers = StudentAnswer.objects.filter(
+            student=request.user,
+            question__level=level,
+            question__topic=finance_topic,
+            session_id=attempt_id
+        )
+        total_score = sum(answer.points_earned for answer in student_answers)
+        # Use the questions from the session (the ones actually selected for this attempt)
+        # This ensures we only count the selected questions (e.g., 12), not all available questions
+        total_points = sum(q.points for q in all_questions) if all_questions else 0
+        # Fallback: if all_questions is empty, calculate from answered questions
+        if total_points == 0 and student_answers.exists():
+            answered_question_ids = student_answers.values_list('question_id', flat=True).distinct()
+            answered_questions = Question.objects.filter(id__in=answered_question_ids, level=level, topic=finance_topic)
+            total_points = sum(q.points for q in answered_questions)
+        now_ts = time.time()
+        start_ts = request.session.get(timer_session_key) or now_ts
+        total_time_seconds = max(1, int(now_ts - start_ts))
+        
+        # Store time_taken_seconds for all answers in this session
+        student_answers.update(time_taken_seconds=total_time_seconds)
+        
+        # Update time log from activities
+        if not request.user.is_teacher:
+            update_time_log_from_activities(request.user)
+        
+        # Clear timer and question list for next attempt
+        if timer_session_key in request.session:
+            del request.session[timer_session_key]
+        if questions_session_key in request.session:
+            del request.session[questions_session_key]
+        if 'current_attempt_id' in request.session:
+            del request.session['current_attempt_id']
+        # Compute points: percentage * 100 * 60 / time_seconds
+        percentage = (total_score / total_points) if total_points else 0
+        final_points = (percentage * 100 * 60) / total_time_seconds if total_time_seconds else 0
+        # Round for display
+        final_points = round(final_points, 2)
+        
+        # Compute previous best record for this level
+        attempt_id = request.session.get('current_attempt_id', '')
+        previous_sessions = StudentAnswer.objects.filter(
+            student=request.user,
+            question__level=level,
+            question__topic=finance_topic
+        ).exclude(session_id=attempt_id).values_list('session_id', flat=True).distinct()
+
+        previous_best_points = None
+        for sid in previous_sessions:
+            if not sid:
+                continue
+            session_answers = StudentAnswer.objects.filter(
+                student=request.user,
+                question__level=level,
+                question__topic=finance_topic,
+                session_id=sid
+            )
+            if not session_answers.exists():
+                continue
+            first_answer = session_answers.first()
+            if first_answer and first_answer.time_taken_seconds > 0:
+                session_correct = sum(1 for a in session_answers if a.is_correct)
+                session_total = session_answers.count()
+                session_time = first_answer.time_taken_seconds
+                session_percentage = (session_correct / session_total) if session_total else 0
+                session_points = (session_percentage * 100 * 60) / session_time if session_time else 0
+            else:
+                session_points = sum(a.points_earned for a in session_answers)
+            
+            if previous_best_points is None or session_points > previous_best_points:
+                previous_best_points = session_points
+        
+        beat_record = previous_best_points is not None and final_points > previous_best_points
+        is_first_attempt = previous_best_points is None
+        
+        return render(request, "maths/measurements_questions.html", {
+            "level": level,
+            "completed": True,
+            "total_score": total_score,
+            "total_points": total_points,
+            "total_time_seconds": total_time_seconds,
+            "final_points": final_points,
+            "topic": finance_topic,
+            "student_answers": student_answers,
+            "all_questions": all_questions,
+            "previous_best_points": round(previous_best_points, 2) if previous_best_points is not None else None,
+            "beat_record": beat_record,
+            "is_first_attempt": is_first_attempt
+        })
+    
+    # Get current question
+    if question_number <= len(all_questions):
+        current_question = all_questions[question_number - 1]
+    else:
+        messages.error(request, "Question not found.")
+        return redirect("maths:level_detail", level_number=level.level_number)
+    
+    # Check if answer was just checked
+    checked = request.GET.get('checked') == '1'
+    selected_answer_id = request.GET.get('answer_id')
+    text_answer = request.GET.get('text_answer')
+    selected_answer = None
+    is_text_answer = False
+    
+    if checked and selected_answer_id:
+        try:
+            selected_answer = Answer.objects.get(id=selected_answer_id, question=current_question)
+        except Answer.DoesNotExist:
+            pass
+    elif checked and text_answer:
+        # For short answer questions, create a mock answer object
+        class MockAnswer:
+            def __init__(self, text, is_correct=True):
+                self.answer_text = text
+                self.is_correct = is_correct
+        
+        selected_answer = MockAnswer(text_answer, True)
+        is_text_answer = True
+    
+    # Get student's previous answers for progress tracking
+    student_answers = StudentAnswer.objects.filter(
+        student=request.user,
+        question__level=level
+    )
+    
+    # Elapsed time for live timer
+    start_ts = request.session.get(timer_session_key)
+    elapsed_seconds = int(time.time() - start_ts) if start_ts else 0
+
+    return render(request, "maths/measurements_questions.html", {
+        "level": level,
+        "current_question": current_question,
+        "question_number": question_number,
+        "total_questions": len(all_questions),
+        "topic": finance_topic,
+        "student_answers": student_answers,
+        "checked": checked,
+        "selected_answer": selected_answer,
+        "is_text_answer": is_text_answer,
+        "is_last_question": question_number == len(all_questions),
+        "elapsed_seconds": elapsed_seconds
+    })
+

@@ -418,6 +418,153 @@ def add_measurements_questions(measurements_topic, level_6):
             "wrong_answers": ["meters", "centimeters", "millimeters", "decimeters"],
             "explanation": "Distances between cities are measured in kilometers.",
         },
+        {
+            "question_text": "The width of a cube increases by 50%, but it remains a cube. What is the percentage increase in the surface area of the cube?",
+            "question_type": "multiple_choice",
+            "correct_answer": "125%",
+            "wrong_answers": ["200%", "225%", "125%", "75%"],
+            "explanation": "Let the original side length of the cube = x, Original surface area = 6𝑥². New side length = 1.5𝑥, New surface area = 6(1.5𝑥)² = 13.5𝑥². Percentage increase = (New surface area - Original surface area) / Original surface area * 100% = (13.5𝑥² - 6𝑥²) / 6𝑥² * 100% = 125%.",
+        },
+        {
+            "question_text": "The sides of a square are doubled. What is the percentage increase in its area?",
+            "question_type": "multiple_choice",
+            "correct_answer": "300%",
+            "wrong_answers": ["100%", "200%", "400%", "300%"],
+            "explanation": "Let the side = x, original area = x². New side = 2x, new area = (2x)² = 4x². Percentage increase = (4x² - x²) / x² × 100 = 300%."
+        },
+        {
+            "question_text": "The radius of a circle increases by 20%. What is the percentage increase in its area?",
+            "question_type": "multiple_choice",
+            "correct_answer": "44%",
+            "wrong_answers": ["20%", "40%", "60%", "44%"],
+            "explanation": "Area ∝ r². If radius increases by 20%, new radius = 1.2r. New area = (1.2r)² = 1.44r², meaning a 44% increase."
+        },
+        {
+            "question_text": "The height of a cylinder is doubled and the radius is halved. What happens to its volume?",
+            "question_type": "multiple_choice",
+            "correct_answer": "It stays the same",
+            "wrong_answers": ["It doubles", "It halves", "It becomes one-quarter", "It stays the same"],
+            "explanation": "Volume = πr²h. New volume = π(½r)²(2h) = πr²h. The volume remains unchanged."
+        },
+        {
+            "question_text": "The length of a rectangle is increased by 50%, and the width stays the same. What is the percentage increase in area?",
+            "question_type": "multiple_choice",
+            "correct_answer": "50%",
+            "wrong_answers": ["25%", "75%", "100%", "50%"],
+            "explanation": "Area = L × W. Increasing length by 50% makes it 1.5L, so new area = 1.5LW. Increase = 50%."
+        },
+        {
+            "question_text": "A cube’s edge length is tripled. By what factor does its volume increase?",
+            "question_type": "multiple_choice",
+            "correct_answer": "27 times",
+            "wrong_answers": ["3 times", "6 times", "9 times", "27 times"],
+            "explanation": "Volume ∝ side³. If side is tripled, volume increases by 3³ = 27 times."
+        },
+        {
+            "question_text": "All dimensions of a rectangular prism are reduced by 50%. What is the percentage decrease in its volume?",
+            "question_type": "multiple_choice",
+            "correct_answer": "87.5%",
+            "wrong_answers": ["50%", "75%", "90%", "87.5%"],
+            "explanation": "Volume ∝ length × width × height. If each is halved, new volume = (0.5)³ = 0.125, meaning 12.5% remains, so an 87.5% decrease."
+        },
+        {
+            "question_text": "The diameter of a circle is reduced by 40%. What is the percentage decrease in its area?",
+            "question_type": "multiple_choice",
+            "correct_answer": "64%",
+            "wrong_answers": ["40%", "36%", "60%", "64%"],
+            "explanation": "Area ∝ r². New radius = 0.6r, new area = 0.36r² → area decreases by 64%."
+        },
+        {
+            "question_text": "The volume of a cube doubles. What is the percentage increase in the cube’s side length?",
+            "question_type": "multiple_choice",
+            "correct_answer": "26%",
+            "wrong_answers": ["10%", "20%", "30%", "26%"],
+            "explanation": "Volume ∝ side³. New side = ³√2 × old side ≈ 1.26×, which is a 26% increase."
+        },
+        {
+            "question_text": "A rectangle’s perimeter is 60 cm. If both its length and width increase by 25%, what is the new perimeter?",
+            "question_type": "multiple_choice",
+            "correct_answer": "75 cm",
+            "wrong_answers": ["70 cm", "80 cm", "90 cm", "75 cm"],
+            "explanation": "Perimeter ∝ (L + W). If both increase by 25%, total perimeter increases by 25% → 60 × 1.25 = 75 cm."
+        },
+        {
+            "question_text": "The surface area of a cube is 150 cm². If the edge length doubles, what is the new surface area?",
+            "question_type": "multiple_choice",
+            "correct_answer": "600 cm²",
+            "wrong_answers": ["300 cm²", "450 cm²", "750 cm²", "600 cm²"],
+            "explanation": "Surface area ∝ side². Doubling the side makes the area 4 times larger → 150 × 4 = 600 cm²."
+        },
+        {
+            "question_text": "A cube-shaped gift box has a side length of 10 cm. If the side is increased by 20%, what is the new volume of the box compared to the old one?",
+            "question_type": "multiple_choice",
+            "correct_answer": "1.728 times larger",
+            "wrong_answers": ["1.2 times larger", "1.44 times larger", "2 times larger", "1.728 times larger"],
+            "explanation": "Volume ∝ side³. New side = 1.2× old side, so new volume = (1.2)³ = 1.728× the original."
+        },
+        {
+            "question_text": "A rectangular water tank is 2 m long, 1.5 m wide, and 1 m high. If the height is doubled, how much more water can it hold?",
+            "question_type": "multiple_choice",
+            "correct_answer": "Double the amount",
+            "wrong_answers": ["Half the amount", "Three times the amount", "Four times the amount", "Double the amount"],
+            "explanation": "Volume ∝ height. Doubling height doubles the capacity → 2× the amount of water."
+        },
+        {
+            "question_text": "A cylindrical candle has a radius of 5 cm and height of 10 cm. If the radius is doubled and height stays the same, how many times greater is its volume?",
+            "question_type": "multiple_choice",
+            "correct_answer": "4 times greater",
+            "wrong_answers": ["2 times", "6 times", "8 times", "4 times greater"],
+            "explanation": "Volume of a cylinder = πr²h. Doubling radius makes r² → (2r)² = 4r² → volume increases 4 times."
+        },
+        {
+            "question_text": "A cone has a radius of 3 cm and height of 8 cm. If both radius and height are doubled, how many times greater is the volume?",
+            "question_type": "multiple_choice",
+            "correct_answer": "8 times greater",
+            "wrong_answers": ["2 times", "4 times", "6 times", "8 times greater"],
+            "explanation": "Volume of a cone = ⅓πr²h. If both r and h double → (2r)²(2h) = 8× bigger."
+        },
+        {
+            "question_text": "A cylindrical water bottle has a volume of 500 mL. If its height is doubled but the radius stays the same, what will the new volume be?",
+            "question_type": "multiple_choice",
+            "correct_answer": "1 L",
+            "wrong_answers": ["750 mL", "1.5 L", "250 mL", "1 L"],
+            "explanation": "Volume ∝ height. Doubling height doubles volume → 500 mL × 2 = 1 L."
+        },
+        {
+            "question_text": "A metal cube is melted and reshaped into a cylinder with the same volume. If the cube’s side is 6 cm, what is its volume?",
+            "question_type": "multiple_choice",
+            "correct_answer": "216 cm³",
+            "wrong_answers": ["36 cm³", "64 cm³", "125 cm³", "216 cm³"],
+            "explanation": "Volume of a cube = side³ = 6³ = 216 cm³."
+        },
+        {
+            "question_text": "A cone and a cylinder have the same base radius and height. How does the volume of the cone compare to the cylinder?",
+            "question_type": "multiple_choice",
+            "correct_answer": "The cone’s volume is one-third of the cylinder’s volume",
+            "wrong_answers": ["The same", "Half", "Twice", "The cone’s volume is one-third of the cylinder’s volume"],
+            "explanation": "Volume of a cone = ⅓πr²h, while cylinder = πr²h. Therefore, cone = one-third of the cylinder."
+        },
+        {
+            "question_text": "A cylindrical jar has a radius of 4 cm and height of 12 cm. If both radius and height increase by 25%, how many times larger is the new volume?",
+            "question_type": "multiple_choice",
+            "correct_answer": "1.953 times larger",
+            "wrong_answers": ["1.5 times", "2 times", "1.75 times", "1.953 times larger"],
+            "explanation": "Volume ∝ r²h. New radius = 1.25r, new height = 1.25h → new volume = (1.25)³ = 1.953× larger."
+        },
+        {
+            "question_text": "A swimming pool is shaped like a rectangular prism 8 m long, 4 m wide, and 2 m deep. If it is filled halfway, how much water is inside?",
+            "question_type": "multiple_choice",
+            "correct_answer": "32 m³",
+            "wrong_answers": ["16 m³", "24 m³", "64 m³", "32 m³"],
+            "explanation": "Full volume = 8×4×2 = 64 m³. Half full = 64 ÷ 2 = 32 m³."
+        },
+        {
+            "question_text": "A cone-shaped paper cup has a height of 9 cm and radius of 3 cm. If both dimensions are halved, what happens to its volume?",
+            "question_type": "multiple_choice",
+            "correct_answer": "It becomes one-eighth as large",
+            "wrong_answers": ["One-quarter", "One-third", "Half", "It becomes one-eighth as large"],
+            "explanation": "Volume ∝ r²h. If r and h are halved → (½)³ = ⅛ → volume becomes one-eighth."
+        }
     ]
     
     print(f"\n[INFO] Processing {len(questions_data)} Measurements questions for Year 6...\n")

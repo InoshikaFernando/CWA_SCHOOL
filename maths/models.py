@@ -170,3 +170,51 @@ class TimeLog(models.Model):
             self.weekly_total_seconds = 0
             self.last_reset_week = current_week
             self.save(update_fields=['weekly_total_seconds', 'last_reset_week'])
+
+class TopicLevelStatistics(models.Model):
+    """Store average and standard deviation (sigma) for each topic-level combination"""
+    level = models.ForeignKey(Level, on_delete=models.CASCADE, related_name="topic_statistics")
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name="level_statistics")
+    average_points = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Average points across all students")
+    sigma = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Standard deviation (sigma)")
+    student_count = models.PositiveIntegerField(default=0, help_text="Number of students who have completed this topic-level")
+    last_updated = models.DateTimeField(auto_now=True, help_text="Last time statistics were calculated")
+    
+    class Meta:
+        unique_together = ("level", "topic")
+        ordering = ['level__level_number', 'topic__name']
+        indexes = [
+            models.Index(fields=['level', 'topic']),
+        ]
+    
+    def __str__(self):
+        return f"{self.level} - {self.topic}: avg={self.average_points}, σ={self.sigma} (n={self.student_count})"
+    
+    def get_color_class(self, student_points):
+        """
+        Determine color class based on student's points relative to average and sigma
+        Returns: 'dark-green', 'green', 'light-green', 'yellow', 'orange', 'red'
+        """
+        if self.sigma == 0 or self.student_count < 2:
+            # Not enough data for meaningful comparison
+            return 'light-green'
+        
+        avg = float(self.average_points)
+        sigma = float(self.sigma)
+        points = float(student_points)
+        
+        # Calculate how many sigmas above/below average
+        diff = points - avg
+        
+        if diff > 2 * sigma:
+            return 'dark-green'  # > avg + 2σ
+        elif diff > sigma:
+            return 'green'  # avg + σ to avg + 2σ
+        elif diff > -sigma:
+            return 'light-green'  # avg - σ to avg + σ
+        elif diff > -2 * sigma:
+            return 'yellow'  # avg - 2σ to avg - σ
+        elif diff > -3 * sigma:
+            return 'orange'  # avg - 3σ to avg - 2σ
+        else:
+            return 'red'  # < avg - 3σ

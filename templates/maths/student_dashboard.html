@@ -149,6 +149,38 @@
 .progress-table tr:hover {
     background: #f8f9fa;
 }
+
+/* Color coding for student results based on average and sigma */
+.progress-table tr.dark-green {
+    background-color: #1b5e20 !important; /* Dark green - > avg + 2σ */
+    color: white;
+}
+
+.progress-table tr.green {
+    background-color: #2e7d32 !important; /* Green - avg + σ to avg + 2σ */
+    color: white;
+}
+
+.progress-table tr.light-green {
+    background-color: #c8e6c9 !important; /* Light green - avg - σ to avg + σ */
+}
+
+.progress-table tr.yellow {
+    background-color: #fff9c4 !important; /* Yellow - avg - 2σ to avg - σ */
+}
+
+.progress-table tr.orange {
+    background-color: #ffcc80 !important; /* Orange - avg - 3σ to avg - 2σ */
+}
+
+.progress-table tr.red {
+    background-color: #ffcdd2 !important; /* Red - < avg - 3σ */
+}
+
+.progress-table tr.dark-green:hover,
+.progress-table tr.green:hover {
+    opacity: 0.9;
+}
 </style>
 
 <h1>Welcome</h1>
@@ -170,7 +202,7 @@
             </thead>
             <tbody>
                 {% for item in progress_by_level %}
-                <tr>
+                <tr class="{{ item.color_class|default:'light-green' }}">
                     <td>{{ item.level_name }}</td>
                     <td>{{ item.topic_name }}</td>
                     <td>{{ item.best_points }}</td>
@@ -226,7 +258,7 @@
                             </thead>
                             <tbody>
                                 {% for progress_data in levels_progress %}
-                                <tr>
+                                <tr class="{{ progress_data.color_class|default:'light-green' }}">
                                     <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold; color: #667eea;">Level {{ progress_data.display_level }}</td>
                                     <td style="padding: 12px; border: 1px solid #dee2e6;">{{ progress_data.best_time_seconds|format_time }}</td>
                                     <td style="padding: 12px; border: 1px solid #dee2e6; font-weight: bold; color: #28a745; font-size: 16px;">{{ progress_data.best_points }}</td>

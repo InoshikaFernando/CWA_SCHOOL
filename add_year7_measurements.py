@@ -296,7 +296,7 @@ def add_measurements_questions(measurements_topic, level_7):
                 # Fallback: match by image filename (handles different path formats)
                 for q in query:
                     if q.image and (image_name in q.image.name or q.image.name.endswith(image_name)):
-                    existing = q
+                        existing = q
                     break
             if not existing:
                 # Last resort: just get first match

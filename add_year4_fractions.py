@@ -184,6 +184,96 @@ def add_fractions_questions(fractions_topic, level_4):
             "wrong_answers": ["1/8", "3/4", "1/3"],
             "explanation": "The cake is divided into 8 equal pieces, and John ate 3 pieces. So John ate 3/8 of the cake."
         },
+        {
+            "question_text": "3/4 of a number is 15. What is the whole number?",
+            "correct_answer": "20",
+            "wrong_answers": ["18", "25", "12"],
+            "explanation": "If 3/4 = 15, divide 15 by 3 to find 1/4 = 5. Then multiply 5 × 4 = 20."
+        },
+        {
+            "question_text": "2/5 of a number is 18. What is the whole number?",
+            "correct_answer": "45",
+            "wrong_answers": ["40", "35", "50"],
+            "explanation": "If 2/5 = 18, divide 18 by 2 to find 1/5 = 9. Then multiply 9 × 5 = 45."
+        },
+        {
+            "question_text": "5/8 of a number is 40. What is the whole number?",
+            "correct_answer": "64",
+            "wrong_answers": ["48", "56", "72"],
+            "explanation": "If 5/8 = 40, divide 40 by 5 to find 1/8 = 8. Then multiply 8 × 8 = 64."
+        },
+        {
+            "question_text": "3/10 of a number is 12. What is the whole number?",
+            "correct_answer": "40",
+            "wrong_answers": ["30", "36", "45"],
+            "explanation": "If 3/10 = 12, divide 12 by 3 to find 1/10 = 4. Then multiply 4 × 10 = 40."
+        },
+        {
+            "question_text": "7/9 of a number is 35. What is the whole number?",
+            "correct_answer": "45",
+            "wrong_answers": ["40", "50", "42"],
+            "explanation": "If 7/9 = 35, divide 35 by 7 to find 1/9 = 5. Then multiply 5 × 9 = 45."
+        },
+        {
+            "question_text": "1/3 of the apples in a basket are green. There are 12 green apples. How many apples are there in total?",
+            "correct_answer": "36",
+            "wrong_answers": ["24", "30", "33"],
+            "explanation": "If 1/3 = 12, multiply 12 × 3 = 36 apples in total."
+        },
+        {
+            "question_text": "2/7 of the students in a class are left-handed. If there are 8 left-handed students, how many students are in the class?",
+            "correct_answer": "28",
+            "wrong_answers": ["24", "32", "35"],
+            "explanation": "If 2/7 = 8, divide 8 by 2 to find 1/7 = 4. Then multiply 4 × 7 = 28."
+        },
+        {
+            "question_text": "5/6 of a ribbon measures 25 cm. What is the full length of the ribbon?",
+            "correct_answer": "30 cm",
+            "wrong_answers": ["28 cm", "32 cm", "36 cm"],
+            "explanation": "If 5/6 = 25, divide 25 by 5 to find 1/6 = 5. Then multiply 5 × 6 = 30 cm."
+        },
+        {
+            "question_text": "3/5 of a tank is filled with 24 litres of water. What is the capacity of the tank?",
+            "correct_answer": "40 litres",
+            "wrong_answers": ["30 litres", "36 litres", "45 litres"],
+            "explanation": "If 3/5 = 24, divide 24 by 3 to find 1/5 = 8. Then multiply 8 × 5 = 40 litres."
+        },
+        {
+            "question_text": "4/9 of a cake was eaten, which is 12 slices. How many slices were there in the whole cake?",
+            "correct_answer": "27 slices",
+            "wrong_answers": ["24 slices", "30 slices", "32 slices"],
+            "explanation": "If 4/9 = 12, divide 12 by 4 to find 1/9 = 3. Then multiply 3 × 9 = 27 slices."
+        },
+        {
+            "question_text": "2/3 of a number is 14. What is 1/3?",
+            "correct_answer": "7",
+            "wrong_answers": ["6", "8", "9"],
+            "explanation": "If 2/3 = 14, divide 14 by 2 to find 1/3 = 7."
+        },
+        {
+            "question_text": "5/6 of a number is 20. What is 1/2 of that number?",
+            "correct_answer": "12",
+            "wrong_answers": ["10", "15", "14"],
+            "explanation": "If 5/6 = 20, divide 20 by 5 to find 1/6 = 4. The whole = 24. Half of 24 = 12."
+        },
+        {
+            "question_text": "3/8 of a number is 24. What is the number?",
+            "correct_answer": "64",
+            "wrong_answers": ["56", "72", "60"],
+            "explanation": "If 3/8 = 24, divide 24 by 3 to find 1/8 = 8. Then multiply 8 × 8 = 64."
+        },
+        {
+            "question_text": "1/4 of a number is 9. What is 3/4?",
+            "correct_answer": "27",
+            "wrong_answers": ["24", "30", "21"],
+            "explanation": "If 1/4 = 9, then 3/4 = 9 × 3 = 27."
+        },
+        {
+            "question_text": "2/5 of a number is 10. What is 4/5?",
+            "correct_answer": "20",
+            "wrong_answers": ["25", "15", "18"],
+            "explanation": "If 2/5 = 10, divide 10 by 2 to find 1/5 = 5. Then 4/5 = 5 × 4 = 20."
+        }
     ]
     
     print(f"\n📝 Adding {len(questions_data)} Fractions questions for Year 4...\n")

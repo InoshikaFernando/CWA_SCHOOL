@@ -17,6 +17,7 @@ from add_year2_place_values import setup_place_values_topic, add_place_values_qu
 from add_year3_measurements import setup_measurements_topic as setup_year3_measurements, add_measurements_questions as add_year3_measurements
 from add_year3_fractions import setup_fractions_topic, add_fractions_questions
 from add_year3_finance import setup_finance_topic, add_finance_questions
+from add_year4_fractions import setup_fractions_topic as setup_year4_fractions, add_fractions_questions as add_year4_fractions
 from add_year5_measurements import setup_measurements_topic as setup_year5_measurements, add_measurements_questions as add_year5_measurements
 from add_year5_bodmas import setup_bodmas_topic as setup_year5_bodmas, add_bodmas_questions as add_year5_bodmas
 from add_year6_measurements import setup_measurements_topic as setup_year6_measurements, add_measurements_questions as add_year6_measurements
@@ -66,6 +67,9 @@ def run_all_question_scripts():
         ("Year 3 - Measurements", setup_year3_measurements, add_year3_measurements),
         ("Year 3 - Fractions", setup_fractions_topic, add_fractions_questions),
         ("Year 3 - Finance", setup_finance_topic, add_finance_questions),
+        
+        # Year 4
+        ("Year 4 - Fractions", setup_year4_fractions, add_year4_fractions),
         
         # Year 5
         ("Year 5 - Measurements", setup_year5_measurements, add_year5_measurements),

@@ -372,6 +372,20 @@
                                     <p>Random questions from all topics</p>
                                 </a>
                             </div>
+                        {% elif level.level_number == 4 %}
+                            <!-- Year 4: Show Fractions and Take Quiz -->
+                            <div class="topic-card">
+                                <a href="{% url 'maths:fractions_questions' level.level_number %}">
+                                    <h4>Fractions</h4>
+                                    <p>Year {{ level.level_number }} - Fractions</p>
+                                </a>
+                            </div>
+                            <div class="topic-card">
+                                <a href="{% url 'maths:take_quiz' level.level_number %}">
+                                    <h4>Take Quiz</h4>
+                                    <p>Random questions from all topics</p>
+                                </a>
+                            </div>
                         {% elif level.level_number == 5 %}
                             <!-- Year 5: Show Measurements, BODMAS/PEMDAS and Take Quiz -->
                             <div class="topic-card">

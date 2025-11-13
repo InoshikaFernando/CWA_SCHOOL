@@ -2122,11 +2122,10 @@ def fractions_questions(request, level_number):
         return redirect("maths:dashboard")
     
     # Get all Fractions questions for this level
-    # Filter to only include Fractions questions (numerator, denominator)
-    all_questions_query = Question.objects.filter(level=level).filter(
-        Q(question_text__icontains='numerator') |
-        Q(question_text__icontains='denominator') |
-        Q(question_text__icontains='fraction')
+    # Use topic field directly instead of text pattern matching
+    all_questions_query = Question.objects.filter(
+        level=level,
+        topic=fractions_topic
     )
     
     # Question limits per year
@@ -2141,20 +2140,15 @@ def fractions_questions(request, level_number):
     questions_session_key = "fractions_question_ids"
     timer_start = request.session.get(timer_session_key)
     
-    # Clear session if questions don't match Fractions patterns (safety check)
+    # Clear session if questions don't match Fractions topic (safety check)
     if question_number == 1 and timer_start:
-        # Validate existing session questions are still Fractions questions
+        # Validate existing session questions are still Fractions questions (check by topic)
         existing_question_ids = request.session.get(questions_session_key, [])
         if existing_question_ids:
-            existing_questions = Question.objects.filter(id__in=existing_question_ids, level=level)
-            # Check if any question doesn't match Fractions pattern
-            invalid_questions = existing_questions.exclude(
-                Q(question_text__icontains='numerator') |
-                Q(question_text__icontains='denominator') |
-                Q(question_text__icontains='fraction')
-            )
-            if invalid_questions.exists():
-                # Clear session and start fresh
+            existing_questions = Question.objects.filter(id__in=existing_question_ids, level=level, topic=fractions_topic)
+            # Check if all questions have the Fractions topic
+            if existing_questions.count() != len(existing_question_ids):
+                # Some questions don't have the Fractions topic - clear session and start fresh
                 if timer_session_key in request.session:
                     del request.session[timer_session_key]
                 if questions_session_key in request.session:
@@ -2186,20 +2180,13 @@ def fractions_questions(request, level_number):
     question_ids = request.session.get(questions_session_key, [])
     
     # Convert to list and maintain the order from session
-    # Validate that all questions are Fractions questions
+    # Validate that all questions are Fractions questions (check by topic)
     if question_ids:
         all_questions = []
         for qid in question_ids:
             try:
-                question = Question.objects.get(id=qid, level=level)
-                # Verify this is a Fractions question
-                is_fraction = (
-                    'numerator' in question.question_text.lower() or
-                    'denominator' in question.question_text.lower() or
-                    'fraction' in question.question_text.lower()
-                )
-                if is_fraction:
-                    all_questions.append(question)
+                question = Question.objects.get(id=qid, level=level, topic=fractions_topic)
+                all_questions.append(question)
             except Question.DoesNotExist:
                 continue
         
@@ -2228,7 +2215,7 @@ def fractions_questions(request, level_number):
             
             if question_id:
                 try:
-                    question = Question.objects.get(id=question_id, level=level)
+                    question = Question.objects.get(id=question_id, level=level, topic=fractions_topic)
                     
                     if answer_id:
                         # Multiple choice or true/false question
@@ -2288,10 +2275,16 @@ def fractions_questions(request, level_number):
         student_answers = StudentAnswer.objects.filter(
             student=request.user,
             question__level=level,
+            question__topic=fractions_topic,
             session_id=attempt_id
         )
         total_score = sum(answer.points_earned for answer in student_answers)
-        total_points = sum(q.points for q in all_questions)
+        total_points = sum(q.points for q in all_questions) if all_questions else 0
+        # Fallback: if all_questions is empty, calculate from answered questions
+        if total_points == 0 and student_answers.exists():
+            answered_question_ids = student_answers.values_list('question_id', flat=True).distinct()
+            answered_questions = Question.objects.filter(id__in=answered_question_ids, level=level, topic=fractions_topic)
+            total_points = sum(q.points for q in answered_questions)
         now_ts = time.time()
         start_ts = request.session.get(timer_session_key) or now_ts
         total_time_seconds = max(1, int(now_ts - start_ts))
@@ -2320,7 +2313,8 @@ def fractions_questions(request, level_number):
         attempt_id = request.session.get('current_attempt_id', '')
         previous_sessions = StudentAnswer.objects.filter(
             student=request.user,
-            question__level=level
+            question__level=level,
+            question__topic=fractions_topic
         ).exclude(session_id=attempt_id).values_list('session_id', flat=True).distinct()
 
         previous_best_points = None
@@ -2330,6 +2324,7 @@ def fractions_questions(request, level_number):
             session_answers = StudentAnswer.objects.filter(
                 student=request.user,
                 question__level=level,
+                question__topic=fractions_topic,
                 session_id=sid
             )
             if not session_answers.exists():

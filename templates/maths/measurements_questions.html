@@ -124,6 +124,14 @@
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
+    /* Make ruler image larger for better visibility */
+    .question-image[src*="image_ruler.png"],
+    .question-image[src*="ruler"],
+    .question-image-ruler {
+        max-width: 600px !important;
+        max-height: 400px !important;
+    }
+    
     .answer-options {
         margin: 20px 0 40px 0;
         min-height: 200px;
@@ -257,7 +265,7 @@
         </div>
         
         {% if current_question.image %}
-            <img src="{{ current_question.image.url }}" alt="Question diagram" class="question-image">
+            <img src="{{ current_question.image.url }}" alt="Question diagram" class="question-image{% if 'ruler' in current_question.image.name %} question-image-ruler{% endif %}">
         {% endif %}
         
         <div class="question-text" id="question-text">{{ current_question.question_text|safe }}</div>

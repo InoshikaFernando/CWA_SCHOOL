@@ -8,7 +8,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "replace-me-with-a-secure-key"
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 'yes')
 ALLOWED_HOSTS = ['mathsroom.wizardslearninghub.co.nz', 'www.mathsroom.wizardslearninghub.co.nz', '127.0.0.1', 'localhost']
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

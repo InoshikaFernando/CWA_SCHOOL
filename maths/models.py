@@ -198,14 +198,14 @@ class TopicLevelStatistics(models.Model):
         if self.sigma == 0 or self.student_count < 2:
             # Not enough data for meaningful comparison
             return 'light-green'
-        
+
         avg = float(self.average_points)
         sigma = float(self.sigma)
         points = float(student_points)
-        
+
         # Calculate how many sigmas above/below average
         diff = points - avg
-        
+
         if diff > 2 * sigma:
             return 'dark-green'  # > avg + 2σ
         elif diff > sigma:
@@ -218,3 +218,58 @@ class TopicLevelStatistics(models.Model):
             return 'orange'  # avg - 3σ to avg - 2σ
         else:
             return 'red'  # < avg - 3σ
+
+class StudentFinalAnswer(models.Model):
+    """
+    Store aggregated results for each quiz attempt.
+    One record per attempt (session_id) with attempt_number that increments for each new attempt of the same topic-level.
+    """
+    student = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="final_answers")
+    session_id = models.CharField(max_length=100, help_text="Session identifier for this attempt")
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name="final_answers")
+    level = models.ForeignKey(Level, on_delete=models.CASCADE, related_name="final_answers")
+    attempt_number = models.PositiveIntegerField(help_text="Attempt number for this student-topic-level combination (increments for each new attempt)")
+    points_earned = models.DecimalField(max_digits=10, decimal_places=2, help_text="Final points earned for this attempt")
+    last_updated_time = models.DateTimeField(auto_now=True, help_text="Last time this record was updated")
+    
+    class Meta:
+        unique_together = ("student", "session_id")
+        ordering = ['-last_updated_time']
+        indexes = [
+            models.Index(fields=['student', 'topic', 'level']),
+            models.Index(fields=['student', 'topic', 'level', 'attempt_number']),
+        ]
+    
+    def __str__(self):
+        return f"{self.student} - {self.level} {self.topic} - Attempt {self.attempt_number}: {self.points_earned} points"
+    
+    @classmethod
+    def get_next_attempt_number(cls, student, topic, level):
+        """Get the next attempt number for a student-topic-level combination"""
+        last_attempt = cls.objects.filter(
+            student=student,
+            topic=topic,
+            level=level
+        ).order_by('-attempt_number').first()
+        
+        if last_attempt:
+            return last_attempt.attempt_number + 1
+        return 1
+    
+    @classmethod
+    def get_best_result(cls, student, topic, level):
+        """Get the best (highest points) result for a student-topic-level combination"""
+        return cls.objects.filter(
+            student=student,
+            topic=topic,
+            level=level
+        ).order_by('-points_earned').first()
+    
+    @classmethod
+    def get_latest_attempt(cls, student, topic, level):
+        """Get the latest (highest attempt_number) attempt for a student-topic-level combination"""
+        return cls.objects.filter(
+            student=student,
+            topic=topic,
+            level=level
+        ).order_by('-attempt_number').first()

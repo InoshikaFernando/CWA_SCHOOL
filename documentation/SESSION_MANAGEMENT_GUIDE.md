@@ -78,6 +78,35 @@ python Testing/fix_all_incomplete_sessions.py --execute
 python Testing/fix_incomplete_sessions.py --level 6 --topic "Measurements" --execute
 ```
 
+## Session Expiration and Reset
+
+### Django Session Expiration (Default: 2 weeks)
+- **Django sessions expire after 2 weeks of inactivity** (default Django behavior)
+- This is the browser session cookie that stores temporary data
+- When expired, user needs to log in again
+
+### Quiz Session Variables (Cleared Immediately)
+Quiz-specific session variables are cleared when:
+1. **Quiz is completed** - After saving all answers, the session variables are cleared
+2. **Starting a new quiz** - If questions don't match the topic, session is cleared
+3. **Questions filtered out** - If questions are removed, session is cleared
+
+**Quiz session variables that get cleared:**
+- `timer_start` - Timer for the quiz
+- `question_ids` - List of question IDs for this attempt
+- `current_attempt_id` - UUID for this quiz attempt
+
+### Database Records (Never Auto-Deleted)
+**Important:** `StudentAnswer` records in the database are **NEVER automatically deleted**:
+- They persist forever, even if Django session expires
+- The `session_id` field in `StudentAnswer` records is permanent
+- Incomplete sessions in the database will remain until you run the fix script
+
+**This means:**
+- If a student starts a quiz but doesn't finish, the `StudentAnswer` records are saved with a `session_id`
+- Even if the Django session expires (2 weeks), the database records remain
+- The fix script can still merge these incomplete sessions later
+
 ## Summary
 
 **Question: Will incomplete sessions affect displaying results in the future?**
@@ -86,6 +115,14 @@ python Testing/fix_incomplete_sessions.py --level 6 --topic "Measurements" --exe
 - **90%+ completion**: Results will display automatically ✅
 - **< 90% completion**: Results won't display, but data is preserved. Run fix script to merge sessions and make them appear ✅
 - **No data loss**: All incomplete sessions are kept, not deleted ✅
+- **Django sessions expire**: After 2 weeks of inactivity, but database records persist forever ✅
+
+**Question: Does it reset session at some point?**
+
+**Answer:**
+- **Django sessions**: Expire after 2 weeks of inactivity (default Django behavior)
+- **Quiz session variables**: Cleared when quiz completes or when starting a new quiz
+- **Database records**: **NEVER automatically deleted** - they persist forever
 
 The system is now much more forgiving - students who are almost done (90%+) will see their results, and you can always merge incomplete sessions later using the fix script.
 

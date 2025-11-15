@@ -12,7 +12,7 @@ import random
 from datetime import datetime
 import json
 import threading
-from .models import Topic, Level, ClassRoom, Enrollment, CustomUser, Question, Answer, StudentAnswer, BasicFactsResult, TimeLog, TopicLevelStatistics
+from .models import Topic, Level, ClassRoom, Enrollment, CustomUser, Question, Answer, StudentAnswer, BasicFactsResult, TimeLog, TopicLevelStatistics, StudentFinalAnswer
 from .forms import CreateClassForm, StudentSignUpForm, TeacherSignUpForm, TeacherCenterRegistrationForm, IndividualStudentRegistrationForm, StudentBulkRegistrationForm, QuestionForm, AnswerFormSet, UserProfileForm, UserPasswordChangeForm
 
 def calculate_age_from_dob(date_of_birth):
@@ -635,6 +635,38 @@ def dashboard_detail(request):
             points_list = [a['points'] for a in attempts_data]
             best_score = max(points_list)
             best_attempt = max(attempts_data, key=lambda x: x['points'])
+            
+            # Try to get best result from StudentFinalAnswer table (more efficient)
+            best_result = None
+            try:
+                if level_obj:
+                    if level_num < 100:
+                        # Year levels: use level and topic directly
+                        topic_obj = Topic.objects.filter(name=topic_name).first()
+                        if topic_obj:
+                            best_result = StudentFinalAnswer.get_best_result(
+                                student=request.user,
+                                topic=topic_obj,
+                                level=level_obj
+                            )
+                            if best_result:
+                                best_score = float(best_result.points_earned)
+                    else:
+                        # Basic Facts: use age-based level and formatted topic
+                        age = calculate_age_from_dob(request.user.date_of_birth)
+                        if age:
+                            age_level = get_or_create_age_level(age)
+                            formatted_topic = get_or_create_formatted_topic(level_num, topic_name)
+                            if age_level and formatted_topic:
+                                best_result = StudentFinalAnswer.get_best_result(
+                                    student=request.user,
+                                    topic=formatted_topic,
+                                    level=age_level
+                                )
+                                if best_result:
+                                    best_score = float(best_result.points_earned)
+            except Exception:
+                pass  # Fallback to calculated best_score if StudentFinalAnswer lookup fails
             
             # Get statistics for this topic-level to determine color
             color_class = 'light-green'  # Default color
@@ -2091,6 +2123,26 @@ def measurements_questions(request, level_number):
         # Round for display
         final_points = round(final_points, 2)
         
+        # Save to StudentFinalAnswer table
+        # Get next attempt number for this student-topic-level combination
+        attempt_number = StudentFinalAnswer.get_next_attempt_number(
+            student=request.user,
+            topic=measurements_topic,
+            level=level
+        )
+        
+        # Create or update StudentFinalAnswer record
+        StudentFinalAnswer.objects.update_or_create(
+            student=request.user,
+            session_id=attempt_id,
+            defaults={
+                'topic': measurements_topic,
+                'level': level,
+                'attempt_number': attempt_number,
+                'points_earned': final_points,
+            }
+        )
+        
         # Compute previous best record for this level - optimized with aggregation
         # IMPORTANT: Save attempt_id BEFORE clearing session (needed for excluding current attempt)
         current_attempt_id = attempt_id
@@ -2437,6 +2489,32 @@ def place_values_questions(request, level_number):
         if not request.user.is_teacher:
             update_time_log_from_activities(request.user)
         
+        # Compute points: percentage * 100 * 60 / time_seconds
+        percentage = (total_score / total_points) if total_points else 0
+        final_points = (percentage * 100 * 60) / total_time_seconds if total_time_seconds else 0
+        # Round for display
+        final_points = round(final_points, 2)
+        
+        # Save to StudentFinalAnswer table
+        # Get or create Place Values topic
+        place_values_topic, _ = Topic.objects.get_or_create(name="Place Values")
+        attempt_number = StudentFinalAnswer.get_next_attempt_number(
+            student=request.user,
+            topic=place_values_topic,
+            level=level
+        )
+        
+        StudentFinalAnswer.objects.update_or_create(
+            student=request.user,
+            session_id=attempt_id,
+            defaults={
+                'topic': place_values_topic,
+                'level': level,
+                'attempt_number': attempt_number,
+                'points_earned': final_points,
+            }
+        )
+        
         # Clear timer and question list for next attempt
         if timer_session_key in request.session:
             del request.session[timer_session_key]
@@ -2444,18 +2522,13 @@ def place_values_questions(request, level_number):
             del request.session[questions_session_key]
         if 'current_attempt_id' in request.session:
             del request.session['current_attempt_id']
-        # Compute points: percentage * 100 * 60 / time_seconds
-        percentage = (total_score / total_points) if total_points else 0
-        final_points = (percentage * 100 * 60) / total_time_seconds if total_time_seconds else 0
-        # Round for display
-        final_points = round(final_points, 2)
         
         # Compute previous best record for this level - optimized with aggregation
-        attempt_id = request.session.get('current_attempt_id', '')
+        current_attempt_id = attempt_id
         previous_sessions_data = StudentAnswer.objects.filter(
             student=request.user,
             question__level=level
-        ).exclude(session_id=attempt_id).exclude(session_id='').values('session_id').annotate(
+        ).exclude(session_id=current_attempt_id).exclude(session_id='').values('session_id').annotate(
             total_correct=Sum('is_correct'),
             total_count=Count('id'),
             total_points=Sum('points_earned'),
@@ -2745,6 +2818,30 @@ def fractions_questions(request, level_number):
         if not request.user.is_teacher:
             update_time_log_from_activities(request.user)
         
+        # Compute points: percentage * 100 * 60 / time_seconds
+        percentage = (total_score / total_points) if total_points else 0
+        final_points = (percentage * 100 * 60) / total_time_seconds if total_time_seconds else 0
+        # Round for display
+        final_points = round(final_points, 2)
+        
+        # Save to StudentFinalAnswer table
+        attempt_number = StudentFinalAnswer.get_next_attempt_number(
+            student=request.user,
+            topic=fractions_topic,
+            level=level
+        )
+        
+        StudentFinalAnswer.objects.update_or_create(
+            student=request.user,
+            session_id=attempt_id,
+            defaults={
+                'topic': fractions_topic,
+                'level': level,
+                'attempt_number': attempt_number,
+                'points_earned': final_points,
+            }
+        )
+        
         # Clear timer and question list for next attempt
         if timer_session_key in request.session:
             del request.session[timer_session_key]
@@ -2752,19 +2849,14 @@ def fractions_questions(request, level_number):
             del request.session[questions_session_key]
         if 'current_attempt_id' in request.session:
             del request.session['current_attempt_id']
-        # Compute points: percentage * 100 * 60 / time_seconds
-        percentage = (total_score / total_points) if total_points else 0
-        final_points = (percentage * 100 * 60) / total_time_seconds if total_time_seconds else 0
-        # Round for display
-        final_points = round(final_points, 2)
         
         # Compute previous best record for this level - optimized with aggregation
-        attempt_id = request.session.get('current_attempt_id', '')
+        current_attempt_id = attempt_id
         previous_sessions_data = StudentAnswer.objects.filter(
             student=request.user,
             question__level=level,
             question__topic=fractions_topic
-        ).exclude(session_id=attempt_id).exclude(session_id='').values('session_id').annotate(
+        ).exclude(session_id=current_attempt_id).exclude(session_id='').values('session_id').annotate(
             total_correct=Sum('is_correct'),
             total_count=Count('id'),
             total_points=Sum('points_earned'),
@@ -3096,6 +3188,29 @@ def bodmas_questions(request, level_number):
         thread.daemon = True
         thread.start()
         
+        # Compute points: percentage * 100 * 60 / time_seconds
+        percentage = (total_score / total_points) if total_points else 0
+        final_points = (percentage * 100 * 60) / total_time_seconds if total_time_seconds else 0
+        final_points = round(final_points, 2)
+        
+        # Save to StudentFinalAnswer table
+        attempt_number = StudentFinalAnswer.get_next_attempt_number(
+            student=request.user,
+            topic=bodmas_topic,
+            level=level
+        )
+        
+        StudentFinalAnswer.objects.update_or_create(
+            student=request.user,
+            session_id=attempt_id,
+            defaults={
+                'topic': bodmas_topic,
+                'level': level,
+                'attempt_number': attempt_number,
+                'points_earned': final_points,
+            }
+        )
+        
         if timer_session_key in request.session:
             del request.session[timer_session_key]
         if questions_session_key in request.session:
@@ -3362,6 +3477,30 @@ def finance_questions(request, level_number):
         thread.daemon = True
         thread.start()
         
+        # Compute points: percentage * 100 * 60 / time_seconds
+        percentage = (total_score / total_points) if total_points else 0
+        final_points = (percentage * 100 * 60) / total_time_seconds if total_time_seconds else 0
+        # Round for display
+        final_points = round(final_points, 2)
+        
+        # Save to StudentFinalAnswer table
+        attempt_number = StudentFinalAnswer.get_next_attempt_number(
+            student=request.user,
+            topic=finance_topic,
+            level=level
+        )
+        
+        StudentFinalAnswer.objects.update_or_create(
+            student=request.user,
+            session_id=attempt_id,
+            defaults={
+                'topic': finance_topic,
+                'level': level,
+                'attempt_number': attempt_number,
+                'points_earned': final_points,
+            }
+        )
+        
         # Clear timer and question list for next attempt
         if timer_session_key in request.session:
             del request.session[timer_session_key]
@@ -3369,14 +3508,9 @@ def finance_questions(request, level_number):
             del request.session[questions_session_key]
         if 'current_attempt_id' in request.session:
             del request.session['current_attempt_id']
-        # Compute points: percentage * 100 * 60 / time_seconds
-        percentage = (total_score / total_points) if total_points else 0
-        final_points = (percentage * 100 * 60) / total_time_seconds if total_time_seconds else 0
-        # Round for display
-        final_points = round(final_points, 2)
         
         # Compute previous best record for this level - optimized with aggregation
-        attempt_id = request.session.get('current_attempt_id', '')
+        current_attempt_id = attempt_id
         previous_sessions_data = StudentAnswer.objects.filter(
             student=request.user,
             question__level=level,

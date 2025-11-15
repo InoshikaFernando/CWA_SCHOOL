@@ -111,123 +111,126 @@ def calculate_topic_level_statistics(level_num=None, topic_name=None):
             if combo_key in processed_combinations:
                 continue
             processed_combinations.add(combo_key)
-        
-        try:
-            level_obj = Level.objects.get(level_number=level_num_val)
-            topic_obj = Topic.objects.filter(name=topic_name_val).first()
             
-            if not topic_obj:
-                pass
-            
-            # Get available questions count
-            available_questions = Question.objects.filter(
-                level=level_obj,
-                topic=topic_obj
-            ).count()
-            
-            standard_limit = YEAR_QUESTION_COUNTS.get(level_num_val, 10)
-            question_limit = min(available_questions, standard_limit) if available_questions > 0 else standard_limit
-            
-            # Get all students who have completed this topic-level
-            # Group by student and session to find best attempt for each student
-            student_best_points = {}
-            
-            # Get all unique student-session combinations for this level-topic
-            student_sessions = year_answers.filter(
-                question__level__level_number=level_num_val,
-                question__topic__name=topic_name_val
-            ).values('student', 'session_id').distinct()
-            
-            for student_session in student_sessions:
-                student_id = student_session['student']
-                session_id = student_session['session_id']
+            try:
+                level_obj = Level.objects.get(level_number=level_num_val)
+                topic_obj = Topic.objects.filter(name=topic_name_val).first()
                 
-                if not session_id:
+                if not topic_obj:
                     continue
                 
-                # Get all answers for this student-session combination
-                session_answers = year_answers.filter(
-                    student_id=student_id,
-                    session_id=session_id,
+                # Get available questions count
+                available_questions = Question.objects.filter(
+                    level=level_obj,
+                    topic=topic_obj
+                ).count()
+                
+                standard_limit = YEAR_QUESTION_COUNTS.get(level_num_val, 10)
+                question_limit = min(available_questions, standard_limit) if available_questions > 0 else standard_limit
+                
+                # Get all students who have completed this topic-level
+                # Group by student and session to find best attempt for each student
+                student_best_points = {}
+                
+                # Get all unique student-session combinations for this level-topic
+                student_sessions = year_answers.filter(
                     question__level__level_number=level_num_val,
                     question__topic__name=topic_name_val
-                )
+                ).values('student', 'session_id').distinct()
                 
-                # Only count full attempts
-                if session_answers.count() < question_limit:
-                    continue
-                
-                # Calculate points for this attempt
-                first_answer = session_answers.first()
-                if first_answer and first_answer.time_taken_seconds > 0:
-                    total_correct = sum(1 for a in session_answers if a.is_correct)
-                    total_questions = session_answers.count()
-                    time_seconds = first_answer.time_taken_seconds
+                for student_session in student_sessions:
+                    student_id = student_session['student']
+                    session_id = student_session['session_id']
                     
-                    percentage = (total_correct / total_questions) if total_questions else 0
-                    final_points = (percentage * 100 * 60) / time_seconds if time_seconds else 0
+                    if not session_id:
+                        continue
+                    
+                    # Get all answers for this student-session combination
+                    session_answers = year_answers.filter(
+                        student_id=student_id,
+                        session_id=session_id,
+                        question__level__level_number=level_num_val,
+                        question__topic__name=topic_name_val
+                    )
+                    
+                    # Count attempts that meet the full limit OR are close to it (90% threshold)
+                    # This matches the dashboard logic
+                    partial_threshold = int(question_limit * 0.9)  # 90% of required questions
+                    if session_answers.count() < partial_threshold:
+                        continue
+                    
+                    # Calculate points for this attempt
+                    first_answer = session_answers.first()
+                    if first_answer and first_answer.time_taken_seconds > 0:
+                        total_correct = sum(1 for a in session_answers if a.is_correct)
+                        total_questions = session_answers.count()
+                        time_seconds = first_answer.time_taken_seconds
+                        
+                        percentage = (total_correct / total_questions) if total_questions else 0
+                        final_points = (percentage * 100 * 60) / time_seconds if time_seconds else 0
+                    else:
+                        final_points = sum(a.points_earned for a in session_answers)
+                    
+                    # Track best points for each student
+                    if student_id not in student_best_points:
+                        student_best_points[student_id] = final_points
+                    else:
+                        student_best_points[student_id] = max(student_best_points[student_id], final_points)
+                
+                # Calculate statistics
+                if len(student_best_points) >= 2:  # Need at least 2 students for meaningful statistics
+                    points_list = list(student_best_points.values())
+                    avg = sum(points_list) / len(points_list)
+                    
+                    # Calculate standard deviation
+                    variance = sum((x - avg) ** 2 for x in points_list) / len(points_list)
+                    sigma = math.sqrt(variance)
+                    
+                    # Get or create statistics record
+                    stats, created = TopicLevelStatistics.objects.get_or_create(
+                        level=level_obj,
+                        topic=topic_obj,
+                        defaults={
+                            'average_points': round(avg, 2),
+                            'sigma': round(sigma, 2),
+                            'student_count': len(student_best_points)
+                        }
+                    )
+                    
+                    if not created:
+                        # Update existing record
+                        stats.average_points = round(avg, 2)
+                        stats.sigma = round(sigma, 2)
+                        stats.student_count = len(student_best_points)
+                        stats.save()
+                        updated_count += 1
+                    else:
+                        created_count += 1
+                    
+                    print(f"  {'[CREATED]' if created else '[UPDATED]'} Year {level_num_val} - {topic_name_val}: "
+                          f"avg={round(avg, 2)}, sigma={round(sigma, 2)}, n={len(student_best_points)}")
                 else:
-                    final_points = sum(a.points_earned for a in session_answers)
-                
-                # Track best points for each student
-                if student_id not in student_best_points:
-                    student_best_points[student_id] = final_points
-                else:
-                    student_best_points[student_id] = max(student_best_points[student_id], final_points)
-            
-            # Calculate statistics
-            if len(student_best_points) >= 2:  # Need at least 2 students for meaningful statistics
-                points_list = list(student_best_points.values())
-                avg = sum(points_list) / len(points_list)
-                
-                # Calculate standard deviation
-                variance = sum((x - avg) ** 2 for x in points_list) / len(points_list)
-                sigma = math.sqrt(variance)
-                
-                # Get or create statistics record
-                stats, created = TopicLevelStatistics.objects.get_or_create(
-                    level=level_obj,
-                    topic=topic_obj,
-                    defaults={
-                        'average_points': round(avg, 2),
-                        'sigma': round(sigma, 2),
-                        'student_count': len(student_best_points)
-                    }
-                )
-                
-                if not created:
-                    # Update existing record
-                    stats.average_points = round(avg, 2)
-                    stats.sigma = round(sigma, 2)
-                    stats.student_count = len(student_best_points)
-                    stats.save()
-                    updated_count += 1
-                else:
-                    created_count += 1
-                
-                print(f"  {'[CREATED]' if created else '[UPDATED]'} Year {level_num_val} - {topic_name_val}: "
-                      f"avg={round(avg, 2)}, sigma={round(sigma, 2)}, n={len(student_best_points)}")
-            else:
-                # Not enough data - set to defaults or skip
-                stats, created = TopicLevelStatistics.objects.get_or_create(
-                    level=level_obj,
-                    topic=topic_obj,
-                    defaults={
-                        'average_points': 0,
-                        'sigma': 0,
-                        'student_count': len(student_best_points)
-                    }
-                )
-                if not created:
-                    stats.student_count = len(student_best_points)
-                    stats.save()
-                # Skip printing for individual combinations with not enough data to reduce noise
-                pass
-        
-        except Exception as e:
-            print(f"  [ERROR] Year {level_num_val} - {topic_name_val}: {str(e)}")
-            import traceback
-            traceback.print_exc()
+                    # Not enough data - set to defaults or skip
+                    stats, created = TopicLevelStatistics.objects.get_or_create(
+                        level=level_obj,
+                        topic=topic_obj,
+                        defaults={
+                            'average_points': 0,
+                            'sigma': 0,
+                            'student_count': len(student_best_points)
+                        }
+                    )
+                    if not created:
+                        stats.student_count = len(student_best_points)
+                        stats.save()
+                    # Skip printing for individual combinations with not enough data to reduce noise
+                    if len(student_best_points) == 1:
+                        print(f"  [SKIP] Year {level_num_val} - {topic_name_val}: Only 1 student (need 2+ for statistics)")
+            except Exception as e:
+                print(f"  [ERROR] Year {level_num_val} - {topic_name_val}: {e}")
+                import traceback
+                traceback.print_exc()
+                continue
     
     # Process Basic Facts levels (group by age and formatted topic)
     if level_num is None or level_num >= 100:

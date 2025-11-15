@@ -19,7 +19,7 @@ def restore_local_database(backup_file):
     Restore a backup file to the local database
     """
     if not os.path.exists(backup_file):
-        print(f"❌ ERROR: Backup file not found: {backup_file}")
+        print(f"[ERROR] Backup file not found: {backup_file}")
         return False
     
     print("=" * 80)
@@ -30,19 +30,19 @@ def restore_local_database(backup_file):
     print(f"Database file: {settings.DATABASES['default'].get('NAME', 'N/A')}")
     
     # Confirm before proceeding
-    print("\n⚠️  WARNING: This will replace all data in your local database!")
+    print("\n[WARNING] This will replace all data in your local database!")
     confirm = input("Type 'YES' to continue: ")
     if confirm != 'YES':
-        print("❌ Restore cancelled.")
+        print("[CANCELLED] Restore cancelled.")
         return False
     
     print("\n[INFO] Flushing existing data...")
     try:
         # Flush the database (clear all data)
         call_command('flush', '--noinput', verbosity=1)
-        print("✅ Database flushed")
+        print("[OK] Database flushed")
     except Exception as e:
-        print(f"⚠️  Warning: Could not flush database: {e}")
+        print(f"[WARNING] Could not flush database: {e}")
         print("   Continuing anyway...")
     
     print("\n[INFO] Loading backup data...")
@@ -55,14 +55,14 @@ def restore_local_database(backup_file):
         print("\n" + "=" * 80)
         print("RESTORE COMPLETE")
         print("=" * 80)
-        print("✅ Database restored successfully!")
-        print(f"\n💡 You can now run: python manage.py runserver")
+        print("[OK] Database restored successfully!")
+        print(f"\n[INFO] You can now run: python manage.py runserver")
         print("=" * 80)
         
         return True
         
     except Exception as e:
-        print(f"\n❌ ERROR: Restore failed!")
+        print(f"\n[ERROR] Restore failed!")
         print(f"   {str(e)}")
         import traceback
         traceback.print_exc()

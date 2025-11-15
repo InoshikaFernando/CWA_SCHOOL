@@ -122,60 +122,74 @@ def diagnose_dashboard_results(username=None):
             print(f"  Question limit: {question_limit}")
             print(f"  Partial threshold (90%): {partial_threshold}")
             
-            # Check each session
-            completed_sessions = []
-            for session_id in session_ids:
-                session_answers = student_answers.filter(
-                    session_id=session_id,
-                    question__level__level_number=level_num,
-                    question__topic__name=topic_name
-                )
-                
-                answer_count = session_answers.count()
-                first_answer = session_answers.first()
-                has_time = first_answer and first_answer.time_taken_seconds > 0
-                time_value = first_answer.time_taken_seconds if first_answer else 0
-                
-                meets_threshold = answer_count >= partial_threshold
-                
-                print(f"\n  Session: {session_id[:36]}...")
-                print(f"    Answer count: {answer_count}")
-                print(f"    Meets threshold: {meets_threshold} ({answer_count} >= {partial_threshold})")
-                print(f"    Has time: {has_time} ({time_value}s)")
-                
-                if meets_threshold:
-                    completed_sessions.append(session_id)
-                    
-                    # Calculate points
-                    if has_time:
-                        total_correct = sum(1 for a in session_answers if a.is_correct)
-                        percentage = (total_correct / answer_count) if answer_count else 0
-                        final_points = (percentage * 100 * 60) / time_value if time_value else 0
-                        print(f"    Points: {round(final_points, 2)} ({total_correct}/{answer_count} correct)")
-                    else:
-                        total_points = sum(a.points_earned for a in session_answers)
-                        print(f"    Points: {total_points} (no time data)")
-            
-            print(f"\n  Completed sessions (meet threshold): {len(completed_sessions)}")
-            
-            # Check if there's a matching StudentFinalAnswer record
+            # PRIMARY: Check StudentFinalAnswer records first (this is what dashboard uses now)
             matching_final = final_answers.filter(
                 level=level_obj,
                 topic=topic_obj
             )
             
             print(f"  StudentFinalAnswer records: {matching_final.count()}")
-            if matching_final.exists():
-                best_final = matching_final.order_by('-points_earned').first()
-                print(f"    Best points: {best_final.points_earned} (Attempt {best_final.attempt_number})")
             
-            # Summary
-            if len(completed_sessions) > 0:
-                print(f"  [OK] Should appear on dashboard")
+            if matching_final.exists():
+                # Dashboard will use StudentFinalAnswer records directly
+                print(f"  [PRIMARY] Dashboard will use StudentFinalAnswer records:")
+                for fa in matching_final.order_by('-points_earned'):
+                    print(f"    Attempt {fa.attempt_number}: {fa.points_earned} points (Session: {fa.session_id[:36]}...)")
+                
+                best_final = matching_final.order_by('-points_earned').first()
+                print(f"\n  [OK] WILL appear on dashboard (using StudentFinalAnswer)")
+                print(f"    Best points: {best_final.points_earned} (Attempt {best_final.attempt_number})")
+                print(f"    Total attempts: {matching_final.count()}")
             else:
-                print(f"  [ISSUE] Won't appear on dashboard - no sessions meet threshold")
-                if len(session_ids) > 0:
-                    print(f"    Reason: Sessions exist but don't meet {partial_threshold} answer threshold")
+                # FALLBACK: Check StudentAnswer records (old method)
+                print(f"  [FALLBACK] No StudentFinalAnswer records, checking StudentAnswer records...")
+                
+                completed_sessions = []
+                # Remove duplicates from session_ids
+                unique_session_ids = list(set(session_ids))
+                
+                for session_id in unique_session_ids:
+                    session_answers = student_answers.filter(
+                        session_id=session_id,
+                        question__level__level_number=level_num,
+                        question__topic__name=topic_name
+                    )
+                    
+                    answer_count = session_answers.count()
+                    first_answer = session_answers.first()
+                    has_time = first_answer and first_answer.time_taken_seconds > 0
+                    time_value = first_answer.time_taken_seconds if first_answer else 0
+                    
+                    meets_threshold = answer_count >= partial_threshold
+                    
+                    print(f"\n  Session: {session_id[:36]}...")
+                    print(f"    Answer count: {answer_count}")
+                    print(f"    Meets threshold: {meets_threshold} ({answer_count} >= {partial_threshold})")
+                    print(f"    Has time: {has_time} ({time_value}s)")
+                    
+                    if meets_threshold:
+                        completed_sessions.append(session_id)
+                        
+                        # Calculate points
+                        if has_time:
+                            total_correct = sum(1 for a in session_answers if a.is_correct)
+                            percentage = (total_correct / answer_count) if answer_count else 0
+                            final_points = (percentage * 100 * 60) / time_value if time_value else 0
+                            print(f"    Points: {round(final_points, 2)} ({total_correct}/{answer_count} correct)")
+                        else:
+                            total_points = sum(a.points_earned for a in session_answers)
+                            print(f"    Points: {total_points} (no time data)")
+                
+                print(f"\n  Completed sessions (meet threshold): {len(completed_sessions)}")
+                
+                # Summary
+                if len(completed_sessions) > 0:
+                    print(f"  [OK] Should appear on dashboard (using StudentAnswer fallback)")
+                else:
+                    print(f"  [ISSUE] Won't appear on dashboard - no sessions meet threshold")
+                    if len(unique_session_ids) > 0:
+                        print(f"    Reason: Sessions exist but don't meet {partial_threshold} answer threshold")
+                    print(f"    Recommendation: Run backfill script to create StudentFinalAnswer records")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Diagnose dashboard results')

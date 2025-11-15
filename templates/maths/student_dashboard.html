@@ -459,11 +459,17 @@
                                 </a>
                             </div>
                         {% elif level.level_number == 7 %}
-                            <!-- Year 7: Show Measurements and Take Quiz -->
+                            <!-- Year 7: Show Measurements, BODMAS and Take Quiz -->
                             <div class="topic-card">
                                 <a href="{% url 'maths:measurements_questions' level.level_number %}">
                                     <h4>Measurements</h4>
                                     <p>Year {{ level.level_number }} - Measurements</p>
+                                </a>
+                            </div>
+                            <div class="topic-card">
+                                <a href="{% url 'maths:bodmas_questions' level.level_number %}">
+                                    <h4>BODMAS/PEMDAS</h4>
+                                    <p>Year {{ level.level_number }} - BODMAS/PEMDAS</p>
                                 </a>
                             </div>
                             <div class="topic-card">

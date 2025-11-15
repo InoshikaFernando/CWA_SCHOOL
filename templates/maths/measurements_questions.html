@@ -322,10 +322,10 @@
             </div>
             
             <div class="action-buttons">
-                <form method="post" style="display: inline;">
+                <form method="post" style="display: inline;" id="question-form">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="next_question">
-                    <button type="submit" class="btn btn-next">
+                    <button type="submit" class="btn btn-next" id="finish-button" onclick="stopTimerImmediately()">
                         {% if is_last_question %}Finish{% else %}Next Question{% endif %}
                     </button>
                 </form>
@@ -349,14 +349,55 @@
         const timerEl = document.getElementById('live-timer');
         if (!timerEl) return;
         let elapsed = parseInt(timerEl.getAttribute('data-start-time')) || 0;
+        let timerInterval = null;
+        let timerStopped = false;
+        
         function render() {
-            timerEl.textContent = elapsed + 's';
+            if (timerEl && !timerStopped) {
+                timerEl.textContent = elapsed + 's';
+            }
         }
-        render();
-        setInterval(function() {
-            elapsed += 1;
+        
+        function startTimer() {
+            if (timerStopped) return;
             render();
-        }, 1000);
+            timerInterval = setInterval(function() {
+                if (timerStopped) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    return;
+                }
+                elapsed += 1;
+                render();
+            }, 1000);
+        }
+        
+        function stopTimer() {
+            timerStopped = true;
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+        
+        // Make stopTimer available globally
+        window.stopTimerImmediately = stopTimer;
+        
+        // Start timer
+        startTimer();
+        
+        // Stop timer when form is submitted (finish button clicked)
+        const forms = document.querySelectorAll('form');
+        forms.forEach(function(form) {
+            form.addEventListener('submit', function() {
+                stopTimer();
+            });
+        });
+        
+        // Also stop timer when page is about to unload
+        window.addEventListener('beforeunload', function() {
+            stopTimer();
+        });
     })();
     
     // Text-to-speech function

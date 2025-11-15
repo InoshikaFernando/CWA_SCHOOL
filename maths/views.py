@@ -7,10 +7,11 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 import time
-from django.db.models import Q
+from django.db.models import Q, Count, Sum, Max, Min, Avg
 import random
 from datetime import datetime
 import json
+import threading
 from .models import Topic, Level, ClassRoom, Enrollment, CustomUser, Question, Answer, StudentAnswer, BasicFactsResult, TimeLog, TopicLevelStatistics
 from .forms import CreateClassForm, StudentSignUpForm, TeacherSignUpForm, TeacherCenterRegistrationForm, IndividualStudentRegistrationForm, StudentBulkRegistrationForm, QuestionForm, AnswerFormSet, UserProfileForm, UserPasswordChangeForm
 
@@ -1725,34 +1726,33 @@ def take_quiz(request, level_number):
             else:
                 previous_best_points = None
         else:
-            # For regular levels, check database records
-            previous_sessions = StudentAnswer.objects.filter(
+            # For regular levels, check database records - optimized with aggregation
+            previous_sessions_data = StudentAnswer.objects.filter(
                 student=request.user,
                 question__level=level
-            ).exclude(session_id=session_id).values_list('session_id', flat=True).distinct()
+            ).exclude(session_id=session_id).exclude(session_id='').values('session_id').annotate(
+                total_correct=Sum('is_correct'),
+                total_count=Count('id'),
+                total_points=Sum('points_earned'),
+                time_taken=Max('time_taken_seconds')
+            )
 
             previous_best_points = None
-            for sid in previous_sessions:
-                if not sid:
+            for session_data in previous_sessions_data:
+                session_id_val = session_data['session_id']
+                if not session_id_val:
                     continue
-                # Get all answers for this session
-                session_answers = StudentAnswer.objects.filter(
-                    student=request.user,
-                    question__level=level,
-                    session_id=sid
-                )
-                if not session_answers.exists():
-                    continue
-                # Calculate points for this session using the same formula
-                first_answer = session_answers.first()
-                if first_answer and first_answer.time_taken_seconds > 0:
-                    session_correct = sum(1 for a in session_answers if a.is_correct)
-                    session_total = session_answers.count()
-                    session_time = first_answer.time_taken_seconds
+                
+                session_correct = session_data['total_correct'] or 0
+                session_total = session_data['total_count'] or 1
+                session_time = session_data['time_taken'] or 0
+                session_points_earned = session_data['total_points'] or 0
+                
+                if session_time > 0:
                     session_percentage = (session_correct / session_total) if session_total else 0
                     session_points = (session_percentage * 100 * 60) / session_time if session_time else 0
                 else:
-                    session_points = sum(a.points_earned for a in session_answers)
+                    session_points = session_points_earned
                 
                 if previous_best_points is None or session_points > previous_best_points:
                     previous_best_points = session_points
@@ -2018,12 +2018,17 @@ def measurements_questions(request, level_number):
         if not request.user.is_teacher:
             update_time_log_from_activities(request.user)
         
-        # Update topic-level statistics (for color coding)
+        # Update topic-level statistics (for color coding) - run asynchronously to avoid blocking redirect
         # This recalculates average and sigma for this topic-level combination
-        try:
-            update_topic_statistics(level_num=level.level_number, topic_name=measurements_topic.name)
-        except Exception:
-            pass  # Silently fail if statistics update fails
+        def update_stats_async():
+            try:
+                update_topic_statistics(level_num=level.level_number, topic_name=measurements_topic.name)
+            except Exception:
+                pass  # Silently fail if statistics update fails
+        
+        thread = threading.Thread(target=update_stats_async)
+        thread.daemon = True
+        thread.start()
         
         # Clear timer and question list for next attempt
         if timer_session_key in request.session:
@@ -2038,35 +2043,38 @@ def measurements_questions(request, level_number):
         # Round for display
         final_points = round(final_points, 2)
         
-        # Compute previous best record for this level
+        # Compute previous best record for this level - optimized with aggregation
         attempt_id = request.session.get('current_attempt_id', '')
-        previous_sessions = StudentAnswer.objects.filter(
+        
+        # Get all previous sessions with aggregated data in a single query
+        previous_sessions_data = StudentAnswer.objects.filter(
             student=request.user,
             question__level=level,
             question__topic=measurements_topic
-        ).exclude(session_id=attempt_id).values_list('session_id', flat=True).distinct()
-
+        ).exclude(session_id=attempt_id).exclude(session_id='').values('session_id').annotate(
+            total_correct=Sum('is_correct'),
+            total_count=Count('id'),
+            total_points=Sum('points_earned'),
+            time_taken=Max('time_taken_seconds')  # All answers in a session have the same time
+        )
+        
         previous_best_points = None
-        for sid in previous_sessions:
-            if not sid:
+        for session_data in previous_sessions_data:
+            session_id = session_data['session_id']
+            if not session_id:
                 continue
-            session_answers = StudentAnswer.objects.filter(
-                student=request.user,
-                question__level=level,
-                question__topic=measurements_topic,
-                session_id=sid
-            )
-            if not session_answers.exists():
-                continue
-            first_answer = session_answers.first()
-            if first_answer and first_answer.time_taken_seconds > 0:
-                session_correct = sum(1 for a in session_answers if a.is_correct)
-                session_total = session_answers.count()
-                session_time = first_answer.time_taken_seconds
+            
+            session_correct = session_data['total_correct'] or 0
+            session_total = session_data['total_count'] or 1
+            session_time = session_data['time_taken'] or 0
+            session_points_earned = session_data['total_points'] or 0
+            
+            # Calculate points using the same formula as current attempt
+            if session_time > 0:
                 session_percentage = (session_correct / session_total) if session_total else 0
                 session_points = (session_percentage * 100 * 60) / session_time if session_time else 0
             else:
-                session_points = sum(a.points_earned for a in session_answers)
+                session_points = session_points_earned
             
             if previous_best_points is None or session_points > previous_best_points:
                 previous_best_points = session_points
@@ -2385,33 +2393,34 @@ def place_values_questions(request, level_number):
         # Round for display
         final_points = round(final_points, 2)
         
-        # Compute previous best record for this level
+        # Compute previous best record for this level - optimized with aggregation
         attempt_id = request.session.get('current_attempt_id', '')
-        previous_sessions = StudentAnswer.objects.filter(
+        previous_sessions_data = StudentAnswer.objects.filter(
             student=request.user,
             question__level=level
-        ).exclude(session_id=attempt_id).values_list('session_id', flat=True).distinct()
+        ).exclude(session_id=attempt_id).exclude(session_id='').values('session_id').annotate(
+            total_correct=Sum('is_correct'),
+            total_count=Count('id'),
+            total_points=Sum('points_earned'),
+            time_taken=Max('time_taken_seconds')
+        )
 
         previous_best_points = None
-        for sid in previous_sessions:
-            if not sid:
+        for session_data in previous_sessions_data:
+            session_id_val = session_data['session_id']
+            if not session_id_val:
                 continue
-            session_answers = StudentAnswer.objects.filter(
-                student=request.user,
-                question__level=level,
-                session_id=sid
-            )
-            if not session_answers.exists():
-                continue
-            first_answer = session_answers.first()
-            if first_answer and first_answer.time_taken_seconds > 0:
-                session_correct = sum(1 for a in session_answers if a.is_correct)
-                session_total = session_answers.count()
-                session_time = first_answer.time_taken_seconds
+            
+            session_correct = session_data['total_correct'] or 0
+            session_total = session_data['total_count'] or 1
+            session_time = session_data['time_taken'] or 0
+            session_points_earned = session_data['total_points'] or 0
+            
+            if session_time > 0:
                 session_percentage = (session_correct / session_total) if session_total else 0
                 session_points = (session_percentage * 100 * 60) / session_time if session_time else 0
             else:
-                session_points = sum(a.points_earned for a in session_answers)
+                session_points = session_points_earned
             
             if previous_best_points is None or session_points > previous_best_points:
                 previous_best_points = session_points
@@ -2692,35 +2701,35 @@ def fractions_questions(request, level_number):
         # Round for display
         final_points = round(final_points, 2)
         
-        # Compute previous best record for this level
+        # Compute previous best record for this level - optimized with aggregation
         attempt_id = request.session.get('current_attempt_id', '')
-        previous_sessions = StudentAnswer.objects.filter(
+        previous_sessions_data = StudentAnswer.objects.filter(
             student=request.user,
             question__level=level,
             question__topic=fractions_topic
-        ).exclude(session_id=attempt_id).values_list('session_id', flat=True).distinct()
+        ).exclude(session_id=attempt_id).exclude(session_id='').values('session_id').annotate(
+            total_correct=Sum('is_correct'),
+            total_count=Count('id'),
+            total_points=Sum('points_earned'),
+            time_taken=Max('time_taken_seconds')
+        )
 
         previous_best_points = None
-        for sid in previous_sessions:
-            if not sid:
+        for session_data in previous_sessions_data:
+            session_id_val = session_data['session_id']
+            if not session_id_val:
                 continue
-            session_answers = StudentAnswer.objects.filter(
-                student=request.user,
-                question__level=level,
-                question__topic=fractions_topic,
-                session_id=sid
-            )
-            if not session_answers.exists():
-                continue
-            first_answer = session_answers.first()
-            if first_answer and first_answer.time_taken_seconds > 0:
-                session_correct = sum(1 for a in session_answers if a.is_correct)
-                session_total = session_answers.count()
-                session_time = first_answer.time_taken_seconds
+            
+            session_correct = session_data['total_correct'] or 0
+            session_total = session_data['total_count'] or 1
+            session_time = session_data['time_taken'] or 0
+            session_points_earned = session_data['total_points'] or 0
+            
+            if session_time > 0:
                 session_percentage = (session_correct / session_total) if session_total else 0
                 session_points = (session_percentage * 100 * 60) / session_time if session_time else 0
             else:
-                session_points = sum(a.points_earned for a in session_answers)
+                session_points = session_points_earned
             
             if previous_best_points is None or session_points > previous_best_points:
                 previous_best_points = session_points
@@ -3019,11 +3028,16 @@ def bodmas_questions(request, level_number):
         if not request.user.is_teacher:
             update_time_log_from_activities(request.user)
         
-        # Update topic-level statistics (for color coding)
-        try:
-            update_topic_statistics(level_num=level.level_number, topic_name=bodmas_topic.name)
-        except Exception:
-            pass
+        # Update topic-level statistics (for color coding) - run asynchronously to avoid blocking redirect
+        def update_stats_async():
+            try:
+                update_topic_statistics(level_num=level.level_number, topic_name=bodmas_topic.name)
+            except Exception:
+                pass  # Silently fail if statistics update fails
+        
+        thread = threading.Thread(target=update_stats_async)
+        thread.daemon = True
+        thread.start()
         
         if timer_session_key in request.session:
             del request.session[timer_session_key]
@@ -3280,11 +3294,16 @@ def finance_questions(request, level_number):
         if not request.user.is_teacher:
             update_time_log_from_activities(request.user)
         
-        # Update topic-level statistics (for color coding)
-        try:
-            update_topic_statistics(level_num=level.level_number, topic_name=finance_topic.name)
-        except Exception:
-            pass
+        # Update topic-level statistics (for color coding) - run asynchronously to avoid blocking redirect
+        def update_stats_async():
+            try:
+                update_topic_statistics(level_num=level.level_number, topic_name=finance_topic.name)
+            except Exception:
+                pass  # Silently fail if statistics update fails
+        
+        thread = threading.Thread(target=update_stats_async)
+        thread.daemon = True
+        thread.start()
         
         # Clear timer and question list for next attempt
         if timer_session_key in request.session:
@@ -3299,35 +3318,35 @@ def finance_questions(request, level_number):
         # Round for display
         final_points = round(final_points, 2)
         
-        # Compute previous best record for this level
+        # Compute previous best record for this level - optimized with aggregation
         attempt_id = request.session.get('current_attempt_id', '')
-        previous_sessions = StudentAnswer.objects.filter(
+        previous_sessions_data = StudentAnswer.objects.filter(
             student=request.user,
             question__level=level,
             question__topic=finance_topic
-        ).exclude(session_id=attempt_id).values_list('session_id', flat=True).distinct()
+        ).exclude(session_id=attempt_id).exclude(session_id='').values('session_id').annotate(
+            total_correct=Sum('is_correct'),
+            total_count=Count('id'),
+            total_points=Sum('points_earned'),
+            time_taken=Max('time_taken_seconds')
+        )
 
         previous_best_points = None
-        for sid in previous_sessions:
-            if not sid:
+        for session_data in previous_sessions_data:
+            session_id_val = session_data['session_id']
+            if not session_id_val:
                 continue
-            session_answers = StudentAnswer.objects.filter(
-                student=request.user,
-                question__level=level,
-                question__topic=finance_topic,
-                session_id=sid
-            )
-            if not session_answers.exists():
-                continue
-            first_answer = session_answers.first()
-            if first_answer and first_answer.time_taken_seconds > 0:
-                session_correct = sum(1 for a in session_answers if a.is_correct)
-                session_total = session_answers.count()
-                session_time = first_answer.time_taken_seconds
+            
+            session_correct = session_data['total_correct'] or 0
+            session_total = session_data['total_count'] or 1
+            session_time = session_data['time_taken'] or 0
+            session_points_earned = session_data['total_points'] or 0
+            
+            if session_time > 0:
                 session_percentage = (session_correct / session_total) if session_total else 0
                 session_points = (session_percentage * 100 * 60) / session_time if session_time else 0
             else:
-                session_points = sum(a.points_earned for a in session_answers)
+                session_points = session_points_earned
             
             if previous_best_points is None or session_points > previous_best_points:
                 previous_best_points = session_points

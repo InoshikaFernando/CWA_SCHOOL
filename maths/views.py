@@ -589,6 +589,10 @@ def dashboard_detail(request):
         standard_limit = YEAR_QUESTION_COUNTS.get(level_num, 10)
         question_limit = min(available_questions, standard_limit) if available_questions > 0 else standard_limit
         
+        # Allow partial results if they're close to the limit (90% or more)
+        # This prevents students from losing progress if they're almost done
+        partial_threshold = int(question_limit * 0.9)  # 90% of required questions
+        
         for session_id in session_ids:
             # Filter by level, topic, and session_id directly
             session_answers = student_answers_with_topics.filter(
@@ -597,10 +601,10 @@ def dashboard_detail(request):
                 question__topic__name=topic_name
                 )
             
-            # Only count full attempts (completed all questions for that topic/level)
-            # Require either the standard limit OR all available questions, whichever is minimum
+            # Count attempts that meet the full limit OR are close to it (partial threshold)
+            # This allows showing results for students who are almost done (e.g., 19/20 or 18/20)
             answer_count = session_answers.count()
-            if answer_count < question_limit:
+            if answer_count < partial_threshold:
                 continue
             completed_session_ids.append(session_id)
             
@@ -2081,13 +2085,6 @@ def measurements_questions(request, level_number):
         thread.daemon = True
         thread.start()
         
-        # Clear timer and question list for next attempt
-        if timer_session_key in request.session:
-            del request.session[timer_session_key]
-        if questions_session_key in request.session:
-            del request.session[questions_session_key]
-        if 'current_attempt_id' in request.session:
-            del request.session['current_attempt_id']
         # Compute points: percentage * 100 * 60 / time_seconds
         percentage = (total_score / total_points) if total_points else 0
         final_points = (percentage * 100 * 60) / total_time_seconds if total_time_seconds else 0
@@ -2095,14 +2092,23 @@ def measurements_questions(request, level_number):
         final_points = round(final_points, 2)
         
         # Compute previous best record for this level - optimized with aggregation
-        attempt_id = request.session.get('current_attempt_id', '')
+        # IMPORTANT: Save attempt_id BEFORE clearing session (needed for excluding current attempt)
+        current_attempt_id = attempt_id
+        
+        # Clear timer and question list for next attempt (AFTER saving attempt_id)
+        if timer_session_key in request.session:
+            del request.session[timer_session_key]
+        if questions_session_key in request.session:
+            del request.session[questions_session_key]
+        if 'current_attempt_id' in request.session:
+            del request.session['current_attempt_id']
         
         # Get all previous sessions with aggregated data in a single query
         previous_sessions_data = StudentAnswer.objects.filter(
             student=request.user,
             question__level=level,
             question__topic=measurements_topic
-        ).exclude(session_id=attempt_id).exclude(session_id='').values('session_id').annotate(
+        ).exclude(session_id=current_attempt_id).exclude(session_id='').values('session_id').annotate(
             total_correct=Sum('is_correct'),
             total_count=Count('id'),
             total_points=Sum('points_earned'),

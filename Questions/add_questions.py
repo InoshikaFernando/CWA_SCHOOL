@@ -33,11 +33,31 @@ def run_script_file(script_name, script_path):
     Run a Python script file using subprocess
     """
     try:
-        script_full_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), script_path)
+        # Get the directory where this script is located (Questions folder)
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        # Get the parent directory (project root)
+        project_root = os.path.dirname(current_dir)
+        
+        # Handle paths that might be relative to project root or Questions folder
+        if script_path.startswith('../') or script_path.startswith('Testing/'):
+            # Path is relative to project root
+            script_full_path = os.path.join(project_root, script_path.lstrip('../'))
+        else:
+            # Path is relative to Questions folder
+            script_full_path = os.path.join(current_dir, script_path)
+        
+        # Normalize the path
+        script_full_path = os.path.normpath(script_full_path)
+        
+        if not os.path.exists(script_full_path):
+            print(f"[ERROR] Script file not found: {script_full_path}")
+            return False
+        
         result = subprocess.run(
             [sys.executable, script_full_path],
             capture_output=False,
-            text=True
+            text=True,
+            cwd=project_root  # Run from project root so imports work correctly
         )
         return result.returncode == 0
     except Exception as e:

@@ -335,7 +335,7 @@ def main():
     basic_facts_levels = Level.objects.filter(level_number__gte=100, level_number__lte=127).order_by('level_number')
     
     if not basic_facts_levels.exists():
-        print("❌ No Basic Facts levels found. Please run create_basic_facts.py first.")
+        print("❌ No Basic Facts levels found. Please run Questions/create_basic_facts.py first.")
         return
     
     total_created = 0

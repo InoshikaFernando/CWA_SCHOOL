@@ -69,7 +69,7 @@ YourNewModel.objects.all()
 ### If You Added New Basic Facts Topics/Levels
 ```bash
 # Run the Basic Facts creation script
-python create_basic_facts.py
+python Questions/create_basic_facts.py
 ```
 
 ### If You Changed Static Files (CSS/JS)
@@ -141,7 +141,7 @@ python manage.py migrate
 ## Step 3: Create Basic Facts Structure
 ```bash
 # Run the script to create Basic Facts topics and levels
-python create_basic_facts.py
+python Questions/create_basic_facts.py
 ```
 
 This script will:
@@ -220,7 +220,7 @@ Run this in PythonAnywhere bash console:
 ```bash
 cd /path/to/your/project
 python manage.py migrate
-python create_basic_facts.py
+python Questions/create_basic_facts.py
 ```
 
 Then reload your web app from the Web tab.

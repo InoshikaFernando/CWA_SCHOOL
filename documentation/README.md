@@ -6,6 +6,7 @@ This folder contains all project documentation files.
 
 - **DATABASE_SCHEMA.md** - Complete database schema with all table relationships (auto-generated)
 - **DEPLOYMENT_STEPS.md** - Step-by-step guide for deploying to production
+- **DEPLOY_STUDENT_FINAL_ANSWER.md** - Guide for deploying the StudentFinalAnswer table to production
 - **SESSION_MANAGEMENT_GUIDE.md** - Guide for managing student quiz sessions
 - **EMAIL_SETUP_GUIDE.md** - Guide for setting up email functionality
 - **TOPIC_STATISTICS_GUIDE.md** - Guide for topic-level statistics and color coding

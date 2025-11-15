@@ -521,38 +521,52 @@ def dashboard_detail(request):
     # This allows us to show separate entries for Measurements and Place Values
     progress_by_level = []
     
-    # Get unique combinations of level_number, topic, and session_id
-    # We need to determine topic from question patterns
     YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
     
-    # Group by level, topic, and session together
-    # This ensures each unique combination gets its own entry
-    # Filter out answers without topics first
-    student_answers_with_topics = student_answers.filter(question__topic__isnull=False)
+    # PRIMARY: Get all level-topic combinations from StudentFinalAnswer table
+    # This is the source of truth for completed quizzes
+    final_answer_combinations = StudentFinalAnswer.objects.filter(
+        student=request.user
+    ).values(
+        'level__level_number',
+        'topic__name'
+    ).distinct()
     
+    # Build level_topic_data from StudentFinalAnswer (primary source)
+    level_topic_data = {}
+    for item in final_answer_combinations:
+        level_num = item['level__level_number']
+        topic_name = item['topic__name']
+        key = (level_num, topic_name)
+        if key not in level_topic_data:
+            level_topic_data[key] = set()
+    
+    # FALLBACK: Also get combinations from StudentAnswer (for records not yet in StudentFinalAnswer)
+    student_answers_with_topics = student_answers.filter(question__topic__isnull=False)
     unique_level_topic_sessions = student_answers_with_topics.values(
         'question__level__level_number', 
         'question__topic__name',
         'session_id'
     ).distinct()
     
-    # Group by level and topic combination
-    level_topic_data = {}
+    # Add StudentAnswer combinations (only if not already in level_topic_data)
     for item in unique_level_topic_sessions:
         level_num = item['question__level__level_number']
         topic_name = item['question__topic__name']
         session_id = item['session_id']
         
-        if not session_id or not topic_name:  # Skip empty session_ids or topics
+        if not session_id or not topic_name:
             continue
         
-        # Create unique key for level + topic combination
         key = (level_num, topic_name)
         if key not in level_topic_data:
             level_topic_data[key] = set()
         level_topic_data[key].add(session_id)
     
     # Calculate stats for each level + topic combination
+    # PRIMARY: Use StudentFinalAnswer table (more efficient and accurate)
+    # FALLBACK: Use StudentAnswer records if no StudentFinalAnswer records exist
+    
     for (level_num, topic_name), session_ids in level_topic_data.items():
         attempts_data = []
         completed_session_ids = []
@@ -566,70 +580,83 @@ def dashboard_detail(request):
             level_name = f"Level {level_num}"
             topic_name = "Unknown"
         
-        # Get the actual number of questions available for this topic/level
-        try:
-            if level_obj is None:
-                available_questions = 0
+        # Get topic object
+        topic_obj = Topic.objects.filter(name=topic_name).first() if level_obj else None
+        
+        # PRIMARY: Try to get results from StudentFinalAnswer table
+        if level_obj and topic_obj:
+            final_answer_records = StudentFinalAnswer.objects.filter(
+                student=request.user,
+                level=level_obj,
+                topic=topic_obj
+            ).order_by('-points_earned')
+            
+            if final_answer_records.exists():
+                # Use StudentFinalAnswer records
+                for fa in final_answer_records:
+                    attempts_data.append({
+                        'points': float(fa.points_earned),
+                        'time_seconds': 0,  # Not stored in StudentFinalAnswer
+                        'date': fa.last_updated_time
+                    })
+                    completed_session_ids.append(fa.session_id)
             else:
-                # Use filter().first() to handle duplicate topic names
-                topic_obj = Topic.objects.filter(name=topic_name).first()
-                if topic_obj:
+                # FALLBACK: Use StudentAnswer records (old method)
+                # Get the actual number of questions available for this topic/level
+                try:
                     available_questions = Question.objects.filter(
                         level=level_obj,
                         topic=topic_obj
                     ).count()
-                else:
+                except Exception:
                     available_questions = 0
-        except (Topic.DoesNotExist, Level.DoesNotExist, Exception) as e:
-            # Handle any exceptions including MultipleObjectsReturned (shouldn't happen with filter().first())
-            # but catch it just in case
-            available_questions = 0
-        
-        # Use the minimum of: standard limit OR all available questions
-        standard_limit = YEAR_QUESTION_COUNTS.get(level_num, 10)
-        question_limit = min(available_questions, standard_limit) if available_questions > 0 else standard_limit
-        
-        # Allow partial results if they're close to the limit (90% or more)
-        # This prevents students from losing progress if they're almost done
-        partial_threshold = int(question_limit * 0.9)  # 90% of required questions
-        
-        for session_id in session_ids:
-            # Filter by level, topic, and session_id directly
-            session_answers = student_answers_with_topics.filter(
-                session_id=session_id,
-                question__level__level_number=level_num,
-                question__topic__name=topic_name
-                )
-            
-            # Count attempts that meet the full limit OR are close to it (partial threshold)
-            # This allows showing results for students who are almost done (e.g., 19/20 or 18/20)
-            answer_count = session_answers.count()
-            if answer_count < partial_threshold:
-                continue
-            completed_session_ids.append(session_id)
-            
-            # Calculate points using the formula: percentage * 100 * 60 / time_seconds
-            first_answer = session_answers.first()
-            if first_answer and first_answer.time_taken_seconds > 0:
-                total_correct = sum(1 for a in session_answers if a.is_correct)
-                total_questions = session_answers.count()
-                time_seconds = first_answer.time_taken_seconds
                 
-                percentage = (total_correct / total_questions) if total_questions else 0
-                final_points = (percentage * 100 * 60) / time_seconds if time_seconds else 0
-                attempts_data.append({
-                    'points': round(final_points, 2),
-                    'time_seconds': time_seconds,
-                    'date': first_answer.answered_at
-                })
-            else:
-                total_points = sum(a.points_earned for a in session_answers)
-                first_answer_date = first_answer.answered_at if first_answer else None
-                attempts_data.append({
-                    'points': total_points,
-                    'time_seconds': 0,
-                    'date': first_answer_date
-                })
+                # Use the minimum of: standard limit OR all available questions
+                standard_limit = YEAR_QUESTION_COUNTS.get(level_num, 10)
+                question_limit = min(available_questions, standard_limit) if available_questions > 0 else standard_limit
+                
+                # Allow partial results if they're close to the limit (90% or more)
+                partial_threshold = int(question_limit * 0.9)  # 90% of required questions
+                
+                # Remove duplicates from session_ids
+                unique_session_ids = list(set(session_ids))
+                
+                for session_id in unique_session_ids:
+                    # Filter by level, topic, and session_id directly
+                    session_answers = student_answers_with_topics.filter(
+                        session_id=session_id,
+                        question__level__level_number=level_num,
+                        question__topic__name=topic_name
+                    )
+                    
+                    # Count attempts that meet the full limit OR are close to it (partial threshold)
+                    answer_count = session_answers.count()
+                    if answer_count < partial_threshold:
+                        continue
+                    completed_session_ids.append(session_id)
+                    
+                    # Calculate points using the formula: percentage * 100 * 60 / time_seconds
+                    first_answer = session_answers.first()
+                    if first_answer and first_answer.time_taken_seconds > 0:
+                        total_correct = sum(1 for a in session_answers if a.is_correct)
+                        total_questions = session_answers.count()
+                        time_seconds = first_answer.time_taken_seconds
+                        
+                        percentage = (total_correct / total_questions) if total_questions else 0
+                        final_points = (percentage * 100 * 60) / time_seconds if time_seconds else 0
+                        attempts_data.append({
+                            'points': round(final_points, 2),
+                            'time_seconds': time_seconds,
+                            'date': first_answer.answered_at
+                        })
+                    else:
+                        total_points = sum(a.points_earned for a in session_answers)
+                        first_answer_date = first_answer.answered_at if first_answer else None
+                        attempts_data.append({
+                            'points': total_points,
+                            'time_seconds': 0,
+                            'date': first_answer_date
+                        })
         
         if attempts_data:
             points_list = [a['points'] for a in attempts_data]

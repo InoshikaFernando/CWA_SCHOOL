@@ -80,7 +80,7 @@ def add_measurements_questions(measurements_topic, level_2):
             "question_text": "Which measurement would you use to measure how tall your friend is?\n\nA) cm\nB) m\nC) g\nD) kg",
             "question_type": "multiple_choice",
             "correct_answer": "m",
-            "wrong_answers": ["cm", "g", "kg"],
+            "wrong_answers": ["l", "g", "kg"],
             "explanation": "We measure height in meters (m) or centimeters (cm). For a person's height, meters is more appropriate.",
         },
         {

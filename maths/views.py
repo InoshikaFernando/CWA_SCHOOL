@@ -47,6 +47,57 @@ def get_or_create_formatted_topic(level_number, topic_name):
     topic, created = Topic.objects.get_or_create(name=formatted_name)
     return topic
 
+def select_questions_stratified(all_questions, num_needed):
+    """
+    Select questions using stratified random sampling.
+    Divides questions into blocks and selects one from each block.
+    
+    Example: If we have 100 questions and need 10:
+    - Divide into 10 blocks of 10 questions each
+    - Select 1 random question from each block
+    - This ensures better coverage across the entire question set
+    
+    Args:
+        all_questions: List of all available questions
+        num_needed: Number of questions to select
+    
+    Returns:
+        List of selected questions
+    """
+    if not all_questions:
+        return []
+    
+    total_questions = len(all_questions)
+    
+    # If we need all or more questions than available, return all
+    if num_needed >= total_questions:
+        return list(all_questions)
+    
+    # Calculate block size: total_questions / num_needed
+    # This gives us the number of questions per block
+    block_size = total_questions / num_needed
+    
+    selected_questions = []
+    
+    # Select one question from each block
+    for i in range(num_needed):
+        # Calculate the start and end indices for this block
+        start_idx = int(i * block_size)
+        end_idx = int((i + 1) * block_size)
+        
+        # Handle the last block to include any remaining questions
+        if i == num_needed - 1:
+            end_idx = total_questions
+        
+        # Get the block of questions
+        block = all_questions[start_idx:end_idx]
+        
+        # Select one random question from this block
+        if block:
+            selected_questions.append(random.choice(block))
+    
+    return selected_questions
+
 def update_topic_statistics(level_num=None, topic_name=None):
     """
     Helper function to update topic-level statistics
@@ -1584,9 +1635,9 @@ def take_quiz(request, level_number):
         # Get all questions for this level from database
         all_questions = list(level.questions.all())
         
-        # Select random questions (limit to 10 questions)
+        # Select random questions using stratified sampling (limit to 10 questions)
         if len(all_questions) > 10:
-            questions = random.sample(all_questions, 10)
+            questions = select_questions_stratified(all_questions, 10)
         else:
             questions = all_questions
         
@@ -1810,7 +1861,7 @@ def practice_questions(request, level_number):
     
     # Select random questions (limit to 10 for practice)
     if all_questions.count() > 10:
-        questions = random.sample(list(all_questions), 10)
+        questions = select_questions_stratified(list(all_questions), 10)
     else:
         questions = list(all_questions)
     
@@ -1881,10 +1932,10 @@ def measurements_questions(request, level_number):
         import uuid
         request.session['current_attempt_id'] = str(uuid.uuid4())
         
-        # Select random questions for this attempt
+        # Select random questions for this attempt using stratified sampling
         all_questions_list = list(all_questions_query)
         if len(all_questions_list) > question_limit:
-            selected_questions = random.sample(all_questions_list, question_limit)
+            selected_questions = select_questions_stratified(all_questions_list, question_limit)
         else:
             selected_questions = all_questions_list
         
@@ -2233,10 +2284,10 @@ def place_values_questions(request, level_number):
         import uuid
         request.session['current_attempt_id'] = str(uuid.uuid4())
         
-        # Select random questions for this attempt
+        # Select random questions for this attempt using stratified sampling
         all_questions_list = list(all_questions_query)
         if len(all_questions_list) > question_limit:
-            selected_questions = random.sample(all_questions_list, question_limit)
+            selected_questions = select_questions_stratified(all_questions_list, question_limit)
         else:
             selected_questions = all_questions_list
         
@@ -2555,10 +2606,10 @@ def fractions_questions(request, level_number):
         import uuid
         request.session['current_attempt_id'] = str(uuid.uuid4())
         
-        # Select random questions for this attempt
+        # Select random questions for this attempt using stratified sampling
         all_questions_list = list(all_questions_query)
         if len(all_questions_list) > question_limit:
-            selected_questions = random.sample(all_questions_list, question_limit)
+            selected_questions = select_questions_stratified(all_questions_list, question_limit)
         else:
             selected_questions = all_questions_list
         
@@ -2868,7 +2919,7 @@ def bodmas_questions(request, level_number):
         
         all_questions_list = list(all_questions_query)
         if len(all_questions_list) > question_limit:
-            selected_questions = random.sample(all_questions_list, question_limit)
+            selected_questions = select_questions_stratified(all_questions_list, question_limit)
         else:
             selected_questions = all_questions_list
         
@@ -2949,7 +3000,7 @@ def bodmas_questions(request, level_number):
         
         all_questions_list = list(all_questions_query)
         if len(all_questions_list) > question_limit:
-            selected_questions = random.sample(all_questions_list, question_limit)
+            selected_questions = select_questions_stratified(all_questions_list, question_limit)
         else:
             selected_questions = all_questions_list
         
@@ -3157,10 +3208,10 @@ def finance_questions(request, level_number):
         import uuid
         request.session['current_attempt_id'] = str(uuid.uuid4())
         
-        # Select random questions for this attempt
+        # Select random questions for this attempt using stratified sampling
         all_questions_list = list(all_questions_query)
         if len(all_questions_list) > question_limit:
-            selected_questions = random.sample(all_questions_list, question_limit)
+            selected_questions = select_questions_stratified(all_questions_list, question_limit)
         else:
             selected_questions = all_questions_list
         

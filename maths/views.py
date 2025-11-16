@@ -3191,6 +3191,7 @@ def bodmas_questions(request, level_number):
         student_answers = StudentAnswer.objects.filter(
             student=request.user,
             question__level=level,
+            question__topic=bodmas_topic,
             session_id=attempt_id
         )
         total_score = sum(answer.points_earned for answer in student_answers)

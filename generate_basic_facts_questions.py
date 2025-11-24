@@ -11,7 +11,7 @@ import random
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cwa_school.settings')
 django.setup()
 
-from maths.models import Level, Question, Answer
+from maths.models import Level, Question, Answer, Topic
 
 def generate_addition_questions(level_num, description, level_obj, num_questions=10):
     """Generate questions for Addition levels"""
@@ -282,18 +282,35 @@ def generate_division_questions(level_num, description, level_obj, num_questions
 
 def generate_questions_for_level(level_num, description, level_obj):
     """Generate questions for a specific level based on its description"""
-    # Determine which generator to use based on level number ranges
-    if 100 <= level_num <= 106:
+    # Determine which generator to use and get the appropriate topic
+    topic = None
+    if 100 <= level_num <= 109:
         questions = generate_addition_questions(level_num, description, level_obj)
-    elif 107 <= level_num <= 113:
+        topic = Topic.objects.filter(name="Addition").first()
+    elif 110 <= level_num <= 119:
         questions = generate_subtraction_questions(level_num, description, level_obj)
-    elif 114 <= level_num <= 120:
+        topic = Topic.objects.filter(name="Subtraction").first()
+    elif 120 <= level_num <= 129:
         questions = generate_multiplication_questions(level_num, description, level_obj)
+        topic = Topic.objects.filter(name="Multiplication").first()
     elif 121 <= level_num <= 127:
         questions = generate_division_questions(level_num, description, level_obj)
+        topic = Topic.objects.filter(name="Division").first()
+    elif 130 <= level_num <= 139:
+        # Division levels 130-139 (if they exist)
+        questions = generate_division_questions(level_num, description, level_obj)
+        topic = Topic.objects.filter(name="Division").first()
+    elif 140 <= level_num <= 149:
+        # Place Value Facts levels
+        print(f"  ⚠️  Place Value Facts questions not yet implemented for level {level_num}")
+        return 0
     else:
         print(f"⚠️  Unknown level number: {level_num}")
-        return
+        return 0
+    
+    if not topic:
+        print(f"  ⚠️  Topic not found for level {level_num}. Please run Questions/create_basic_facts.py first.")
+        return 0
     
     # Create questions in database
     created_count = 0
@@ -306,11 +323,17 @@ def generate_questions_for_level(level_num, description, level_obj):
         
         if existing:
             print(f"  ⏭️  Question already exists: {question_text}")
+            # Update existing question to have topic if it doesn't have one
+            if existing.topic != topic:
+                existing.topic = topic
+                existing.save()
+                print(f"  ✅ Updated existing question to have {topic.name} topic")
             continue
         
-        # Create question
+        # Create question with topic assigned
         question = Question.objects.create(
             level=level_obj,
+            topic=topic,  # ✅ Assign topic
             question_text=question_text,
             question_type='short_answer',  # Basic Facts are short answer questions
             difficulty=1,
@@ -331,8 +354,9 @@ def generate_questions_for_level(level_num, description, level_obj):
 
 def main():
     """Generate questions for all Basic Facts levels"""
-    # Get all Basic Facts levels (100-127)
-    basic_facts_levels = Level.objects.filter(level_number__gte=100, level_number__lte=127).order_by('level_number')
+    # Get all Basic Facts levels (100-149, but questions are generated for 100-127)
+    # Note: Levels 130-139 and 140-149 exist but question generation is not yet implemented for them
+    basic_facts_levels = Level.objects.filter(level_number__gte=100, level_number__lte=149).order_by('level_number')
     
     if not basic_facts_levels.exists():
         print("❌ No Basic Facts levels found. Please run Questions/create_basic_facts.py first.")

@@ -148,23 +148,28 @@ class TimeLog(models.Model):
         return f"{self.student.username} - Daily: {self.daily_total_seconds}s, Weekly: {self.weekly_total_seconds}s"
     
     def reset_daily_if_needed(self):
-        """Reset daily time if it's past midnight"""
+        """Reset daily time if it's past midnight (local time)"""
         from django.utils import timezone
-        today = timezone.now().date()
+        from django.utils.timezone import localtime
+        # Use local time for date calculations
+        now_local = localtime(timezone.now())
+        today = now_local.date()
         if self.last_reset_date < today:
             self.daily_total_seconds = 0
             self.last_reset_date = today
             self.save(update_fields=['daily_total_seconds', 'last_reset_date'])
     
     def reset_weekly_if_needed(self):
-        """Reset weekly time if it's past Sunday midnight (Monday 00:00)"""
+        """Reset weekly time if it's past Sunday midnight (Monday 00:00) in local time"""
         from django.utils import timezone
-        now = timezone.now()
-        current_week = now.isocalendar()[1]  # ISO week number
-        current_year = now.year
+        from django.utils.timezone import localtime
+        # Use local time for week calculations
+        now_local = localtime(timezone.now())
+        current_week = now_local.isocalendar()[1]  # ISO week number
+        current_year = now_local.year
         
         # Check if we need to reset (new week)
-        # Week resets on Monday (weekday 0) at midnight
+        # Week resets on Monday (weekday 0) at midnight local time
         if self.last_reset_week != current_week:
             # Week has changed, reset weekly total
             self.weekly_total_seconds = 0

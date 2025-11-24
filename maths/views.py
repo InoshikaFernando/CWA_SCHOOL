@@ -876,9 +876,11 @@ def dashboard_detail(request):
                                     try:
                                         completed_date = datetime.fromisoformat(date_str)
                                     except:
-                                        completed_date = datetime.now()
+                                        from django.utils import timezone
+                                        completed_date = timezone.now()
                                 else:
-                                    completed_date = date_str if date_str else datetime.now()
+                                    from django.utils import timezone
+                                    completed_date = date_str if date_str else timezone.now()
                                 
                                 BasicFactsResult.objects.create(
                                     student=request.user,
@@ -1196,14 +1198,15 @@ def user_profile(request):
     })
 
 def get_or_create_time_log(user):
-    """Get or create TimeLog for user and handle resets"""
+    """Get or create TimeLog for user and handle resets (using local time)"""
+    from django.utils.timezone import localtime
     time_log, created = TimeLog.objects.get_or_create(student=user)
     if created:
-        # Initialize with current date/week
+        # Initialize with current date/week (local time)
         from django.utils import timezone
-        now = timezone.now()
-        time_log.last_reset_date = now.date()
-        time_log.last_reset_week = now.isocalendar()[1]
+        now_local = localtime(timezone.now())
+        time_log.last_reset_date = now_local.date()
+        time_log.last_reset_week = now_local.isocalendar()[1]
         time_log.save()
     else:
         # Check and reset if needed
@@ -1212,70 +1215,80 @@ def get_or_create_time_log(user):
     return time_log
 
 def update_time_log_from_activities(user):
-    """Update TimeLog by summing time from all completed activities"""
+    """Update TimeLog by summing time from all completed activities (using local time)"""
     from django.utils import timezone
+    from django.utils.timezone import localtime
     from django.db.models import Sum
     from datetime import timedelta
     
     time_log = get_or_create_time_log(user)
     
-    # Get today's date for filtering
-    today = timezone.now().date()
+    # Get today's date for filtering (local time)
+    now_local = localtime(timezone.now())
+    today = now_local.date()
     
-    # Get current week (ISO week number)
-    now = timezone.now()
-    current_week = now.isocalendar()[1]
+    # Get current week (ISO week number) in local time
+    current_week = now_local.isocalendar()[1]
     
     # Sum time from StudentAnswer records (regular quizzes and measurements)
     # Only count completed sessions (where time_taken_seconds > 0)
+    # Note: answered_at is stored in UTC, so we need to filter by local date
     daily_student_answers = StudentAnswer.objects.filter(
         student=user,
-        answered_at__date=today,
         time_taken_seconds__gt=0
-    ).values('session_id', 'time_taken_seconds').distinct('session_id')
+    )
     
     # For daily: sum unique session times (each session represents one activity)
+    # Filter by local date by converting UTC to local time
     daily_time_from_student_answers = 0
     seen_sessions = set()
-    for answer in StudentAnswer.objects.filter(
-        student=user,
-        answered_at__date=today,
-        time_taken_seconds__gt=0
-    ).order_by('session_id', 'answered_at'):
-        if answer.session_id and answer.session_id not in seen_sessions:
-            seen_sessions.add(answer.session_id)
-            daily_time_from_student_answers += answer.time_taken_seconds
+    for answer in daily_student_answers.order_by('session_id', 'answered_at'):
+        # Convert UTC to local time for date comparison
+        answer_local = localtime(answer.answered_at)
+        if answer_local.date() == today:
+            if answer.session_id and answer.session_id not in seen_sessions:
+                seen_sessions.add(answer.session_id)
+                daily_time_from_student_answers += answer.time_taken_seconds
     
-    # For weekly: same logic but for current week
+    # For weekly: same logic but for current week (local time)
     weekly_time_from_student_answers = 0
     seen_weekly_sessions = set()
-    # Get start of week (Monday)
-    days_since_monday = now.weekday()
-    week_start = now.date() - timedelta(days=days_since_monday)
+    # Get start of week (Monday) in local time
+    days_since_monday = now_local.weekday()
+    week_start = now_local.date() - timedelta(days=days_since_monday)
     
-    for answer in StudentAnswer.objects.filter(
-        student=user,
-        answered_at__date__gte=week_start,
-        time_taken_seconds__gt=0
-    ).order_by('session_id', 'answered_at'):
-        if answer.session_id and answer.session_id not in seen_weekly_sessions:
-            seen_weekly_sessions.add(answer.session_id)
-            weekly_time_from_student_answers += answer.time_taken_seconds
+    for answer in daily_student_answers.order_by('session_id', 'answered_at'):
+        # Convert UTC to local time for date comparison
+        answer_local = localtime(answer.answered_at)
+        if answer_local.date() >= week_start:
+            if answer.session_id and answer.session_id not in seen_weekly_sessions:
+                seen_weekly_sessions.add(answer.session_id)
+                weekly_time_from_student_answers += answer.time_taken_seconds
     
-    # Sum time from BasicFactsResult records
-    daily_basic_facts = BasicFactsResult.objects.filter(
-        student=user,
-        completed_at__date=today
-    ).values('session_id').annotate(
-        session_time=Sum('time_taken_seconds')
-    ).aggregate(total=Sum('time_taken_seconds'))['total'] or 0
+    # Sum time from BasicFactsResult records (also stored in UTC)
+    all_basic_facts = BasicFactsResult.objects.filter(student=user)
     
-    weekly_basic_facts = BasicFactsResult.objects.filter(
-        student=user,
-        completed_at__date__gte=week_start
-    ).values('session_id').annotate(
-        session_time=Sum('time_taken_seconds')
-    ).aggregate(total=Sum('time_taken_seconds'))['total'] or 0
+    daily_basic_facts = 0
+    seen_daily_sessions = set()
+    weekly_basic_facts = 0
+    seen_weekly_bf_sessions = set()
+    
+    for result in all_basic_facts:
+        # Convert UTC to local time for date comparison
+        result_local = localtime(result.completed_at)
+        result_date = result_local.date()
+        
+        # Daily check
+        if result_date == today:
+            if result.session_id and result.session_id not in seen_daily_sessions:
+                seen_daily_sessions.add(result.session_id)
+                daily_basic_facts += result.time_taken_seconds
+        
+        # Weekly check
+        if result_date >= week_start:
+            if result.session_id and result.session_id not in seen_weekly_bf_sessions:
+                seen_weekly_bf_sessions.add(result.session_id)
+                weekly_basic_facts += result.time_taken_seconds
     
     # Update TimeLog with total time from activities
     time_log.daily_total_seconds = daily_time_from_student_answers + daily_basic_facts
@@ -1851,13 +1864,14 @@ def take_quiz(request, level_number):
             # Also keep in session for backward compatibility (optional)
             basic_facts_results_key = f"basic_facts_results_{request.user.id}_{level_number}"
             results_list = request.session.get(basic_facts_results_key, [])
+            from django.utils import timezone
             result_entry = {
                 'session_id': session_id,
                 'score': score,
                 'total_points': total_points,
                 'time_taken_seconds': time_taken_seconds,
                 'points': final_points_calc,
-                'date': datetime.now().isoformat()
+                'date': timezone.now().isoformat()
             }
             results_list.append(result_entry)
             request.session[basic_facts_results_key] = results_list

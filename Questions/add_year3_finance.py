@@ -248,7 +248,7 @@ def add_finance_questions(finance_topic, level_3):
             "question_text": "Which coins could you use to make $1.20?",
             "question_type": "multiple_choice",
             "correct_answer": "$1 coin + 20c coin",
-            "wrong_answers": ["50c + 50c + 20c", "$1 + 50c", "50c + 20c + 10c + 10c"],
+            "wrong_answers": ["50c + 50c + 50c + 20c", "$1 + 50c", "50c + 20c + 10c + 10c"],
             "explanation": "$1 + 20c = $1.20."
         },
         {

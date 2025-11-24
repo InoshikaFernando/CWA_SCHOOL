@@ -79,6 +79,7 @@ def run_all_question_scripts():
     # Scripts that need to be run as files (no function structure)
     file_scripts = [
         ("Basic Facts - Topic Structure", "create_basic_facts.py"),
+        ("Basic Facts - Generate Questions", "../generate_basic_facts_questions.py"),
     ]
     
     # Scripts that use function calls

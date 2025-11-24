@@ -46,12 +46,20 @@ def generate_addition_questions(level_num, description, level_obj, num_questions
     elif level_num == 103:  # Adding double digits where you have to carry
         for _ in range(num_questions):
             # Force carry in units place
-            a = random.randint(10, 99)
-            b = random.randint(10, 99)
             # Ensure units place sum >= 10
-            a_units = a % 10
-            b_units = random.randint(10 - a_units, 9)
-            b = (b // 10) * 10 + b_units
+            a_units = random.randint(1, 9)  # Start with a_units between 1-9 (not 0, to allow carry)
+            a_tens = random.randint(1, 9)
+            a = a_tens * 10 + a_units
+            
+            # b_units must be >= (10 - a_units) to force carry
+            min_b_units = max(0, 10 - a_units)
+            if min_b_units > 9:
+                # This shouldn't happen, but handle edge case
+                min_b_units = 9
+            b_units = random.randint(min_b_units, 9)
+            b_tens = random.randint(1, 9)
+            b = b_tens * 10 + b_units
+            
             answer = a + b
             questions.append((f"{a} + {b} = ?", str(answer)))
     
@@ -283,6 +291,7 @@ def generate_division_questions(level_num, description, level_obj, num_questions
 def generate_questions_for_level(level_num, description, level_obj):
     """Generate questions for a specific level based on its description"""
     # Determine which generator to use and get the appropriate topic
+    # IMPORTANT: Check more specific ranges first (Division 121-127 before Multiplication 120-129)
     topic = None
     if 100 <= level_num <= 109:
         questions = generate_addition_questions(level_num, description, level_obj)
@@ -290,26 +299,28 @@ def generate_questions_for_level(level_num, description, level_obj):
     elif 110 <= level_num <= 119:
         questions = generate_subtraction_questions(level_num, description, level_obj)
         topic = Topic.objects.filter(name="Subtraction").first()
-    elif 120 <= level_num <= 129:
-        questions = generate_multiplication_questions(level_num, description, level_obj)
-        topic = Topic.objects.filter(name="Multiplication").first()
     elif 121 <= level_num <= 127:
+        # Division levels 121-127 (check before Multiplication 120-129)
         questions = generate_division_questions(level_num, description, level_obj)
         topic = Topic.objects.filter(name="Division").first()
+    elif 114 <= level_num <= 120:
+        # Multiplication levels 114-120 (121-127 are Division, handled above)
+        questions = generate_multiplication_questions(level_num, description, level_obj)
+        topic = Topic.objects.filter(name="Multiplication").first()
     elif 130 <= level_num <= 139:
         # Division levels 130-139 (if they exist)
         questions = generate_division_questions(level_num, description, level_obj)
         topic = Topic.objects.filter(name="Division").first()
     elif 140 <= level_num <= 149:
         # Place Value Facts levels
-        print(f"  ⚠️  Place Value Facts questions not yet implemented for level {level_num}")
+        print(f"  [WARNING] Place Value Facts questions not yet implemented for level {level_num}")
         return 0
     else:
-        print(f"⚠️  Unknown level number: {level_num}")
+        print(f"[WARNING] Unknown level number: {level_num}")
         return 0
     
     if not topic:
-        print(f"  ⚠️  Topic not found for level {level_num}. Please run Questions/create_basic_facts.py first.")
+        print(f"  [WARNING] Topic not found for level {level_num}. Please run Questions/create_basic_facts.py first.")
         return 0
     
     # Create questions in database
@@ -322,12 +333,12 @@ def generate_questions_for_level(level_num, description, level_obj):
         ).first()
         
         if existing:
-            print(f"  ⏭️  Question already exists: {question_text}")
+            print(f"  [SKIP] Question already exists: {question_text}")
             # Update existing question to have topic if it doesn't have one
             if existing.topic != topic:
                 existing.topic = topic
                 existing.save()
-                print(f"  ✅ Updated existing question to have {topic.name} topic")
+                print(f"  [OK] Updated existing question to have {topic.name} topic")
             continue
         
         # Create question with topic assigned
@@ -359,27 +370,27 @@ def main():
     basic_facts_levels = Level.objects.filter(level_number__gte=100, level_number__lte=149).order_by('level_number')
     
     if not basic_facts_levels.exists():
-        print("❌ No Basic Facts levels found. Please run Questions/create_basic_facts.py first.")
+        print("[ERROR] No Basic Facts levels found. Please run Questions/create_basic_facts.py first.")
         return
     
     total_created = 0
     for level in basic_facts_levels:
-        print(f"\n📝 Generating questions for Level {level.level_number}: {level.title}")
+        print(f"\n[INFO] Generating questions for Level {level.level_number}: {level.title}")
         
         # Check existing questions
         existing_count = level.questions.count()
         if existing_count > 0:
-            print(f"  ℹ️  Level already has {existing_count} questions. Generating 10 more...")
+            print(f"  [INFO] Level already has {existing_count} questions. Generating 10 more...")
         
         created = generate_questions_for_level(level.level_number, level.title, level)
         if created:
-            print(f"  ✅ Created {created} new questions")
+            print(f"  [OK] Created {created} new questions")
             total_created += created
         else:
-            print(f"  ⚠️  No new questions created (may already exist)")
+            print(f"  [WARNING] No new questions created (may already exist)")
     
     print(f"\n{'='*60}")
-    print(f"✅ Question generation complete!")
+    print(f"[OK] Question generation complete!")
     print(f"   Total new questions created: {total_created}")
     print(f"{'='*60}")
 

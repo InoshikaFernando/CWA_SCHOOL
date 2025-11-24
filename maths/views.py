@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.views.decorators.http import require_http_methods
 import time
 from django.db.models import Q, Count, Sum, Max, Min, Avg
@@ -12,8 +12,43 @@ import random
 from datetime import datetime
 import json
 import threading
+from django.utils.text import slugify
 from .models import Topic, Level, ClassRoom, Enrollment, CustomUser, Question, Answer, StudentAnswer, BasicFactsResult, TimeLog, TopicLevelStatistics, StudentFinalAnswer
 from .forms import CreateClassForm, StudentSignUpForm, TeacherSignUpForm, TeacherCenterRegistrationForm, IndividualStudentRegistrationForm, StudentBulkRegistrationForm, QuestionForm, AnswerFormSet, UserProfileForm, UserPasswordChangeForm
+
+BASIC_FACTS_TOPIC_CONFIG = {
+    "addition": {"start_level": 100, "level_count": 7},
+    "subtraction": {"start_level": 107, "level_count": 7},
+    "multiplication": {"start_level": 114, "level_count": 7},
+    "division": {"start_level": 121, "level_count": 7},
+    "place-value-facts": {"start_level": 128, "level_count": 5},
+}
+
+
+def normalize_basic_facts_topic(topic_name):
+    return slugify(topic_name or "").lower()
+
+
+def get_level_number_for_basic_facts(topic_name, display_level):
+    slug = normalize_basic_facts_topic(topic_name)
+    config = BASIC_FACTS_TOPIC_CONFIG.get(slug)
+    if not config:
+        return None
+    if display_level < 1 or display_level > config["level_count"]:
+        return None
+    return config["start_level"] + display_level - 1
+
+
+def get_display_level_for_basic_facts(level_number, topic_name):
+    slug = normalize_basic_facts_topic(topic_name)
+    config = BASIC_FACTS_TOPIC_CONFIG.get(slug)
+    if not config:
+        return None
+    start = config["start_level"]
+    end = start + config["level_count"] - 1
+    if start <= level_number <= end:
+        return level_number - start + 1
+    return None
 
 def calculate_age_from_dob(date_of_birth):
     """
@@ -1634,6 +1669,14 @@ def basic_facts_subtopic(request, subtopic_name):
         if level_number:
             try:
                 level = Level.objects.get(level_number=int(level_number), topics=topic)
+                topic_slug = normalize_basic_facts_topic(subtopic_name)
+                display_level = get_display_level_for_basic_facts(level.level_number, subtopic_name)
+                if topic_slug and display_level:
+                    return redirect(
+                        'maths:take_basic_facts_quiz',
+                        basic_topic=topic_slug,
+                        display_level=display_level
+                    )
                 return redirect('maths:take_quiz', level_number=level.level_number)
             except (Level.DoesNotExist, ValueError):
                 messages.error(request, "Invalid level selected.")
@@ -1652,6 +1695,19 @@ def basic_facts_subtopic(request, subtopic_name):
         "levels": levels,
         "subtopic_icon": subtopic_icons.get(subtopic_name, '🧮')
     })
+
+
+@login_required
+def take_basic_facts_quiz(request, basic_topic, display_level):
+    """
+    Friendly URL wrapper for Basic Facts quizzes.
+    Converts /level/addition/6/quiz to the underlying numeric level.
+    """
+    level_number = get_level_number_for_basic_facts(basic_topic, display_level)
+    if not level_number:
+        raise Http404("Invalid Basic Facts level.")
+    return take_quiz(request, level_number)
+
 
 @login_required
 def take_quiz(request, level_number):

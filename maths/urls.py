@@ -18,6 +18,7 @@ urlpatterns = [
     path("level/<int:level_number>/questions/", views.level_questions, name="level_questions"),
     path("level/<int:level_number>/add-question/", views.add_question, name="add_question"),
     path("level/<int:level_number>/quiz/", views.take_quiz, name="take_quiz"),
+    path("level/<slug:basic_topic>/<int:display_level>/quiz/", views.take_basic_facts_quiz, name="take_basic_facts_quiz"),
     path("level/<int:level_number>/practice/", views.practice_questions, name="practice_questions"),
     path("level/<int:level_number>/measurements/", views.measurements_questions, name="measurements_questions"),
     path("level/<int:level_number>/measurements-progress/", views.measurements_progress, name="measurements_progress"),

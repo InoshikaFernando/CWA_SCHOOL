@@ -192,12 +192,16 @@ def add_whole_numbers_questions(whole_numbers_topic, level_6):
                 # Delete old answers and create new ones
                 existing_question.answers.all().delete()
                 
+                # Update question explanation if provided
+                if explanation:
+                    existing_question.explanation = explanation
+                    existing_question.save()
+                
                 # Create correct answer
                 Answer.objects.create(
                     question=existing_question,
                     answer_text=correct_answer,
-                    is_correct=True,
-                    explanation=explanation
+                    is_correct=True
                 )
                 
                 # Create wrong answers
@@ -255,12 +259,16 @@ def add_whole_numbers_questions(whole_numbers_topic, level_6):
                     question.image.name = image_path
                     question.save()
             
+            # Set question explanation if provided
+            if explanation:
+                question.explanation = explanation
+                question.save()
+            
             # Create correct answer
             Answer.objects.create(
                 question=question,
                 answer_text=correct_answer,
-                is_correct=True,
-                explanation=explanation
+                is_correct=True
             )
             
             # Create wrong answers

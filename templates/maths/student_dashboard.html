@@ -379,7 +379,7 @@
                                 </a>
                             </div>
                         {% elif level.level_number == 3 %}
-                            <!-- Year 3: Show Measurements, Fractions, Finance, and Take Quiz -->
+                            <!-- Year 3: Show Measurements, Fractions, Finance, Date and Time, and Take Quiz -->
                             <div class="topic-card">
                                 <a href="{% url 'maths:measurements_questions' level.level_number %}">
                                     <h4>Measurements</h4>
@@ -396,6 +396,12 @@
                                 <a href="{% url 'maths:finance_questions' level.level_number %}">
                                     <h4>Finance</h4>
                                     <p>Year {{ level.level_number }} - Finance</p>
+                                </a>
+                            </div>
+                            <div class="topic-card">
+                                <a href="{% url 'maths:date_time_questions' level.level_number %}">
+                                    <h4>Date and Time</h4>
+                                    <p>Year {{ level.level_number }} - Date and Time</p>
                                 </a>
                             </div>
                             <div class="topic-card">
@@ -439,7 +445,7 @@
                                 </a>
                             </div>
                         {% elif level.level_number == 6 %}
-                            <!-- Year 6: Show Measurements, BODMAS/PEMDAS and Take Quiz -->
+                            <!-- Year 6: Show Measurements, BODMAS/PEMDAS, Whole Numbers and Take Quiz -->
                             <div class="topic-card">
                                 <a href="{% url 'maths:measurements_questions' level.level_number %}">
                                     <h4>Measurements</h4>
@@ -450,6 +456,12 @@
                                 <a href="{% url 'maths:bodmas_questions' level.level_number %}">
                                     <h4>BODMAS/PEMDAS</h4>
                                     <p>Year {{ level.level_number }} - Order of Operations</p>
+                                </a>
+                            </div>
+                            <div class="topic-card">
+                                <a href="{% url 'maths:whole_numbers_questions' level.level_number %}">
+                                    <h4>Whole Numbers</h4>
+                                    <p>Year {{ level.level_number }} - Whole Numbers</p>
                                 </a>
                             </div>
                             <div class="topic-card">

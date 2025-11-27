@@ -253,6 +253,150 @@ def add_bodmas_questions(bodmas_topic, level_6):
             "wrong_answers": ["14", "18", "10"],
             "explanation": "Brackets first: (6 × 3) = 18. Then powers: 4² = 16. Finally 10 + 18 - 16 = 12."
         },
+        {
+            "question_text": "Simplify (8 + 12) - 5",
+            "correct_answer": "15",
+            "wrong_answers": ["10", "17", "25"],
+            "explanation": "8 + 12 = 20, then 20 - 5 = 15."
+        },
+        {
+            "question_text": "Simplify 64 - (30 + 5)",
+            "correct_answer": "29",
+            "wrong_answers": ["34", "30", "28"],
+            "explanation": "30 + 5 = 35, then 64 - 35 = 29."
+        },
+        {
+            "question_text": "Simplify (8 + 12) + (6 + 4)",
+            "correct_answer": "30",
+            "wrong_answers": ["20", "28", "26"],
+            "explanation": "8 + 12 = 20 and 6 + 4 = 10. Total = 30."
+        },
+        {
+            "question_text": "Simplify (5 + 7) × 3",
+            "correct_answer": "36",
+            "wrong_answers": ["30", "24", "32"],
+            "explanation": "5 + 7 = 12, then 12 × 3 = 36."
+        },
+        {
+            "question_text": "Simplify 18 × (42 ÷ 7)",
+            "correct_answer": "108",
+            "wrong_answers": ["54", "126", "84"],
+            "explanation": "42 ÷ 7 = 6, then 18 × 6 = 108."
+        },
+        {
+            "question_text": "Simplify (62 + 10) ÷ (36 ÷ 4)",
+            "correct_answer": "8",
+            "wrong_answers": ["6", "12", "9"],
+            "explanation": "62 + 10 = 72 and 36 ÷ 4 = 9, then 72 ÷ 9 = 8."
+        },
+        {
+            "question_text": "Simplify 12 + 13 + 5 - 7",
+            "correct_answer": "23",
+            "wrong_answers": ["24", "25", "21"],
+            "explanation": "12 + 13 + 5 = 30, then 30 - 7 = 23."
+        },
+        {
+            "question_text": "Simplify 64 - 12 - 6 - 4",
+            "correct_answer": "42",
+            "wrong_answers": ["40", "48", "52"],
+            "explanation": "64 - 12 = 52; 52 - 6 = 46; 46 - 4 = 42."
+        },
+        {
+            "question_text": "Simplify 8 × 2 × 2 × 3",
+            "correct_answer": "96",
+            "wrong_answers": ["48", "72", "64"],
+            "explanation": "8×2=16, 16×2=32, 32×3=96."
+        },
+        {
+            "question_text": "Write the basic numeral: 9 + 2 × 5 + 7",
+            "correct_answer": "26",
+            "wrong_answers": ["21", "29", "24"],
+            "explanation": "2×5=10; 9+10+7=26."
+        },
+        {
+            "question_text": "Write the basic numeral: 32 + 18 × 5",
+            "correct_answer": "122",
+            "wrong_answers": ["50", "140", "90"],
+            "explanation": "18×5=90; 32+90=122."
+        },
+        {
+            "question_text": "Write the basic numeral: 85 - 18 ÷ 9 + 20",
+            "correct_answer": "103",
+            "wrong_answers": ["87", "101", "95"],
+            "explanation": "18÷9=2; 85-2=83; 83+20=103."
+        },
+        {
+            "question_text": "Write the basic numeral: 12 × (8 - 3) ÷ (17 - 7)",
+            "correct_answer": "6",
+            "wrong_answers": ["12", "10", "9"],
+            "explanation": "8-3=5; 17-7=10; 12×5=60; 60÷10=6."
+        },
+        {
+            "question_text": "Write the basic numeral: (34 + 14) ÷ 6",
+            "correct_answer": "8",
+            "wrong_answers": ["6", "10", "9"],
+            "explanation": "34+14=48; 48÷6=8."
+        },
+        {
+            "question_text": "Write the basic numeral: 84 - 5(15 - 3) + 25",
+            "correct_answer": "49",
+            "wrong_answers": ["39", "59", "45"],
+            "explanation": "15-3=12; 5×12=60; 84-60=24; 24+25=49."
+        },
+        {
+            "question_text": "Write the basic numeral: 64 + 2 × (28 - 8 × 2)",
+            "correct_answer": "72",
+            "wrong_answers": ["44", "96", "52"],
+            "explanation": "8×2=16; 28-16=12; 2×12=24; 64+24=72."
+        },
+        {
+            "question_text": "Write the basic numeral: 96 ÷ (4 + 8) × 5",
+            "correct_answer": "40",
+            "wrong_answers": ["20", "60", "50"],
+            "explanation": "4+8=12; 96÷12=8; 8×5=40."
+        },
+        {
+            "question_text": "Write the basic numeral: 8 × (28 + 8) ÷ 4",
+            "correct_answer": "72",
+            "wrong_answers": ["64", "48", "80"],
+            "explanation": "28+8=36; 36÷4=9; 9×8=72."
+        },
+        {
+            "question_text": "Use the order of operations to simplify: [(10 + 5) ÷ 3] × 7",
+            "correct_answer": "35",
+            "wrong_answers": ["21", "49", "45"],
+            "explanation": "10+5=15; 15÷3=5; 5×7=35."
+        },
+        {
+            "question_text": "Use the order of operations to simplify: 30 × [(36 ÷ 9) × 2] - 6",
+            "correct_answer": "234",
+            "wrong_answers": ["216", "200", "250"],
+            "explanation": "36÷9=4; 4×2=8; 30×8=240; 240-6=234."
+        },
+        {
+            "question_text": "Use the order of operations to simplify: [(4 + 8) × (19 - 14)] ÷ 4",
+            "correct_answer": "15",
+            "wrong_answers": ["20", "12", "10"],
+            "explanation": "4+8=12; 19-14=5; 12×5=60; 60÷4=15."
+        },
+        {
+            "question_text": "Use the order of operations to simplify: ([24 + 11] ÷ 7) × 9",
+            "correct_answer": "45",
+            "wrong_answers": ["30", "36", "54"],
+            "explanation": "24+11=35; 35÷7=5; 5×9=45."
+        },
+        {
+            "question_text": "Use the order of operations to simplify: [8 + (8 × 8)] ÷ 8",
+            "correct_answer": "9",
+            "wrong_answers": ["8", "10", "11"],
+            "explanation": "8×8=64; 64+8=72; 72÷8=9."
+        },
+        {
+            "question_text": "Use the order of operations to simplify: 6 × [(2 + 14) × (13 - 6)]",
+            "correct_answer": "612",
+            "wrong_answers": ["420", "504", "300"],
+            "explanation": "2+14=16; 13-6=7; 16×7=112; 112×6=612."
+        },
     ]
     
     print(f"\n[INFO] Adding {len(questions_data)} BODMAS/PEMDAS questions for Year 6...\n")

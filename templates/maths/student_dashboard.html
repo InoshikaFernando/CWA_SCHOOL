@@ -465,6 +465,12 @@
                                 </a>
                             </div>
                             <div class="topic-card">
+                                <a href="{% url 'maths:factors_questions' level.level_number %}">
+                                    <h4>Factors</h4>
+                                    <p>Year {{ level.level_number }} - Factors</p>
+                                </a>
+                            </div>
+                            <div class="topic-card">
                                 <a href="{% url 'maths:take_quiz' level.level_number %}">
                                     <h4>Take Quiz</h4>
                                     <p>Random questions from all topics</p>

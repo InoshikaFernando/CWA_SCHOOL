@@ -27,6 +27,7 @@ from add_year5_bodmas import setup_bodmas_topic as setup_year5_bodmas, add_bodma
 from add_year6_measurements import setup_measurements_topic as setup_year6_measurements, add_measurements_questions as add_year6_measurements
 from add_year6_bodmas import setup_bodmas_topic as setup_year6_bodmas, add_bodmas_questions as add_year6_bodmas
 from add_year6_whole_numbers import setup_whole_numbers_topic as setup_year6_whole_numbers, add_whole_numbers_questions as add_year6_whole_numbers
+from add_year6_factors import setup_factors_topic as setup_year6_factors, add_factors_questions as add_year6_factors
 from add_year7_measurements import setup_measurements_topic as setup_year7_measurements, add_measurements_questions as add_year7_measurements
 from add_year7_bodmas import setup_bodmas_topic as setup_year7_bodmas, add_bodmas_questions as add_year7_bodmas
 
@@ -107,6 +108,7 @@ def run_all_question_scripts():
         ("Year 6 - Measurements", setup_year6_measurements, add_year6_measurements),
         ("Year 6 - BODMAS/PEMDAS", setup_year6_bodmas, add_year6_bodmas),
         ("Year 6 - Whole Numbers", setup_year6_whole_numbers, add_year6_whole_numbers),
+        ("Year 6 - Factors", setup_year6_factors, add_year6_factors),
         
         # Year 7
         ("Year 7 - Measurements", setup_year7_measurements, add_year7_measurements),

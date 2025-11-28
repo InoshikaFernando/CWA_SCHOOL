@@ -298,12 +298,21 @@
                 <input type="hidden" name="question_id" value="{{ current_question.id }}">
                 
                 <div class="answer-options">
-                    {% for answer in current_question.answers.all %}
-                        <label class="answer-option">
-                            <input type="radio" name="answer_id" value="{{ answer.id }}" required>
-                            {{ answer.answer_text }}
-                        </label>
-                    {% endfor %}
+                    {% if shuffled_answers %}
+                        {% for answer in shuffled_answers %}
+                            <label class="answer-option">
+                                <input type="radio" name="answer_id" value="{{ answer.id }}" required>
+                                {{ answer.answer_text }}
+                            </label>
+                        {% endfor %}
+                    {% else %}
+                        {% for answer in current_question.answers.all %}
+                            <label class="answer-option">
+                                <input type="radio" name="answer_id" value="{{ answer.id }}" required>
+                                {{ answer.answer_text }}
+                            </label>
+                        {% endfor %}
+                    {% endif %}
                 </div>
                 
                 <div class="action-buttons">
@@ -313,12 +322,21 @@
         {% else %}
             <!-- Show checked answers -->
             <div class="answer-options">
-                {% for answer in current_question.answers.all %}
-                    <label class="answer-option {% if answer == selected_answer %}{% if answer.is_correct %}correct{% else %}incorrect{% endif %}{% elif answer.is_correct and not selected_answer.is_correct %}correct{% endif %}">
-                        <input type="radio" {% if answer == selected_answer %}checked{% endif %} disabled>
-                        {{ answer.answer_text }}
-                    </label>
-                {% endfor %}
+                {% if shuffled_answers %}
+                    {% for answer in shuffled_answers %}
+                        <label class="answer-option {% if answer == selected_answer %}{% if answer.is_correct %}correct{% else %}incorrect{% endif %}{% elif answer.is_correct and not selected_answer.is_correct %}correct{% endif %}">
+                            <input type="radio" {% if answer == selected_answer %}checked{% endif %} disabled>
+                            {{ answer.answer_text }}
+                        </label>
+                    {% endfor %}
+                {% else %}
+                    {% for answer in current_question.answers.all %}
+                        <label class="answer-option {% if answer == selected_answer %}{% if answer.is_correct %}correct{% else %}incorrect{% endif %}{% elif answer.is_correct and not selected_answer.is_correct %}correct{% endif %}">
+                            <input type="radio" {% if answer == selected_answer %}checked{% endif %} disabled>
+                            {{ answer.answer_text }}
+                        </label>
+                    {% endfor %}
+                {% endif %}
             </div>
             
             <div class="action-buttons">

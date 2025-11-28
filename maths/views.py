@@ -1910,6 +1910,40 @@ def take_quiz(request, level_number):
             else:
                 previous_best_points = None
         else:
+            # For regular levels, save to StudentFinalAnswer with "Quiz" topic
+            if not is_basic_facts:
+                # Get or create "Quiz" topic for mixed quizzes
+                quiz_topic, _ = Topic.objects.get_or_create(name="Quiz")
+                
+                # Save to StudentFinalAnswer table
+                attempt_number = StudentFinalAnswer.get_next_attempt_number(
+                    student=request.user,
+                    topic=quiz_topic,
+                    level=level
+                )
+                
+                StudentFinalAnswer.objects.update_or_create(
+                    student=request.user,
+                    session_id=session_id,
+                    defaults={
+                        'topic': quiz_topic,
+                        'level': level,
+                        'attempt_number': attempt_number,
+                        'points_earned': final_points,
+                    }
+                )
+                
+                # Update topic statistics asynchronously
+                def update_stats_async():
+                    try:
+                        update_topic_statistics(level_num=level.level_number, topic_name="Quiz")
+                    except Exception:
+                        pass
+                
+                thread = threading.Thread(target=update_stats_async)
+                thread.daemon = True
+                thread.start()
+            
             # For regular levels, check database records - optimized with aggregation
             previous_sessions_data = StudentAnswer.objects.filter(
                 student=request.user,
@@ -2341,6 +2375,16 @@ def measurements_questions(request, level_number):
     # Elapsed time for live timer
     start_ts = request.session.get(timer_session_key)
     elapsed_seconds = int(time.time() - start_ts) if start_ts else 0
+    
+    # Randomize answer order for MCQs (only if not checked yet)
+    shuffled_answers = None
+    if not checked and current_question.question_type in ['multiple_choice', 'true_false']:
+        answers_list = list(current_question.answers.all())
+        random.shuffle(answers_list)
+        shuffled_answers = answers_list
+    else:
+        # If already checked, keep original order for consistency
+        shuffled_answers = list(current_question.answers.all())
 
     return render(request, "maths/measurements_questions.html", {
         "level": level,
@@ -2353,7 +2397,8 @@ def measurements_questions(request, level_number):
         "selected_answer": selected_answer,
         "is_text_answer": is_text_answer,
         "is_last_question": question_number == len(all_questions),
-        "elapsed_seconds": elapsed_seconds
+        "elapsed_seconds": elapsed_seconds,
+        "shuffled_answers": shuffled_answers
     })
 
 @login_required
@@ -2641,6 +2686,16 @@ def whole_numbers_questions(request, level_number):
     
     start_ts = request.session.get(timer_session_key)
     elapsed_seconds = int(time.time() - start_ts) if start_ts else 0
+    
+    # Randomize answer order for MCQs (only if not checked yet)
+    shuffled_answers = None
+    if not checked and current_question.question_type in ['multiple_choice', 'true_false']:
+        answers_list = list(current_question.answers.all())
+        random.shuffle(answers_list)
+        shuffled_answers = answers_list
+    else:
+        # If already checked, keep original order for consistency
+        shuffled_answers = list(current_question.answers.all())
 
     return render(request, "maths/measurements_questions.html", {
         "level": level,
@@ -2653,7 +2708,8 @@ def whole_numbers_questions(request, level_number):
         "selected_answer": selected_answer,
         "is_text_answer": is_text_answer,
         "is_last_question": question_number == len(all_questions),
-        "elapsed_seconds": elapsed_seconds
+        "elapsed_seconds": elapsed_seconds,
+        "shuffled_answers": shuffled_answers
     })
 
 @login_required
@@ -3008,6 +3064,16 @@ def place_values_questions(request, level_number):
     # Elapsed time for live timer
     start_ts = request.session.get(timer_session_key)
     elapsed_seconds = int(time.time() - start_ts) if start_ts else 0
+    
+    # Randomize answer order for MCQs (only if not checked yet)
+    shuffled_answers = None
+    if not checked and current_question.question_type in ['multiple_choice', 'true_false']:
+        answers_list = list(current_question.answers.all())
+        random.shuffle(answers_list)
+        shuffled_answers = answers_list
+    else:
+        # If already checked, keep original order for consistency
+        shuffled_answers = list(current_question.answers.all())
 
     return render(request, "maths/measurements_questions.html", {
         "level": level,
@@ -3020,7 +3086,8 @@ def place_values_questions(request, level_number):
         "selected_answer": selected_answer,
         "is_text_answer": is_text_answer,
         "is_last_question": question_number == len(all_questions),
-        "elapsed_seconds": elapsed_seconds
+        "elapsed_seconds": elapsed_seconds,
+        "shuffled_answers": shuffled_answers
     })
 
 @login_required
@@ -3336,6 +3403,16 @@ def fractions_questions(request, level_number):
     # Elapsed time for live timer
     start_ts = request.session.get(timer_session_key)
     elapsed_seconds = int(time.time() - start_ts) if start_ts else 0
+    
+    # Randomize answer order for MCQs (only if not checked yet)
+    shuffled_answers = None
+    if not checked and current_question.question_type in ['multiple_choice', 'true_false']:
+        answers_list = list(current_question.answers.all())
+        random.shuffle(answers_list)
+        shuffled_answers = answers_list
+    else:
+        # If already checked, keep original order for consistency
+        shuffled_answers = list(current_question.answers.all())
 
     return render(request, "maths/measurements_questions.html", {
         "level": level,
@@ -3348,7 +3425,8 @@ def fractions_questions(request, level_number):
         "selected_answer": selected_answer,
         "is_text_answer": is_text_answer,
         "is_last_question": question_number == len(all_questions),
-        "elapsed_seconds": elapsed_seconds
+        "elapsed_seconds": elapsed_seconds,
+        "shuffled_answers": shuffled_answers
     })
 
 @login_required
@@ -3427,57 +3505,13 @@ def bodmas_questions(request, level_number):
         all_questions = []
         for qid in question_ids:
             try:
-                question = Question.objects.get(id=qid, level=level)
-                # Check if it's a BODMAS question using strict whitelist
-                q_text_lower = question.question_text.lower()
-                is_bodmas = (
-                    q_text_lower.startswith('evaluate:') or
-                    q_text_lower.startswith('calculate:') or
-                    q_text_lower.startswith('find the missing number:') or
-                    q_text_lower.startswith('i think of a number') or
-                    q_text_lower.startswith('i add') or
-                    q_text_lower.startswith('i multiply') or
-                    q_text_lower.startswith('using the digits') or
-                    q_text_lower.startswith('write down what') or
-                    'bodmas' in q_text_lower or
-                    'pemdas' in q_text_lower or
-                    'bidmas' in q_text_lower or
-                    '_____' in question.question_text  # Missing number pattern
-                )
-                # Exclude measurement, fraction, and place value questions
-                is_not_bodmas = (
-                    'cm' in q_text_lower or
-                    'centimeter' in q_text_lower or
-                    'meter' in q_text_lower or
-                    'kilometer' in q_text_lower or
-                    'liter' in q_text_lower or
-                    'gram' in q_text_lower or
-                    'kilogram' in q_text_lower or
-                    'width' in q_text_lower or
-                    'height' in q_text_lower or
-                    'length' in q_text_lower or
-                    'area' in q_text_lower or
-                    'perimeter' in q_text_lower or
-                    'volume' in q_text_lower or
-                    'measure' in q_text_lower or
-                    'unit would you use' in q_text_lower or
-                    'ruler' in q_text_lower or
-                    'scale' in q_text_lower or
-                    'numerator' in q_text_lower or
-                    'denominator' in q_text_lower or
-                    'fraction' in q_text_lower or
-                    'complete the following sequence' in q_text_lower or
-                    'counting on' in q_text_lower or
-                    'counting back' in q_text_lower or
-                    'skip counting' in q_text_lower or
-                    'tens and ones' in q_text_lower or
-                    'how many tens' in q_text_lower
-                )
-                if is_bodmas and not is_not_bodmas:
-                    all_questions.append(question)
+                # Filter by topic directly (same as other views)
+                question = Question.objects.get(id=qid, level=level, topic=bodmas_topic)
+                all_questions.append(question)
             except Question.DoesNotExist:
                 continue
         
+        # If we filtered out questions, clear session and start fresh
         if len(all_questions) != len(question_ids):
             if timer_session_key in request.session:
                 del request.session[timer_session_key]
@@ -3485,6 +3519,7 @@ def bodmas_questions(request, level_number):
                 del request.session[questions_session_key]
             if 'current_attempt_id' in request.session:
                 del request.session['current_attempt_id']
+            # Redirect to question 1 with fresh questions
             return redirect(f"{request.path}?q=1")
     else:
         # No session exists - initialize it now
@@ -3632,8 +3667,6 @@ def bodmas_questions(request, level_number):
         return redirect("maths:dashboard")
     
     current_question = all_questions[question_number - 1]
-    answers = current_question.answers.all()
-    
     checked = request.GET.get('checked') == '1'
     answer_id = request.GET.get('answer_id')
     text_answer = request.GET.get('text_answer')
@@ -3650,6 +3683,16 @@ def bodmas_questions(request, level_number):
             is_text_answer = True
             selected_answer = text_answer
     
+    # Randomize answer order for MCQs (only if not checked yet)
+    shuffled_answers = None
+    if not checked and current_question.question_type in ['multiple_choice', 'true_false']:
+        answers_list = list(current_question.answers.all())
+        random.shuffle(answers_list)
+        shuffled_answers = answers_list
+    else:
+        # If already checked, keep original order for consistency
+        shuffled_answers = list(current_question.answers.all())
+    
     if timer_start:
         elapsed_seconds = int(time.time() - timer_start)
     else:
@@ -3659,14 +3702,14 @@ def bodmas_questions(request, level_number):
         'level': level,
         'topic': bodmas_topic,
         'current_question': current_question,
-        'answers': answers,
         'question_number': question_number,
         'total_questions': len(all_questions),
         'checked': checked,
         'selected_answer': selected_answer,
         'is_text_answer': is_text_answer,
         "is_last_question": question_number == len(all_questions),
-        "elapsed_seconds": elapsed_seconds
+        "elapsed_seconds": elapsed_seconds,
+        'shuffled_answers': shuffled_answers
     })
 
 @login_required
@@ -3956,6 +3999,16 @@ def date_time_questions(request, level_number):
     
     start_ts = request.session.get(timer_session_key)
     elapsed_seconds = int(time.time() - start_ts) if start_ts else 0
+    
+    # Randomize answer order for MCQs (only if not checked yet)
+    shuffled_answers = None
+    if not checked and current_question.question_type in ['multiple_choice', 'true_false']:
+        answers_list = list(current_question.answers.all())
+        random.shuffle(answers_list)
+        shuffled_answers = answers_list
+    else:
+        # If already checked, keep original order for consistency
+        shuffled_answers = list(current_question.answers.all())
 
     return render(request, "maths/measurements_questions.html", {
         "level": level,
@@ -3968,7 +4021,8 @@ def date_time_questions(request, level_number):
         "selected_answer": selected_answer,
         "is_text_answer": is_text_answer,
         "is_last_question": question_number == len(all_questions),
-        "elapsed_seconds": elapsed_seconds
+        "elapsed_seconds": elapsed_seconds,
+        "shuffled_answers": shuffled_answers
     })
 
 @login_required
@@ -4298,6 +4352,16 @@ def finance_questions(request, level_number):
     # Elapsed time for live timer
     start_ts = request.session.get(timer_session_key)
     elapsed_seconds = int(time.time() - start_ts) if start_ts else 0
+    
+    # Randomize answer order for MCQs (only if not checked yet)
+    shuffled_answers = None
+    if not checked and current_question.question_type in ['multiple_choice', 'true_false']:
+        answers_list = list(current_question.answers.all())
+        random.shuffle(answers_list)
+        shuffled_answers = answers_list
+    else:
+        # If already checked, keep original order for consistency
+        shuffled_answers = list(current_question.answers.all())
 
     return render(request, "maths/measurements_questions.html", {
         "level": level,
@@ -4310,6 +4374,7 @@ def finance_questions(request, level_number):
         "selected_answer": selected_answer,
         "is_text_answer": is_text_answer,
         "is_last_question": question_number == len(all_questions),
-        "elapsed_seconds": elapsed_seconds
+        "elapsed_seconds": elapsed_seconds,
+        "shuffled_answers": shuffled_answers
     })
 

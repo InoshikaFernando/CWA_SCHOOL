@@ -3947,9 +3947,11 @@ def date_time_questions(request, level_number):
         selected_answer = MockAnswer(text_answer, True)
         is_text_answer = True
     
+    # Filter student answers by topic (same as measurements_questions)
     student_answers = StudentAnswer.objects.filter(
         student=request.user,
-        question__level=level
+        question__level=level,
+        question__topic=date_time_topic
     )
     
     start_ts = request.session.get(timer_session_key)

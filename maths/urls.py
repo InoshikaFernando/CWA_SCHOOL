@@ -29,6 +29,7 @@ urlpatterns = [
     path("level/<int:level_number>/bodmas/", views.bodmas_questions, name="bodmas_questions"),
     path("level/<int:level_number>/whole-numbers/", views.whole_numbers_questions, name="whole_numbers_questions"),
     path("level/<int:level_number>/factors/", views.factors_questions, name="factors_questions"),
+    path("level/<int:level_number>/angles/", views.angles_questions, name="angles_questions"),
     path("basic-facts/<str:subtopic_name>/", views.basic_facts_subtopic, name="basic_facts_subtopic"),
     path("profile/", views.user_profile, name="user_profile"),
     path("api/update-time-log/", views.update_time_log, name="update_time_log"),

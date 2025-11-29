@@ -3124,6 +3124,318 @@ def factors_questions(request, level_number):
     })
 
 @login_required
+def angles_questions(request, level_number):
+    """Show Angles questions one by one"""
+    level = get_object_or_404(Level, level_number=level_number)
+    
+    # Check if student has access to this level
+    allowed = student_allowed_levels(request.user)
+    if allowed is not None and not allowed.filter(pk=level.pk).exists():
+        messages.error(request, "You don't have access to this level.")
+        return redirect("maths:dashboard")
+    
+    # Get Angles topic
+    angles_topic = Topic.objects.filter(name="Angles").first()
+    if not angles_topic:
+        angles_topic = Topic.objects.create(name="Angles")
+    
+    # Get all Angles questions for this level
+    all_questions_query = Question.objects.filter(
+        level=level,
+        topic=angles_topic
+    )
+    
+    # Question limits per year
+    YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
+    question_limit = YEAR_QUESTION_COUNTS.get(level.level_number, 10)
+    
+    # Get current question number from URL parameter (default to 1)
+    question_number = int(request.GET.get('q', 1))
+    
+    # Start timer on first question load and create session
+    timer_session_key = "angles_timer_start"
+    questions_session_key = "angles_question_ids"
+    timer_start = request.session.get(timer_session_key)
+    
+    # Clear session if questions don't match Angles topic (safety check)
+    if question_number == 1 and timer_start:
+        existing_question_ids = request.session.get(questions_session_key, [])
+        if existing_question_ids:
+            existing_questions = Question.objects.filter(id__in=existing_question_ids, level=level, topic=angles_topic)
+            if existing_questions.count() != len(existing_question_ids):
+                if timer_session_key in request.session:
+                    del request.session[timer_session_key]
+                if questions_session_key in request.session:
+                    del request.session[questions_session_key]
+                if 'current_attempt_id' in request.session:
+                    del request.session['current_attempt_id']
+                timer_start = None
+    
+    if question_number == 1 and not timer_start:
+        request.session[timer_session_key] = time.time()
+        import uuid
+        request.session['current_attempt_id'] = str(uuid.uuid4())
+        
+        all_questions_list = list(all_questions_query)
+        if len(all_questions_list) > question_limit:
+            selected_questions = select_questions_stratified(all_questions_list, question_limit)
+        else:
+            selected_questions = all_questions_list
+        
+        random.shuffle(selected_questions)
+        request.session[questions_session_key] = [q.id for q in selected_questions]
+    
+    question_ids = request.session.get(questions_session_key, [])
+    
+    if question_ids:
+        all_questions = []
+        for qid in question_ids:
+            try:
+                question = Question.objects.get(id=qid, level=level, topic=angles_topic)
+                all_questions.append(question)
+            except Question.DoesNotExist:
+                continue
+        
+        if len(all_questions) != len(question_ids):
+            if timer_session_key in request.session:
+                del request.session[timer_session_key]
+            if questions_session_key in request.session:
+                del request.session[questions_session_key]
+            if 'current_attempt_id' in request.session:
+                del request.session['current_attempt_id']
+            return redirect(f"{request.path}?q=1")
+    else:
+        all_questions = []
+    
+    # Handle form submission
+    if request.method == "POST":
+        action = request.POST.get('action')
+        
+        if action == 'check_answer':
+            question_id = request.POST.get('question_id')
+            answer_id = request.POST.get('answer_id')
+            text_answer = request.POST.get('text_answer')
+            
+            if question_id:
+                try:
+                    question = Question.objects.get(id=question_id, level=level, topic=angles_topic)
+                    
+                    if answer_id:
+                        answer = Answer.objects.get(id=answer_id, question=question)
+                        attempt_id = request.session.get('current_attempt_id', '')
+                        student_answer, created = StudentAnswer.objects.update_or_create(
+                            student=request.user,
+                            question=question,
+                            defaults={
+                                'selected_answer': answer,
+                                'is_correct': answer.is_correct,
+                                'points_earned': question.points if answer.is_correct else 0,
+                                'session_id': attempt_id
+                            }
+                        )
+                        return redirect(f"{request.path}?q={question_number}&checked=1&answer_id={answer_id}")
+                    
+                    elif text_answer and question.question_type == 'short_answer':
+                        attempt_id = request.session.get('current_attempt_id', '')
+                        student_answer, created = StudentAnswer.objects.update_or_create(
+                            student=request.user,
+                            question=question,
+                            defaults={
+                                'text_answer': text_answer,
+                                'is_correct': True,
+                                'points_earned': question.points,
+                                'session_id': attempt_id
+                            }
+                        )
+                        return redirect(f"{request.path}?q={question_number}&checked=1&text_answer={text_answer}")
+                    
+                except (Question.DoesNotExist, Answer.DoesNotExist):
+                    messages.error(request, "Invalid question or answer.")
+        
+        elif action == 'next_question':
+            next_question = question_number + 1
+            if next_question <= len(all_questions):
+                return redirect(f"{request.path}?q={next_question}")
+            else:
+                return redirect(f"{request.path}?completed=1")
+    
+    # Check if completed
+    completed = request.GET.get('completed') == '1'
+    
+    if completed:
+        attempt_id = request.session.get('current_attempt_id', '')
+        student_answers = StudentAnswer.objects.filter(
+            student=request.user,
+            question__level=level,
+            question__topic=angles_topic,
+            session_id=attempt_id
+        )
+        total_score = sum(answer.points_earned for answer in student_answers)
+        total_points = sum(q.points for q in all_questions) if all_questions else 0
+        if total_points == 0 and student_answers.exists():
+            answered_question_ids = student_answers.values_list('question_id', flat=True).distinct()
+            answered_questions = Question.objects.filter(id__in=answered_question_ids, level=level, topic=angles_topic)
+            total_points = sum(q.points for q in answered_questions)
+        now_ts = time.time()
+        start_ts = request.session.get(timer_session_key) or now_ts
+        total_time_seconds = max(1, int(now_ts - start_ts))
+        
+        student_answers.update(time_taken_seconds=total_time_seconds)
+        
+        if not request.user.is_teacher:
+            update_time_log_from_activities(request.user)
+        
+        def update_stats_async():
+            try:
+                update_topic_statistics(level_num=level.level_number, topic_name=angles_topic.name)
+            except Exception:
+                pass
+        
+        thread = threading.Thread(target=update_stats_async)
+        thread.daemon = True
+        thread.start()
+        
+        percentage = (total_score / total_points) if total_points else 0
+        final_points = (percentage * 100 * 60) / total_time_seconds if total_time_seconds else 0
+        final_points = round(final_points, 2)
+        
+        attempt_number = StudentFinalAnswer.get_next_attempt_number(
+            student=request.user,
+            topic=angles_topic,
+            level=level
+        )
+        
+        StudentFinalAnswer.objects.update_or_create(
+            student=request.user,
+            session_id=attempt_id,
+            defaults={
+                'topic': angles_topic,
+                'level': level,
+                'attempt_number': attempt_number,
+                'points_earned': final_points,
+            }
+        )
+        
+        current_attempt_id = attempt_id
+        
+        if timer_session_key in request.session:
+            del request.session[timer_session_key]
+        if questions_session_key in request.session:
+            del request.session[questions_session_key]
+        if 'current_attempt_id' in request.session:
+            del request.session['current_attempt_id']
+        
+        previous_sessions_data = StudentAnswer.objects.filter(
+            student=request.user,
+            question__level=level,
+            question__topic=angles_topic
+        ).exclude(session_id=current_attempt_id).exclude(session_id='').values('session_id').annotate(
+            total_correct=Sum('is_correct'),
+            total_count=Count('id'),
+            total_points=Sum('points_earned'),
+            time_taken=Max('time_taken_seconds')
+        )
+        
+        previous_best_points = None
+        for session_data in previous_sessions_data:
+            session_id = session_data['session_id']
+            if not session_id:
+                continue
+            
+            session_correct = session_data['total_correct'] or 0
+            session_total = session_data['total_count'] or 1
+            session_time = session_data['time_taken'] or 0
+            session_points_earned = session_data['total_points'] or 0
+            
+            if session_time > 0:
+                session_percentage = (session_correct / session_total) if session_total else 0
+                session_points = (session_percentage * 100 * 60) / session_time if session_time else 0
+            else:
+                session_points = session_points_earned
+            
+            if previous_best_points is None or session_points > previous_best_points:
+                previous_best_points = session_points
+        
+        beat_record = previous_best_points is not None and final_points > previous_best_points
+        is_first_attempt = previous_best_points is None
+        
+        return render(request, "maths/measurements_questions.html", {
+            "level": level,
+            "completed": True,
+            "total_score": total_score,
+            "total_points": total_points,
+            "total_time_seconds": total_time_seconds,
+            "final_points": final_points,
+            "topic": angles_topic,
+            "student_answers": student_answers,
+            "all_questions": all_questions,
+            "previous_best_points": round(previous_best_points, 2) if previous_best_points is not None else None,
+            "beat_record": beat_record,
+            "is_first_attempt": is_first_attempt
+        })
+    
+    # Get current question
+    if question_number <= len(all_questions):
+        current_question = all_questions[question_number - 1]
+    else:
+        messages.error(request, "Question not found.")
+        return redirect("maths:level_detail", level_number=level.level_number)
+    
+    checked = request.GET.get('checked') == '1'
+    selected_answer_id = request.GET.get('answer_id')
+    text_answer = request.GET.get('text_answer')
+    selected_answer = None
+    is_text_answer = False
+    
+    if checked and selected_answer_id:
+        try:
+            selected_answer = Answer.objects.get(id=selected_answer_id, question=current_question)
+        except Answer.DoesNotExist:
+            pass
+    elif checked and text_answer:
+        class MockAnswer:
+            def __init__(self, text, is_correct=True):
+                self.answer_text = text
+                self.is_correct = is_correct
+        
+        selected_answer = MockAnswer(text_answer, True)
+        is_text_answer = True
+    
+    student_answers = StudentAnswer.objects.filter(
+        student=request.user,
+        question__level=level,
+        question__topic=angles_topic
+    )
+    
+    start_ts = request.session.get(timer_session_key)
+    elapsed_seconds = int(time.time() - start_ts) if start_ts else 0
+    
+    # Randomize answer order for MCQs (only if not checked yet)
+    shuffled_answers = None
+    if not checked and current_question.question_type in ['multiple_choice', 'true_false']:
+        answers_list = list(current_question.answers.all())
+        random.shuffle(answers_list)
+        shuffled_answers = answers_list
+    else:
+        # If already checked, keep original order for consistency
+        shuffled_answers = list(current_question.answers.all())
+
+    return render(request, "maths/measurements_questions.html", {
+        "level": level,
+        "current_question": current_question,
+        "question_number": question_number,
+        "total_questions": len(all_questions),
+        "topic": angles_topic,
+        "student_answers": student_answers,
+        "checked": checked,
+        "selected_answer": selected_answer,
+        "is_text_answer": is_text_answer,
+        "is_last_question": question_number == len(all_questions),
+        "elapsed_seconds": elapsed_seconds,
+        "shuffled_answers": shuffled_answers
+    })
+
+@login_required
 def place_values_questions(request, level_number):
     """Show Place Values questions one by one"""
     level = get_object_or_404(Level, level_number=level_number)

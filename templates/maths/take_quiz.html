@@ -336,7 +336,7 @@
         Best record: {{ previous_best_points }}
     </div>
     {% endif %}
-    {% if is_basic_facts and question_review_data %}
+    {% if question_review_data %}
     <button onclick="openReviewPopup()" class="back-button{% if beat_record %} gold{% endif %}" style="margin-right: 15px; cursor: pointer;">
         📋 View Answers
     </button>
@@ -344,7 +344,7 @@
     <a href="{% url 'maths:dashboard_detail' %}" class="back-button{% if beat_record %} gold{% endif %}">Back to Dashboard</a>
 </div>
 
-{% if is_basic_facts and question_review_data %}
+{% if question_review_data %}
 <!-- Review Popup Modal -->
 <div id="reviewPopup" class="review-popup-overlay">
     <div class="review-popup">
@@ -380,6 +380,9 @@
                     </span>
                 </div>
                 <div class="review-question-text">{{ review.question_text }}</div>
+                {% if review.question_image %}
+                    <img src="{{ review.question_image.url }}" alt="Question diagram" class="question-image" style="max-width: 100%; margin: 15px 0;">
+                {% endif %}
                 <div class="review-answer-section">
                     <div class="review-answer-box student-answer">
                         <div class="review-answer-label">Your Answer</div>
@@ -390,6 +393,12 @@
                         <div class="review-answer-value">{{ review.correct_answer }}</div>
                     </div>
                 </div>
+                {% if review.explanation %}
+                    <div class="review-explanation" style="margin-top: 15px; padding: 15px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 4px;">
+                        <div style="font-weight: bold; margin-bottom: 8px; color: #1976d2;">💡 Explanation:</div>
+                        <div style="color: #333;">{{ review.explanation }}</div>
+                    </div>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
@@ -439,9 +448,7 @@
         <div class="quiz-info">
             <p><strong>Total Questions:</strong> {{ questions|length }}</p>
             <p><strong>Topics Covered:</strong> {% if level.level_number >= 100 %}Basic Facts{% else %}All topics for Year {{ level.level_number }}{% endif %}</p>
-            {% if level.level_number >= 100 %}
             <p style="text-align: center; color: #333; font-weight: bold; margin-top: 10px;">⏱️ Time: <span id="live-timer">0s</span></p>
-            {% endif %}
         </div>
         
         {% for question in questions %}
@@ -469,20 +476,25 @@
                                    style="width: 100%; padding: 12px; font-size: 16px; border: 2px solid #dee2e6; border-radius: 6px; margin-top: 10px;">
                         </div>
                     {% else %}
-                        {% for answer in question.answers.all %}
-                            <label class="answer-option">
-                                <input type="radio" name="question_{{ question.id }}" value="{{ answer.id }}" required>
-                                <span>{{ answer.answer_text }}</span>
-                            </label>
-                        {% endfor %}
+                        {% if question.shuffled_answers %}
+                            {% for answer in question.shuffled_answers %}
+                                <label class="answer-option">
+                                    <input type="radio" name="question_{{ question.id }}" value="{{ answer.id }}" required>
+                                    <span>{{ answer.answer_text }}</span>
+                                </label>
+                            {% endfor %}
+                        {% else %}
+                            {% for answer in question.answers.all %}
+                                <label class="answer-option">
+                                    <input type="radio" name="question_{{ question.id }}" value="{{ answer.id }}" required>
+                                    <span>{{ answer.answer_text }}</span>
+                                </label>
+                            {% endfor %}
+                        {% endif %}
                     {% endif %}
                 </div>
                 
-                {% if question.explanation %}
-                    <div class="question-hint">
-                        <small><em>Hint: {{ question.explanation }}</em></small>
-                    </div>
-                {% endif %}
+                {% comment %}Hints/explanations are hidden initially and shown after submission{% endcomment %}
             </div>
         {% endfor %}
         
@@ -634,9 +646,8 @@
     }
 </style>
 
-{% if level.level_number >= 100 %}
 <script>
-    // Live timer for Basic Facts - tracks actual elapsed time from page load
+    // Live timer for all quizzes - tracks actual elapsed time from page load
     document.addEventListener('DOMContentLoaded', function() {
         const timerEl = document.getElementById('live-timer');
         if (!timerEl) return;
@@ -654,7 +665,6 @@
         }, 1000);
     });
 </script>
-{% endif %}
 
 {% endif %}
 {% endblock %}

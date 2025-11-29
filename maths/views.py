@@ -1,4 +1,5 @@
 ﻿from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -1764,17 +1765,49 @@ def take_quiz(request, level_number):
             questions_data = request.session.get(session_questions_key, [])
             questions = [DynamicQuestion(q['text'], q['correct_answer'], q['index']) for q in questions_data]
     else:
-        # Get all questions for this level from database
-        all_questions = list(level.questions.all())
-        
-        # Select random questions using stratified sampling (limit to 10 questions)
-        if len(all_questions) > 10:
-            questions = select_questions_stratified(all_questions, 10)
+        # For regular quizzes, get questions from database and store in session
+        if request.method == "GET":
+            # Get all questions for this level from database (all topics)
+            all_questions = list(level.questions.all())
+            
+            # Question limits per year
+            YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
+            question_limit = YEAR_QUESTION_COUNTS.get(level.level_number, 10)
+            
+            # Select random questions using stratified sampling
+            if len(all_questions) > question_limit:
+                questions = select_questions_stratified(all_questions, question_limit)
+            else:
+                questions = all_questions
+            
+            # Shuffle the questions
+            random.shuffle(questions)
+            
+            # Randomize answer order for each question
+            for question in questions:
+                if question.question_type in ['multiple_choice', 'true_false']:
+                    # Store shuffled answer IDs in a temporary attribute
+                    answers_list = list(question.answers.all())
+                    random.shuffle(answers_list)
+                    question.shuffled_answers = answers_list
+            
+            # Store question IDs in session
+            request.session[session_questions_key] = [q.id for q in questions]
         else:
-            questions = all_questions
-        
-        # Shuffle the questions
-        random.shuffle(questions)
+            # POST - retrieve question IDs from session and load questions
+            question_ids = request.session.get(session_questions_key, [])
+            questions = []
+            for qid in question_ids:
+                try:
+                    question = Question.objects.get(id=qid, level=level)
+                    # Randomize answer order for MCQs
+                    if question.question_type in ['multiple_choice', 'true_false']:
+                        answers_list = list(question.answers.all())
+                        random.shuffle(answers_list)
+                        question.shuffled_answers = answers_list
+                    questions.append(question)
+                except Question.DoesNotExist:
+                    continue
     
     if request.method == "POST":
         # Get time elapsed
@@ -1994,16 +2027,81 @@ def take_quiz(request, level_number):
                 "is_basic_facts": True
             })
         
-        # For regular levels, show messages and redirect
-        if previous_best_points is None:
-            messages.success(request, f"Quiz completed! You scored {final_points} points. New high score received!")
-        elif final_points > previous_best_points:
-            messages.success(request, f"🎉 You beat your record! New high score received: {final_points} points (previous best was {round(previous_best_points, 2)}).")
-        else:
-            messages.info(request, f"Quiz completed! You scored {final_points} points. Best record remains {round(previous_best_points, 2)} points.")
-        return redirect("maths:dashboard")
+        # For regular levels, show results page with all questions and answers
+        if not is_basic_facts:
+            # Get or create "Quiz" topic
+            quiz_topic, _ = Topic.objects.get_or_create(name="Quiz")
+            
+            # Get student answers for this session to show results
+            student_answers_dict = {}
+            student_answers_query = StudentAnswer.objects.filter(
+                student=request.user,
+                question__level=level,
+                session_id=session_id
+            ).select_related('question', 'selected_answer')
+            
+            for sa in student_answers_query:
+                student_answers_dict[sa.question_id] = sa
+            
+            # Create question review data with explanations
+            question_review_data = []
+            for question in questions:
+                student_answer_obj = student_answers_dict.get(question.id)
+                is_correct = student_answer_obj.is_correct if student_answer_obj else False
+                selected_answer_text = ""
+                correct_answer_text = ""
+                
+                if question.question_type == 'multiple_choice' or question.question_type == 'true_false':
+                    if student_answer_obj and student_answer_obj.selected_answer:
+                        selected_answer_text = student_answer_obj.selected_answer.answer_text
+                    # Get correct answer
+                    correct_answer = question.answers.filter(is_correct=True).first()
+                    if correct_answer:
+                        correct_answer_text = correct_answer.answer_text
+                elif question.question_type == 'short_answer':
+                    if student_answer_obj:
+                        selected_answer_text = student_answer_obj.text_answer or ""
+                    # For short answer, we'd need to store the correct answer somewhere
+                    # For now, just show the student's answer
+                
+                question_review_data.append({
+                    'question': question,
+                    'question_text': question.question_text,
+                    'question_image': question.image,
+                    'student_answer': selected_answer_text,
+                    'correct_answer': correct_answer_text,
+                    'is_correct': is_correct,
+                    'points': question.points if is_correct else 0,
+                    'explanation': question.explanation or ""
+                })
+            
+            beat_record = previous_best_points is not None and final_points > previous_best_points
+            is_first_attempt = previous_best_points is None
+            
+            # Clear questions from session
+            if session_questions_key in request.session:
+                del request.session[session_questions_key]
+            
+            return render(request, "maths/take_quiz.html", {
+                "level": level,
+                "completed": True,
+                "total_score": score,
+                "total_points": total_points,
+                "total_time_seconds": time_taken_seconds,
+                "final_points": final_points,
+                "previous_best_points": round(previous_best_points, 2) if previous_best_points is not None else None,
+                "beat_record": beat_record,
+                "is_first_attempt": is_first_attempt,
+                "question_review_data": question_review_data,
+                "is_basic_facts": False
+            })
     
     # For regular quizzes (non-Basic Facts), show all questions at once
+    # Start timer on first load
+    if not timer_start:
+        request.session[timer_session_key] = time.time()
+    
+    # For Basic Facts, keep the original all-at-once approach
     # Start timer on first load
     if not timer_start:
         request.session[timer_session_key] = time.time()

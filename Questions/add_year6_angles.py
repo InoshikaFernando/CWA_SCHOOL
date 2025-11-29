@@ -81,7 +81,7 @@ def add_angles_questions(angles_topic, level_6):
             "question_text": "Without using a protractor, find the value of the pronumeral 𝑎",
             "question_type": "multiple_choice",
             "correct_answer": "82°",
-            "wrong_answers": ["80°", "85°", "90°"],
+            "wrong_answers": ["80°", "85°", "98°"],
             "explanation": "The angle a and 82° are vertically opposite angles, so they are equal.",
             "image_path": "questions/year6/angles/image3.png"
         },

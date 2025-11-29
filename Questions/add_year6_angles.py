@@ -240,68 +240,52 @@ def add_angles_questions(angles_topic, level_6):
         explanation = q_data.get("explanation", "")
         image_path = q_data.get("image_path", "")
         
-        # Check if question already exists (by exact question_text match)
-        existing_question = Question.objects.filter(
+        # Check if question already exists by matching:
+        # 1. question_text
+        # 2. correct_answer
+        # 3. wrong_answers (all of them)
+        # 4. image_path (if provided)
+        existing_questions = Question.objects.filter(
             question_text=question_text,
             level=level_6,
             topic=angles_topic
-        ).first()
+        )
         
-        if existing_question:
-            # Question exists - check if we need to update answers
-            existing_answers = existing_question.answers.all()
-            correct_answer_exists = existing_answers.filter(
-                answer_text=correct_answer,
-                is_correct=True
-            ).exists()
-            
-            if correct_answer_exists:
-                print(f"[SKIP] Question already exists and is up-to-date: {question_text[:50]}...")
-                skipped_count += 1
+        # If image_path is provided, also filter by image
+        if image_path:
+            existing_questions = existing_questions.filter(image__icontains=os.path.basename(image_path))
+        
+        # Check each existing question to see if it matches all criteria
+        matching_question = None
+        for eq in existing_questions:
+            # Check correct answer
+            existing_correct = eq.answers.filter(is_correct=True).first()
+            if not existing_correct or existing_correct.answer_text != correct_answer:
                 continue
-            else:
-                # Update existing question
-                print(f"[UPDATE] Updating question: {question_text[:50]}...")
-                
-                # Delete old answers
-                existing_answers.delete()
-                
-                # Add new answers
-                Answer.objects.create(
-                    question=existing_question,
-                    answer_text=correct_answer,
-                    is_correct=True
-                )
-                for wrong_answer in wrong_answers:
-                    Answer.objects.create(
-                        question=existing_question,
-                        answer_text=wrong_answer,
-                        is_correct=False
-                    )
-                
-                # Update explanation if provided
-                if explanation:
-                    existing_question.explanation = explanation
-                    existing_question.save(update_fields=['explanation'])
-                
-                # Update image if provided
-                if image_path:
-                    full_image_path = os.path.join(settings.MEDIA_ROOT, image_path)
-                    if os.path.exists(full_image_path):
-                        with open(full_image_path, 'rb') as f:
-                            existing_question.image.save(
-                                os.path.basename(image_path),
-                                File(f),
-                                save=True
-                            )
-                        print(f"  [OK] Updated image: {image_path}")
-                    else:
-                        # Set image path even if file doesn't exist locally (for production)
-                        existing_question.image.name = image_path
-                        existing_question.save(update_fields=['image'])
-                        print(f"  [INFO] Set image path (file not found locally): {image_path}")
-                
-                updated_count += 1
+            
+            # Check wrong answers (must have same number and same values)
+            existing_wrong = list(eq.answers.filter(is_correct=False).values_list('answer_text', flat=True))
+            if len(existing_wrong) != len(wrong_answers):
+                continue
+            
+            # Check if all wrong answers match (order doesn't matter)
+            if set(existing_wrong) != set(wrong_answers):
+                continue
+            
+            # If image_path was provided, check image matches
+            if image_path:
+                if not eq.image or os.path.basename(eq.image.name) != os.path.basename(image_path):
+                    continue
+            
+            # All criteria match - this is a duplicate
+            matching_question = eq
+            break
+        
+        if matching_question:
+            # Question exists with same text, answers, and image - skip it
+            print(f"[SKIP] Question already exists and is up-to-date: {question_text[:50]}...")
+            skipped_count += 1
+            continue
         else:
             # Create new question
             print(f"[ADD] Adding new question: {question_text[:50]}...")
@@ -331,22 +315,12 @@ def add_angles_questions(angles_topic, level_6):
                     is_correct=False
                 )
             
-            # Add image if provided
+            # Add image if provided - just set the path, don't copy the file
             if image_path:
-                full_image_path = os.path.join(settings.MEDIA_ROOT, image_path)
-                if os.path.exists(full_image_path):
-                    with open(full_image_path, 'rb') as f:
-                        new_question.image.save(
-                            os.path.basename(image_path),
-                            File(f),
-                            save=True
-                        )
-                    print(f"  [OK] Added image: {image_path}")
-                else:
-                    # Set image path even if file doesn't exist locally (for production)
-                    new_question.image.name = image_path
-                    new_question.save(update_fields=['image'])
-                    print(f"  [INFO] Set image path (file not found locally): {image_path}")
+                # Set image path without copying the file
+                new_question.image.name = image_path
+                new_question.save(update_fields=['image'])
+                print(f"  [OK] Set image path: {image_path}")
             
             added_count += 1
     

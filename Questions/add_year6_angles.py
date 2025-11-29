@@ -251,10 +251,6 @@ def add_angles_questions(angles_topic, level_6):
             topic=angles_topic
         )
         
-        # If image_path is provided, also filter by image
-        if image_path:
-            existing_questions = existing_questions.filter(image__icontains=os.path.basename(image_path))
-        
         # Check each existing question to see if it matches all criteria
         matching_question = None
         for eq in existing_questions:
@@ -274,7 +270,17 @@ def add_angles_questions(angles_topic, level_6):
             
             # If image_path was provided, check image matches
             if image_path:
-                if not eq.image or os.path.basename(eq.image.name) != os.path.basename(image_path):
+                image_basename = os.path.basename(image_path)
+                if not eq.image:
+                    # Question doesn't have image but we're adding one - not a match
+                    continue
+                # Check if image filename matches (handle different path formats)
+                eq_image_basename = os.path.basename(eq.image.name) if eq.image.name else ""
+                if eq_image_basename != image_basename and image_basename not in eq.image.name:
+                    continue
+            else:
+                # No image_path provided - check that existing question also has no image
+                if eq.image:
                     continue
             
             # All criteria match - this is a duplicate

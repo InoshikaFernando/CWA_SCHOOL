@@ -82,7 +82,7 @@ def add_angles_questions(angles_topic, level_6):
             "question_type": "multiple_choice",
             "correct_answer": "82°",
             "wrong_answers": ["80°", "85°", "90°"],
-            "explanation": "The angle 𝑎 is part of a straight line (180°). If the other angle is 98°, then 𝑎 = 180° - 98° = 82°.",
+            "explanation": "The angle a and 82° are vertically opposite angles, so they are equal.",
             "image_path": "questions/year6/angles/image3.png"
         },
         {

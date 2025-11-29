@@ -271,12 +271,20 @@ def add_angles_questions(angles_topic, level_6):
             # If image_path was provided, check image matches
             if image_path:
                 image_basename = os.path.basename(image_path)
+                # Remove extension for comparison (Django may add suffixes like _ooCBWLf)
+                image_name_without_ext = os.path.splitext(image_basename)[0]
+                
                 if not eq.image:
                     # Question doesn't have image but we're adding one - not a match
                     continue
-                # Check if image filename matches (handle different path formats)
-                eq_image_basename = os.path.basename(eq.image.name) if eq.image.name else ""
-                if eq_image_basename != image_basename and image_basename not in eq.image.name:
+                
+                # Check if image filename matches (handle Django's filename suffixes)
+                eq_image_name = eq.image.name if eq.image.name else ""
+                eq_image_basename = os.path.basename(eq_image_name)
+                eq_image_name_without_ext = os.path.splitext(eq_image_basename)[0]
+                
+                # Match if the base name (without extension and Django suffix) matches
+                if eq_image_name_without_ext != image_name_without_ext:
                     continue
             else:
                 # No image_path provided - check that existing question also has no image

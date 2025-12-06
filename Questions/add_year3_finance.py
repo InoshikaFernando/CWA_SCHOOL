@@ -66,7 +66,7 @@ def add_finance_questions(finance_topic, level_3):
             "question_text": "Which coins make $1?",
             "question_type": "multiple_choice",
             "correct_answer": "50c + 20c + 10c + 10c + 10c",
-            "wrong_answers": ["50c + 20c + 20c + 10c", "20c + 20c + 20c + 20c", "10c + 10c + 10c + 10c"],
+            "wrong_answers": ["50c + 20c + 30c + 10c", "20c + 20c + 20c + 20c", "10c + 10c + 10c + 10c"],
             "explanation": "50c + 20c + 10c + 10c + 10c = 100c = $1. This combination adds up to exactly one dollar.",
         },
         {

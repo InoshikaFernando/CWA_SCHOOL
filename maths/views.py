@@ -1970,16 +1970,22 @@ def take_quiz(request, level_number):
             final_points_calc = ((percentage * 100 * 60) / time_taken_seconds) / 10 if time_taken_seconds else 0
             final_points_calc = round(final_points_calc, 2)
             
-            # Save to database
-            BasicFactsResult.objects.create(
-                student=request.user,
-                level=level,
-                session_id=session_id,
-                score=score,
-                total_points=total_points,
-                time_taken_seconds=time_taken_seconds,
-                points=final_points_calc
-            )
+            # Save to database with retry logic
+            from maths.utils import retry_on_db_lock
+            
+            @retry_on_db_lock(max_retries=5)
+            def save_basic_facts_result():
+                BasicFactsResult.objects.create(
+                    student=request.user,
+                    level=level,
+                    session_id=session_id,
+                    score=score,
+                    total_points=total_points,
+                    time_taken_seconds=time_taken_seconds,
+                    points=final_points_calc
+                )
+            
+            save_basic_facts_result()
             
             # Update time log from activities
             if not request.user.is_teacher:
@@ -2039,22 +2045,14 @@ def take_quiz(request, level_number):
                 # Get or create "Quiz" topic for mixed quizzes
                 quiz_topic, _ = Topic.objects.get_or_create(name="Quiz")
                 
-                # Save to StudentFinalAnswer table
-                attempt_number = StudentFinalAnswer.get_next_attempt_number(
-                    student=request.user,
-                    topic=quiz_topic,
-                    level=level
-                )
-                
-                StudentFinalAnswer.objects.update_or_create(
+                # Save to StudentFinalAnswer table with retry logic
+                from maths.utils import save_student_final_answer
+                save_student_final_answer(
                     student=request.user,
                     session_id=session_id,
-                    defaults={
-                        'topic': quiz_topic,
-                        'level': level,
-                        'attempt_number': attempt_number,
-                        'points_earned': final_points,
-                    }
+                    topic=quiz_topic,
+                    level=level,
+                    points_earned=final_points
                 )
                 
                 # Update topic statistics asynchronously
@@ -2445,24 +2443,14 @@ def measurements_questions(request, level_number):
         # Round for display
         final_points = round(final_points, 2)
         
-        # Save to StudentFinalAnswer table
-        # Get next attempt number for this student-topic-level combination
-        attempt_number = StudentFinalAnswer.get_next_attempt_number(
-            student=request.user,
-            topic=measurements_topic,
-            level=level
-        )
-        
-        # Create or update StudentFinalAnswer record
-        StudentFinalAnswer.objects.update_or_create(
+        # Save to StudentFinalAnswer table with retry logic
+        from maths.utils import save_student_final_answer
+        save_student_final_answer(
             student=request.user,
             session_id=attempt_id,
-            defaults={
-                'topic': measurements_topic,
-                'level': level,
-                'attempt_number': attempt_number,
-                'points_earned': final_points,
-            }
+            topic=measurements_topic,
+            level=level,
+            points_earned=final_points
         )
         
         # Compute previous best record for this level - optimized with aggregation

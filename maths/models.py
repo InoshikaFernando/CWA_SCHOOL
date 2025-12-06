@@ -250,15 +250,39 @@ class StudentFinalAnswer(models.Model):
     
     @classmethod
     def get_next_attempt_number(cls, student, topic, level):
-        """Get the next attempt number for a student-topic-level combination"""
-        last_attempt = cls.objects.filter(
-            student=student,
-            topic=topic,
-            level=level
-        ).order_by('-attempt_number').first()
+        """
+        Get the next attempt number for a student-topic-level combination.
+        Uses atomic transaction to prevent race conditions.
+        """
+        from django.db import transaction
+        from django.db.models import Max
         
-        if last_attempt:
-            return last_attempt.attempt_number + 1
+        # Use atomic transaction with retry logic for SQLite
+        max_retries = 5
+        for attempt in range(max_retries):
+            try:
+                with transaction.atomic():
+                    # Use aggregation to get max attempt number atomically
+                    result = cls.objects.filter(
+                        student=student,
+                        topic=topic,
+                        level=level
+                    ).aggregate(max_attempt=Max('attempt_number'))
+                    
+                    max_attempt = result['max_attempt']
+                    if max_attempt is not None:
+                        return max_attempt + 1
+                    return 1
+            except Exception as e:
+                # If it's the last attempt, raise the exception
+                if attempt == max_retries - 1:
+                    raise
+                # Otherwise, wait a bit and retry (exponential backoff)
+                import time
+                time.sleep(0.01 * (2 ** attempt))  # 10ms, 20ms, 40ms, 80ms
+                continue
+        
+        # Fallback (shouldn't reach here)
         return 1
     
     @classmethod

@@ -1744,6 +1744,48 @@ def take_quiz(request, level_number):
     timer_session_key = f"quiz_timer_{level_number}"
     timer_start = request.session.get(timer_session_key)
     
+    # Check if there's a recently completed quiz (within last 30 seconds) to show results on refresh
+    if is_basic_facts and request.method == "GET":
+        from django.utils import timezone
+        from datetime import timedelta
+        recent_result = BasicFactsResult.objects.filter(
+            student=request.user,
+            level=level
+        ).order_by('-completed_at').first()
+        
+        if recent_result:
+            # Check if completed within last 30 seconds
+            # Convert completed_at to timezone-aware if needed
+            completed_at = recent_result.completed_at
+            if timezone.is_naive(completed_at):
+                completed_at = timezone.make_aware(completed_at)
+            
+            time_since_completion = timezone.now() - completed_at
+            if time_since_completion.total_seconds() < 30:
+                # Show completion screen with stored results
+                previous_results = BasicFactsResult.objects.filter(
+                    student=request.user,
+                    level=level
+                ).exclude(session_id=recent_result.session_id).order_by('-points')
+                
+                previous_best_points = float(previous_results.first().points) if previous_results.exists() else None
+                beat_record = previous_best_points is not None and float(recent_result.points) > previous_best_points
+                is_first_attempt = previous_best_points is None
+                
+                return render(request, "maths/take_quiz.html", {
+                    "level": level,
+                    "completed": True,
+                    "total_score": recent_result.score,
+                    "total_points": recent_result.total_points,
+                    "total_time_seconds": recent_result.time_taken_seconds,
+                    "final_points": float(recent_result.points),
+                    "previous_best_points": round(previous_best_points, 2) if previous_best_points is not None else None,
+                    "beat_record": beat_record,
+                    "is_first_attempt": is_first_attempt,
+                    "question_review_data": [],  # Can't retrieve review data after session cleared
+                    "is_basic_facts": True
+                })
+    
     if is_basic_facts:
         if request.method == "GET":
             # Generate 10 questions
@@ -1768,7 +1810,8 @@ def take_quiz(request, level_number):
         # For regular quizzes, get questions from database and store in session
         if request.method == "GET":
             # Get all questions for this level from database (all topics)
-            all_questions = list(level.questions.all())
+            # Use prefetch_related to avoid N+1 queries when accessing answers
+            all_questions = list(level.questions.all().prefetch_related('answers'))
             
             # Question limits per year
             YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
@@ -1783,7 +1826,7 @@ def take_quiz(request, level_number):
             # Shuffle the questions
             random.shuffle(questions)
             
-            # Randomize answer order for each question
+            # Randomize answer order for each question (answers already prefetched)
             for question in questions:
                 if question.question_type in ['multiple_choice', 'true_false']:
                     # Store shuffled answer IDs in a temporary attribute
@@ -1795,21 +1838,69 @@ def take_quiz(request, level_number):
             request.session[session_questions_key] = [q.id for q in questions]
         else:
             # POST - retrieve question IDs from session and load questions
+            # Use bulk query with prefetch_related to avoid N+1 queries
             question_ids = request.session.get(session_questions_key, [])
-            questions = []
-            for qid in question_ids:
-                try:
-                    question = Question.objects.get(id=qid, level=level)
-                    # Randomize answer order for MCQs
+            if question_ids:
+                questions = list(Question.objects.filter(
+                    id__in=question_ids,
+                    level=level
+                ).prefetch_related('answers'))
+                
+                # Create a dict for quick lookup and maintain order
+                questions_dict = {q.id: q for q in questions}
+                questions = [questions_dict[qid] for qid in question_ids if qid in questions_dict]
+                
+                # Randomize answer order for MCQs (answers already prefetched)
+                for question in questions:
                     if question.question_type in ['multiple_choice', 'true_false']:
                         answers_list = list(question.answers.all())
                         random.shuffle(answers_list)
                         question.shuffled_answers = answers_list
-                    questions.append(question)
-                except Question.DoesNotExist:
-                    continue
+            else:
+                questions = []
     
     if request.method == "POST":
+        # Check if quiz was already completed (prevent duplicate submissions)
+        if is_basic_facts:
+            from django.utils import timezone
+            from datetime import timedelta
+            recent_result = BasicFactsResult.objects.filter(
+                student=request.user,
+                level=level
+            ).order_by('-completed_at').first()
+            
+            if recent_result:
+                # Check if completed within last 5 seconds (likely a duplicate submission)
+                completed_at = recent_result.completed_at
+                if timezone.is_naive(completed_at):
+                    completed_at = timezone.make_aware(completed_at)
+                
+                time_since_completion = timezone.now() - completed_at
+                if time_since_completion.total_seconds() < 5:
+                    # This is likely a duplicate submission, show the existing result
+                    previous_results = BasicFactsResult.objects.filter(
+                        student=request.user,
+                        level=level
+                    ).exclude(session_id=recent_result.session_id).order_by('-points')
+                    
+                    previous_best_points = float(previous_results.first().points) if previous_results.exists() else None
+                    beat_record = previous_best_points is not None and float(recent_result.points) > previous_best_points
+                    is_first_attempt = previous_best_points is None
+                    
+                    return render(request, "maths/take_quiz.html", {
+                        "level": level,
+                        "completed": True,
+                        "total_score": recent_result.score,
+                        "total_points": recent_result.total_points,
+                        "total_time_seconds": recent_result.time_taken_seconds,
+                        "final_points": float(recent_result.points),
+                        "previous_best_points": round(previous_best_points, 2) if previous_best_points is not None else None,
+                        "beat_record": beat_record,
+                        "is_first_attempt": is_first_attempt,
+                        "question_review_data": [],
+                        "is_basic_facts": True
+                    })
+        
         # Get time elapsed
         now_ts = time.time()
         start_ts = request.session.get(timer_session_key, now_ts)
@@ -2158,10 +2249,11 @@ def measurements_questions(request, level_number):
     
     # Get all measurements questions for this level
     # Use topic field directly instead of text pattern matching
+    # Prefetch answers to avoid N+1 queries
     all_questions_query = Question.objects.filter(
         level=level,
         topic=measurements_topic
-    )
+    ).prefetch_related('answers')
     
     # Question limits per year
     YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
@@ -2215,15 +2307,15 @@ def measurements_questions(request, level_number):
     question_ids = request.session.get(questions_session_key, [])
     
     # Convert to list and maintain the order from session
-    # Validate that all questions are Measurements questions (check by topic)
+    # Use bulk query with prefetch_related to avoid N+1 queries
     if question_ids:
-        all_questions = []
-        for qid in question_ids:
-            try:
-                question = Question.objects.get(id=qid, level=level, topic=measurements_topic)
-                all_questions.append(question)
-            except Question.DoesNotExist:
-                continue
+        questions_dict = {q.id: q for q in Question.objects.filter(
+            id__in=question_ids,
+            level=level,
+            topic=measurements_topic
+        ).prefetch_related('answers')}
+        # Maintain order from session
+        all_questions = [questions_dict[qid] for qid in question_ids if qid in questions_dict]
         
         # If we filtered out questions, clear session and start fresh
         if len(all_questions) != len(question_ids):
@@ -2520,7 +2612,7 @@ def whole_numbers_questions(request, level_number):
     all_questions_query = Question.objects.filter(
         level=level,
         topic=whole_numbers_topic
-    )
+    ).prefetch_related('answers')
     
     # Question limits per year
     YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
@@ -2565,13 +2657,14 @@ def whole_numbers_questions(request, level_number):
     question_ids = request.session.get(questions_session_key, [])
     
     if question_ids:
-        all_questions = []
-        for qid in question_ids:
-            try:
-                question = Question.objects.get(id=qid, level=level, topic=whole_numbers_topic)
-                all_questions.append(question)
-            except Question.DoesNotExist:
-                continue
+        # Use bulk query with prefetch_related to avoid N+1 queries
+        questions_dict = {q.id: q for q in Question.objects.filter(
+            id__in=question_ids,
+            level=level,
+            topic=whole_numbers_topic
+        ).prefetch_related('answers')}
+        # Maintain order from session
+        all_questions = [questions_dict[qid] for qid in question_ids if qid in questions_dict]
         
         if len(all_questions) != len(question_ids):
             if timer_session_key in request.session:
@@ -2831,7 +2924,7 @@ def factors_questions(request, level_number):
     all_questions_query = Question.objects.filter(
         level=level,
         topic=factors_topic
-    )
+    ).prefetch_related('answers')
     
     # Question limits per year
     YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
@@ -2876,13 +2969,14 @@ def factors_questions(request, level_number):
     question_ids = request.session.get(questions_session_key, [])
     
     if question_ids:
-        all_questions = []
-        for qid in question_ids:
-            try:
-                question = Question.objects.get(id=qid, level=level, topic=factors_topic)
-                all_questions.append(question)
-            except Question.DoesNotExist:
-                continue
+        # Use bulk query with prefetch_related to avoid N+1 queries
+        questions_dict = {q.id: q for q in Question.objects.filter(
+            id__in=question_ids,
+            level=level,
+            topic=factors_topic
+        ).prefetch_related('answers')}
+        # Maintain order from session
+        all_questions = [questions_dict[qid] for qid in question_ids if qid in questions_dict]
         
         if len(all_questions) != len(question_ids):
             if timer_session_key in request.session:
@@ -3140,10 +3234,15 @@ def angles_questions(request, level_number):
         angles_topic = Topic.objects.create(name="Angles")
     
     # Get all Angles questions for this level
+    # Use annotations to count answers efficiently (avoids N+1 queries)
     all_questions_query = Question.objects.filter(
         level=level,
         topic=angles_topic
-    )
+    ).annotate(
+        answer_count=Count('answers'),
+        correct_count=Count('answers', filter=Q(answers__is_correct=True)),
+        wrong_count=Count('answers', filter=Q(answers__is_correct=False))
+    ).prefetch_related('answers')
     
     # Question limits per year
     YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
@@ -3176,7 +3275,22 @@ def angles_questions(request, level_number):
         import uuid
         request.session['current_attempt_id'] = str(uuid.uuid4())
         
-        all_questions_list = list(all_questions_query)
+        # Filter out questions without valid answers
+        # Use annotated counts (already calculated efficiently)
+        all_questions_list = []
+        for q in all_questions_query:
+            # Skip questions without answers
+            if q.answer_count == 0:
+                continue
+            # Skip questions without correct answer
+            if q.correct_count == 0:
+                continue
+            # For multiple choice/true false, need at least one wrong answer
+            if q.question_type in ['multiple_choice', 'true_false'] and q.wrong_count == 0:
+                continue
+            
+            all_questions_list.append(q)
+        
         if len(all_questions_list) > question_limit:
             selected_questions = select_questions_stratified(all_questions_list, question_limit)
         else:
@@ -3188,13 +3302,29 @@ def angles_questions(request, level_number):
     question_ids = request.session.get(questions_session_key, [])
     
     if question_ids:
+        # Use bulk query with annotations to avoid N+1 queries
+        questions_dict = {q.id: q for q in Question.objects.filter(
+            id__in=question_ids,
+            level=level,
+            topic=angles_topic
+        ).annotate(
+            answer_count=Count('answers'),
+            correct_count=Count('answers', filter=Q(answers__is_correct=True)),
+            wrong_count=Count('answers', filter=Q(answers__is_correct=False))
+        ).prefetch_related('answers')}
+        
+        # Maintain order from session and filter by answer counts
         all_questions = []
         for qid in question_ids:
-            try:
-                question = Question.objects.get(id=qid, level=level, topic=angles_topic)
-                all_questions.append(question)
-            except Question.DoesNotExist:
+            if qid not in questions_dict:
                 continue
+            question = questions_dict[qid]
+            # Verify question has valid answers (using annotated counts)
+            if question.answer_count == 0 or question.correct_count == 0:
+                continue
+            if question.question_type in ['multiple_choice', 'true_false'] and question.wrong_count == 0:
+                continue
+            all_questions.append(question)
         
         if len(all_questions) != len(question_ids):
             if timer_session_key in request.session:
@@ -3538,32 +3668,39 @@ def place_values_questions(request, level_number):
     # Validate that all questions are Place Values questions
     if question_ids:
         all_questions = []
+        # Use bulk query with prefetch_related to avoid N+1 queries
+        questions_dict = {q.id: q for q in Question.objects.filter(
+            id__in=question_ids,
+            level=level
+        ).prefetch_related('answers')}
+        
+        # Filter by text patterns and maintain order from session
+        all_questions = []
         for qid in question_ids:
-            try:
-                question = Question.objects.get(id=qid, level=level)
-                # Verify this is a Place Values question
-                is_place_value = (
-                    'complete the following sequence' in question.question_text.lower() or
-                    'counting on' in question.question_text.lower() or
-                    'counting back' in question.question_text.lower() or
-                    'skip counting' in question.question_text.lower() or
-                    'tens and ones' in question.question_text.lower() or
-                    'how many tens' in question.question_text.lower()
-                )
-                # Exclude measurement questions
-                is_measurement = (
-                    'which unit would you use' in question.question_text.lower() or
-                    'measure the length' in question.question_text.lower() or
-                    'measure the width' in question.question_text.lower() or
-                    'centimeter' in question.question_text.lower() or
-                    'meter' in question.question_text.lower() or
-                    'kilometer' in question.question_text.lower() or
-                    'liter' in question.question_text.lower()
-                )
-                if is_place_value and not is_measurement:
-                    all_questions.append(question)
-            except Question.DoesNotExist:
+            if qid not in questions_dict:
                 continue
+            question = questions_dict[qid]
+            # Verify this is a Place Values question
+            is_place_value = (
+                'complete the following sequence' in question.question_text.lower() or
+                'counting on' in question.question_text.lower() or
+                'counting back' in question.question_text.lower() or
+                'skip counting' in question.question_text.lower() or
+                'tens and ones' in question.question_text.lower() or
+                'how many tens' in question.question_text.lower()
+            )
+            # Exclude measurement questions
+            is_measurement = (
+                'which unit would you use' in question.question_text.lower() or
+                'measure the length' in question.question_text.lower() or
+                'measure the width' in question.question_text.lower() or
+                'centimeter' in question.question_text.lower() or
+                'meter' in question.question_text.lower() or
+                'kilometer' in question.question_text.lower() or
+                'liter' in question.question_text.lower()
+            )
+            if is_place_value and not is_measurement:
+                all_questions.append(question)
         
         # If we filtered out questions, clear session and start fresh
         if len(all_questions) != len(question_ids):
@@ -3835,7 +3972,7 @@ def fractions_questions(request, level_number):
     all_questions_query = Question.objects.filter(
         level=level,
         topic=fractions_topic
-    )
+    ).prefetch_related('answers')
     
     # Question limits per year
     YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
@@ -3892,12 +4029,14 @@ def fractions_questions(request, level_number):
     # Validate that all questions are Fractions questions (check by topic)
     if question_ids:
         all_questions = []
-        for qid in question_ids:
-            try:
-                question = Question.objects.get(id=qid, level=level, topic=fractions_topic)
-                all_questions.append(question)
-            except Question.DoesNotExist:
-                continue
+        # Use bulk query with prefetch_related to avoid N+1 queries
+        questions_dict = {q.id: q for q in Question.objects.filter(
+            id__in=question_ids,
+            level=level,
+            topic=fractions_topic
+        ).prefetch_related('answers')}
+        # Maintain order from session
+        all_questions = [questions_dict[qid] for qid in question_ids if qid in questions_dict]
         
         # If we filtered out questions, clear session and start fresh
         if len(all_questions) != len(question_ids):
@@ -4175,7 +4314,7 @@ def bodmas_questions(request, level_number):
     all_questions_query = Question.objects.filter(
         level=level,
         topic=bodmas_topic
-    )
+    ).prefetch_related('answers')
     
     # Question limits per year
     YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
@@ -4225,14 +4364,14 @@ def bodmas_questions(request, level_number):
     question_ids = request.session.get(questions_session_key, [])
     
     if question_ids:
-        all_questions = []
-        for qid in question_ids:
-            try:
-                # Filter by topic directly (same as other views)
-                question = Question.objects.get(id=qid, level=level, topic=bodmas_topic)
-                all_questions.append(question)
-            except Question.DoesNotExist:
-                continue
+        # Use bulk query with prefetch_related to avoid N+1 queries
+        questions_dict = {q.id: q for q in Question.objects.filter(
+            id__in=question_ids,
+            level=level,
+            topic=bodmas_topic
+        ).prefetch_related('answers')}
+        # Maintain order from session
+        all_questions = [questions_dict[qid] for qid in question_ids if qid in questions_dict]
         
         # If we filtered out questions, clear session and start fresh
         if len(all_questions) != len(question_ids):
@@ -4455,7 +4594,7 @@ def date_time_questions(request, level_number):
     all_questions_query = Question.objects.filter(
         level=level,
         topic=date_time_topic
-    )
+    ).prefetch_related('answers')
     
     # Question limits per year
     YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
@@ -4501,12 +4640,14 @@ def date_time_questions(request, level_number):
     
     if question_ids:
         all_questions = []
-        for qid in question_ids:
-            try:
-                question = Question.objects.get(id=qid, level=level, topic=date_time_topic)
-                all_questions.append(question)
-            except Question.DoesNotExist:
-                continue
+        # Use bulk query with prefetch_related to avoid N+1 queries
+        questions_dict = {q.id: q for q in Question.objects.filter(
+            id__in=question_ids,
+            level=level,
+            topic=date_time_topic
+        ).prefetch_related('answers')}
+        # Maintain order from session
+        all_questions = [questions_dict[qid] for qid in question_ids if qid in questions_dict]
         
         if len(all_questions) != len(question_ids):
             if timer_session_key in request.session:
@@ -4769,7 +4910,7 @@ def finance_questions(request, level_number):
     all_questions_query = Question.objects.filter(
         level=level,
         topic=finance_topic
-    )
+    ).prefetch_related('answers')
     
     # Question limits per year
     YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
@@ -4826,12 +4967,14 @@ def finance_questions(request, level_number):
     # Validate that all questions are Finance questions (check by topic)
     if question_ids:
         all_questions = []
-        for qid in question_ids:
-            try:
-                question = Question.objects.get(id=qid, level=level, topic=finance_topic)
-                all_questions.append(question)
-            except Question.DoesNotExist:
-                continue
+        # Use bulk query with prefetch_related to avoid N+1 queries
+        questions_dict = {q.id: q for q in Question.objects.filter(
+            id__in=question_ids,
+            level=level,
+            topic=finance_topic
+        ).prefetch_related('answers')}
+        # Maintain order from session
+        all_questions = [questions_dict[qid] for qid in question_ids if qid in questions_dict]
         
         # If we filtered out questions, clear session and start fresh
         if len(all_questions) != len(question_ids):

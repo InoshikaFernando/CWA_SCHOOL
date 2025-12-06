@@ -284,28 +284,42 @@ def add_measurements_questions(measurements_topic, level_7):
     skipped_count = 0
     
     for i, q_data in enumerate(questions_data, 1):
-        # Check if question already exists (by exact text match and image if provided)
-        query = Question.objects.filter(
-            level=level_7,
-            question_text=q_data["question_text"]
-        )
+        # Check if question already exists (by exact text match AND image if provided)
+        # For questions with images, we need BOTH text and image to match
+        existing = None
         
-        # If image_path is specified, also match by image
         if "image_path" in q_data and q_data["image_path"]:
             image_name = os.path.basename(q_data["image_path"])
+            # Must match both question_text AND image
+            query = Question.objects.filter(
+                level=level_7,
+                question_text=q_data["question_text"]
+            )
+            
             # Try to find by exact image path first
             existing = query.filter(image=q_data["image_path"]).first()
             if not existing:
                 # Fallback: match by image filename (handles different path formats)
                 for q in query:
-                    if q.image and (image_name in q.image.name or q.image.name.endswith(image_name)):
-                        existing = q
-                    break
-            if not existing:
-                # Last resort: just get first match
-                existing = query.first()
+                    if q.image:
+                        q_image_name = os.path.basename(q.image.name)
+                        # Remove Django suffix if present (e.g., image5_abc123.png -> image5.png)
+                        if '_' in q_image_name:
+                            q_image_base = q_image_name.split('_')[0] + os.path.splitext(q_image_name)[1]
+                        else:
+                            q_image_base = q_image_name
+                        
+                        if image_name == q_image_base or image_name in q.image.name or q.image.name.endswith(image_name):
+                            existing = q
+                            break
         else:
-            existing = query.first()
+            # No image: match by question_text only (but only if no image questions exist with same text)
+            query = Question.objects.filter(
+                level=level_7,
+                question_text=q_data["question_text"]
+            )
+            # Only match if the existing question also has no image
+            existing = query.filter(image__isnull=True).first() or (query.first() if query.count() == 1 else None)
         
         if existing:
             question = existing

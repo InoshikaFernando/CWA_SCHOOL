@@ -2288,8 +2288,26 @@ def measurements_questions(request, level_number):
         import uuid
         request.session['current_attempt_id'] = str(uuid.uuid4())
         
+        # Filter out questions without valid answers
+        all_questions_list = []
+        for q in all_questions_query:
+            answer_count = q.answers.count()
+            correct_count = q.answers.filter(is_correct=True).count()
+            wrong_count = q.answers.filter(is_correct=False).count()
+            
+            # Skip questions without answers
+            if answer_count == 0:
+                continue
+            # Skip questions without correct answer
+            if correct_count == 0:
+                continue
+            # For multiple choice/true false, need at least one wrong answer
+            if q.question_type in ['multiple_choice', 'true_false'] and wrong_count == 0:
+                continue
+            
+            all_questions_list.append(q)
+        
         # Select random questions for this attempt using stratified sampling
-        all_questions_list = list(all_questions_query)
         if len(all_questions_list) > question_limit:
             selected_questions = select_questions_stratified(all_questions_list, question_limit)
         else:

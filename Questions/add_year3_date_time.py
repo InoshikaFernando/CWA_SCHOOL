@@ -20,6 +20,7 @@ django.setup()
 from maths.models import Level, Topic, Question, Answer
 from django.core.files import File
 from django.conf import settings
+from question_utils import process_questions
 
 def setup_date_time_topic():
     """Create Date and Time topic and associate with Year 3"""
@@ -377,149 +378,15 @@ def add_date_time_questions(date_time_topic, level_3):
         print("Please add questions to the questions_data list in the script.")
         return
     
-    print(f"\n{'=' * 80}")
-    print(f"Processing {len(questions_data)} Date and Time questions for Year 3")
-    print(f"{'=' * 80}\n")
+    # Use shared utility function to process questions
+    results = process_questions(
+        level=level_3,
+        topic=date_time_topic,
+        questions_data=questions_data,
+        verbose=True
+    )
     
-    added_count = 0
-    updated_count = 0
-    skipped_count = 0
-    
-    for idx, q_data in enumerate(questions_data, 1):
-        question_text = q_data.get("question_text", "").strip()
-        if not question_text:
-            print(f"[SKIP] Question {idx}: Empty question text")
-            skipped_count += 1
-            continue
-        
-        question_type = q_data.get("question_type", "multiple_choice")
-        correct_answer = q_data.get("correct_answer", "").strip()
-        wrong_answers = q_data.get("wrong_answers", [])
-        explanation = q_data.get("explanation", "")
-        image_path = q_data.get("image_path", None)
-        
-        if not correct_answer:
-            print(f"[SKIP] Question {idx}: No correct answer provided")
-            skipped_count += 1
-            continue
-        
-        # Check if question already exists (by exact text match)
-        existing_question = Question.objects.filter(
-            question_text=question_text,
-            level=level_3,
-            topic=date_time_topic
-        ).first()
-        
-        if existing_question:
-            # Question exists - check if we need to update answers
-            existing_correct = existing_question.answers.filter(is_correct=True).first()
-            needs_update = False
-            
-            if not existing_correct or existing_correct.answer_text != correct_answer:
-                needs_update = True
-            
-            if needs_update:
-                # Delete old answers and create new ones
-                existing_question.answers.all().delete()
-                
-                # Update question explanation if provided
-                if explanation:
-                    existing_question.explanation = explanation
-                    existing_question.save()
-                
-                # Create correct answer
-                Answer.objects.create(
-                    question=existing_question,
-                    answer_text=correct_answer,
-                    is_correct=True
-                )
-                
-                # Create wrong answers
-                for wrong_answer in wrong_answers:
-                    if wrong_answer and wrong_answer.strip():
-                        Answer.objects.create(
-                            question=existing_question,
-                            answer_text=wrong_answer.strip(),
-                            is_correct=False
-                        )
-                
-                # Update image if provided
-                if image_path:
-                    image_full_path = os.path.join(settings.MEDIA_ROOT, image_path)
-                    if os.path.exists(image_full_path):
-                        with open(image_full_path, 'rb') as f:
-                            existing_question.image.save(
-                                os.path.basename(image_path),
-                                File(f),
-                                save=True
-                            )
-                    else:
-                        # Set image path even if file doesn't exist locally (for production)
-                        existing_question.image.name = image_path
-                        existing_question.save()
-                
-                print(f"[UPDATE] Question {idx}: Updated '{question_text[:50]}...'")
-                updated_count += 1
-            else:
-                print(f"[SKIP] Question {idx}: Already exists and up-to-date")
-                skipped_count += 1
-        else:
-            # Create new question
-            question = Question.objects.create(
-                level=level_3,
-                topic=date_time_topic,
-                question_text=question_text,
-                question_type=question_type,
-                difficulty=1,
-                points=1
-            )
-            
-            # Add image if provided
-            if image_path:
-                image_full_path = os.path.join(settings.MEDIA_ROOT, image_path)
-                if os.path.exists(image_full_path):
-                    with open(image_full_path, 'rb') as f:
-                        question.image.save(
-                            os.path.basename(image_path),
-                            File(f),
-                            save=True
-                        )
-                else:
-                    # Set image path even if file doesn't exist locally (for production)
-                    question.image.name = image_path
-                    question.save()
-            
-            # Set question explanation if provided
-            if explanation:
-                question.explanation = explanation
-                question.save()
-            
-            # Create correct answer
-            Answer.objects.create(
-                question=question,
-                answer_text=correct_answer,
-                is_correct=True
-            )
-            
-            # Create wrong answers
-            for wrong_answer in wrong_answers:
-                if wrong_answer and wrong_answer.strip():
-                    Answer.objects.create(
-                        question=question,
-                        answer_text=wrong_answer.strip(),
-                        is_correct=False
-                    )
-            
-            print(f"[ADDED] Question {idx}: '{question_text[:50]}...'")
-            added_count += 1
-    
-    print(f"\n{'=' * 80}")
-    print(f"SUMMARY:")
-    print(f"  Added: {added_count}")
-    print(f"  Updated: {updated_count}")
-    print(f"  Skipped: {skipped_count}")
-    print(f"  Total: {len(questions_data)}")
-    print(f"{'=' * 80}\n")
+    print(f"\n[OK] All questions are associated with Date and Time topic for Year 3")
 
 if __name__ == "__main__":
     print("=" * 80)

@@ -15,6 +15,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cwa_school.settings')
 django.setup()
 
 from maths.models import Level, Topic, Question, Answer
+from question_utils import process_questions
 
 def setup_bodmas_topic():
     """Create BODMAS/PEMDAS topic and associate with Year 6"""
@@ -399,73 +400,14 @@ def add_bodmas_questions(bodmas_topic, level_6):
         },
     ]
     
-    print(f"\n[INFO] Adding {len(questions_data)} BODMAS/PEMDAS questions for Year 6...\n")
+    # Use shared utility function to process questions
+    results = process_questions(
+        level=level_6,
+        topic=bodmas_topic,
+        questions_data=questions_data,
+        verbose=True
+    )
     
-    created_count = 0
-    updated_count = 0
-    
-    for i, q_data in enumerate(questions_data, 1):
-        # Check if question already exists
-        existing = Question.objects.filter(
-            level=level_6,
-            question_text=q_data["question_text"]
-        ).first()
-        
-        if existing:
-            # Update existing question
-            question = existing
-            question.explanation = q_data.get("explanation", "")
-            # Ensure topic is set
-            if not question.topic:
-                question.topic = bodmas_topic
-            question.save()
-            
-            # Delete old answers to replace with correct ones
-            Answer.objects.filter(question=question).delete()
-            
-            print(f"  [UPDATE] Question {i} already exists, updating answers...")
-            updated_count += 1
-        else:
-            # Create new question
-            question = Question.objects.create(
-                level=level_6,
-                topic=bodmas_topic,  # Set topic directly on question
-                question_text=q_data["question_text"],
-                question_type='multiple_choice',
-                difficulty=1,
-                points=1,
-                explanation=q_data.get("explanation", "")
-            )
-            # Safe print that handles Unicode
-            safe_text = q_data['question_text'][:50].encode('ascii', 'ignore').decode('ascii')
-            print(f"  [OK] Created Question {i}: {safe_text}...")
-            created_count += 1
-        
-        # Ensure question has topic set and level has topic associated
-        if not question.topic:
-            question.topic = bodmas_topic
-            question.save()
-        question.level.topics.add(bodmas_topic)
-        
-        # Create answers - mix correct and wrong answers
-        all_answers = [q_data["correct_answer"]] + q_data["wrong_answers"]
-        # Shuffle order for variety
-        random.shuffle(all_answers)
-        
-        order = 0
-        for answer_text in all_answers:
-            is_correct = (answer_text == q_data["correct_answer"])
-            Answer.objects.create(
-                question=question,
-                answer_text=answer_text,
-                is_correct=is_correct,
-                order=order
-            )
-            order += 1
-    
-    print(f"\n[SUMMARY]")
-    print(f"   [OK] Created: {created_count} questions")
-    print(f"   [UPDATE] Updated: {updated_count} questions")
     print(f"\n[OK] All questions are associated with BODMAS/PEMDAS topic for Year 6")
 
 if __name__ == "__main__":

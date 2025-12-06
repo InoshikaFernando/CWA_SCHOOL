@@ -17,6 +17,7 @@ django.setup()
 from maths.models import Level, Topic, Question, Answer
 from django.core.files import File
 from django.conf import settings
+from question_utils import process_questions
 
 def setup_fractions_topic():
     """Create Fractions topic and associate with Year 4"""
@@ -279,8 +280,18 @@ def add_fractions_questions(fractions_topic, level_4):
         }
     ]
     
-    print(f"\n📝 Adding {len(questions_data)} Fractions questions for Year 4...\n")
+    # Use shared utility function to process questions
+    results = process_questions(
+        level=level_4,
+        topic=fractions_topic,
+        questions_data=questions_data,
+        verbose=True
+    )
     
+    print(f"\n✅ All questions are associated with Fractions topic for Year 4")
+    
+    # Legacy code below - kept for reference but not used
+    """
     created_count = 0
     updated_count = 0
     
@@ -341,11 +352,7 @@ def add_fractions_questions(fractions_topic, level_4):
                 order=order
             )
             order += 1
-    
-    print(f"\n📊 Summary:")
-    print(f"   ✅ Created: {created_count} questions")
-    print(f"   🔄 Updated: {updated_count} questions")
-    print(f"\n✅ All questions are associated with Fractions topic for Year 4")
+    """
 
 if __name__ == "__main__":
     print("🔄 Setting up Fractions topic for Year 4...\n")

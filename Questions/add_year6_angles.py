@@ -20,6 +20,7 @@ django.setup()
 from maths.models import Level, Topic, Question, Answer
 from django.core.files import File
 from django.conf import settings
+from question_utils import process_questions
 
 def setup_angles_topic():
     """Create Angles topic and associate with Year 6"""
@@ -223,128 +224,15 @@ def add_angles_questions(angles_topic, level_6):
         },
     ]
     
-    added_count = 0
-    updated_count = 0
-    skipped_count = 0
+    # Use shared utility function to process questions
+    results = process_questions(
+        level=level_6,
+        topic=angles_topic,
+        questions_data=questions_data,
+        verbose=True
+    )
     
-    for q_data in questions_data:
-        question_text = q_data.get("question_text", "").strip()
-        if not question_text:
-            print("[SKIP] Empty question text, skipping...")
-            skipped_count += 1
-            continue
-        
-        question_type = q_data.get("question_type", "multiple_choice")
-        correct_answer = q_data.get("correct_answer", "")
-        wrong_answers = q_data.get("wrong_answers", [])
-        explanation = q_data.get("explanation", "")
-        image_path = q_data.get("image_path", "")
-        
-        # Check if question already exists by matching:
-        # 1. question_text
-        # 2. correct_answer
-        # 3. wrong_answers (all of them)
-        # 4. image_path (if provided)
-        existing_questions = Question.objects.filter(
-            question_text=question_text,
-            level=level_6,
-            topic=angles_topic
-        )
-        
-        # Check each existing question to see if it matches all criteria
-        matching_question = None
-        for eq in existing_questions:
-            # Check correct answer
-            existing_correct = eq.answers.filter(is_correct=True).first()
-            if not existing_correct or existing_correct.answer_text != correct_answer:
-                continue
-            
-            # Check wrong answers (must have same number and same values)
-            existing_wrong = list(eq.answers.filter(is_correct=False).values_list('answer_text', flat=True))
-            if len(existing_wrong) != len(wrong_answers):
-                continue
-            
-            # Check if all wrong answers match (order doesn't matter)
-            if set(existing_wrong) != set(wrong_answers):
-                continue
-            
-            # If image_path was provided, check image matches
-            if image_path:
-                image_basename = os.path.basename(image_path)
-                # Remove extension for comparison (Django may add suffixes like _ooCBWLf)
-                image_name_without_ext = os.path.splitext(image_basename)[0]
-                
-                if not eq.image:
-                    # Question doesn't have image but we're adding one - not a match
-                    continue
-                
-                # Check if image filename matches (handle Django's filename suffixes)
-                eq_image_name = eq.image.name if eq.image.name else ""
-                eq_image_basename = os.path.basename(eq_image_name)
-                eq_image_name_without_ext = os.path.splitext(eq_image_basename)[0]
-                
-                # Match if the base name (without extension and Django suffix) matches
-                if eq_image_name_without_ext != image_name_without_ext:
-                    continue
-            else:
-                # No image_path provided - check that existing question also has no image
-                if eq.image:
-                    continue
-            
-            # All criteria match - this is a duplicate
-            matching_question = eq
-            break
-        
-        if matching_question:
-            # Question exists with same text, answers, and image - skip it
-            print(f"[SKIP] Question already exists and is up-to-date: {question_text[:50]}...")
-            skipped_count += 1
-            continue
-        else:
-            # Create new question
-            print(f"[ADD] Adding new question: {question_text[:50]}...")
-            
-            new_question = Question.objects.create(
-                level=level_6,
-                topic=angles_topic,
-                question_text=question_text,
-                question_type=question_type,
-                difficulty=1,
-                points=1,
-                explanation=explanation
-            )
-            
-            # Add correct answer
-            Answer.objects.create(
-                question=new_question,
-                answer_text=correct_answer,
-                is_correct=True
-            )
-            
-            # Add wrong answers
-            for wrong_answer in wrong_answers:
-                Answer.objects.create(
-                    question=new_question,
-                    answer_text=wrong_answer,
-                    is_correct=False
-                )
-            
-            # Add image if provided - just set the path, don't copy the file
-            if image_path:
-                # Set image path without copying the file
-                new_question.image.name = image_path
-                new_question.save(update_fields=['image'])
-                print(f"  [OK] Set image path: {image_path}")
-            
-            added_count += 1
-    
-    print(f"\n[SUMMARY]")
-    print(f"  Added: {added_count}")
-    print(f"  Updated: {updated_count}")
-    print(f"  Skipped: {skipped_count}")
-    print(f"  Total processed: {added_count + updated_count + skipped_count}")
-    
-    return added_count + updated_count
+    return results['created'] + results['updated']
 
 if __name__ == "__main__":
     print("=" * 60)

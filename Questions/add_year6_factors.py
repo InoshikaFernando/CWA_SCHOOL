@@ -20,6 +20,7 @@ django.setup()
 from maths.models import Level, Topic, Question, Answer
 from django.core.files import File
 from django.conf import settings
+from question_utils import process_questions
 
 def setup_factors_topic():
     """Create Factors topic and associate with Year 6"""
@@ -186,133 +187,13 @@ def add_factors_questions(factors_topic, level_6):
         }
     ]
     
-    added_count = 0
-    updated_count = 0
-    skipped_count = 0
-    
-    for q_data in questions_data:
-        question_text = q_data["question_text"]
-        question_type = q_data.get("question_type", "multiple_choice")
-        correct_answer = q_data["correct_answer"]
-        wrong_answers = q_data.get("wrong_answers", [])
-        explanation = q_data.get("explanation", "")
-        image_path = q_data.get("image_path", None)
-        
-        # Check if question already exists (by exact text match)
-        existing_question = Question.objects.filter(
-            question_text=question_text,
-            level=level_6,
-            topic=factors_topic
-        ).first()
-        
-        if existing_question:
-            # Question exists - check if we need to update answers
-            existing_correct_answer = existing_question.answers.filter(is_correct=True).first()
-            needs_update = False
-            
-            # Check if correct answer changed
-            if not existing_correct_answer or existing_correct_answer.answer_text != correct_answer:
-                needs_update = True
-            
-            # Check if explanation changed
-            if existing_question.explanation != explanation:
-                needs_update = True
-            
-            if needs_update:
-                # Delete old answers
-                existing_question.answers.all().delete()
-                
-                # Update question explanation
-                if explanation:
-                    existing_question.explanation = explanation
-                    existing_question.save()
-                
-                # Create correct answer
-                Answer.objects.create(
-                    question=existing_question,
-                    answer_text=correct_answer,
-                    is_correct=True
-                )
-                
-                # Create wrong answers
-                for wrong_answer in wrong_answers:
-                    if wrong_answer and wrong_answer.strip():
-                        Answer.objects.create(
-                            question=existing_question,
-                            answer_text=wrong_answer.strip(),
-                            is_correct=False
-                        )
-                
-                # Update image if provided
-                if image_path:
-                    image_full_path = os.path.join(settings.MEDIA_ROOT, image_path)
-                    if os.path.exists(image_full_path):
-                        with open(image_full_path, 'rb') as f:
-                            existing_question.image.save(
-                                os.path.basename(image_path),
-                                File(f),
-                                save=True
-                            )
-                    else:
-                        # Set image path even if file doesn't exist locally (for production)
-                        existing_question.image.name = image_path
-                        existing_question.save()
-                
-                updated_count += 1
-                print(f"  [UPDATED] {question_text[:60]}...")
-            else:
-                skipped_count += 1
-        else:
-            # Create new question
-            question = Question.objects.create(
-                level=level_6,
-                topic=factors_topic,
-                question_text=question_text,
-                question_type=question_type,
-                difficulty=1,
-                points=1,
-                explanation=explanation
-            )
-            
-            # Set image if provided
-            if image_path:
-                image_full_path = os.path.join(settings.MEDIA_ROOT, image_path)
-                if os.path.exists(image_full_path):
-                    with open(image_full_path, 'rb') as f:
-                        question.image.save(
-                            os.path.basename(image_path),
-                            File(f),
-                            save=True
-                        )
-                else:
-                    # Set image path even if file doesn't exist locally (for production)
-                    question.image.name = image_path
-                    question.save()
-            
-            # Create correct answer
-            Answer.objects.create(
-                question=question,
-                answer_text=correct_answer,
-                is_correct=True
-            )
-            
-            # Create wrong answers
-            for wrong_answer in wrong_answers:
-                if wrong_answer and wrong_answer.strip():
-                    Answer.objects.create(
-                        question=question,
-                        answer_text=wrong_answer.strip(),
-                        is_correct=False
-                    )
-            
-            added_count += 1
-            print(f"  [ADDED] {question_text[:60]}...")
-    
-    print(f"\n[SUMMARY]")
-    print(f"  Added: {added_count}")
-    print(f"  Updated: {updated_count}")
-    print(f"  Skipped: {skipped_count}")
-    print(f"  Total: {len(questions_data)}")
+    # Use shared utility function to process questions
+    results = process_questions(
+        level=level_6,
+        topic=factors_topic,
+        questions_data=questions_data,
+        verbose=True
+    )
 
 if __name__ == "__main__":
     import argparse

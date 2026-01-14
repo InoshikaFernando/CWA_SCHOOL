@@ -20,6 +20,7 @@ django.setup()
 from maths.models import Level, Topic, Question, Answer
 from django.core.files import File
 from django.conf import settings
+from question_utils import process_questions
 
 def setup_measurements_topic():
     """Create Measurements topic and associate with Year 5"""
@@ -273,11 +274,7 @@ def add_measurements_questions(measurements_topic, level_5):
                         order += 1
                     print(f"      [ANSWERS] Created {len(all_answers)} answer(s)")
     
-    print(f"\n[SUMMARY]")
-    print(f"   [CREATE] Created: {created_count} questions")
-    print(f"   [UPDATE] Updated: {updated_count} questions")
-    print(f"   [SKIP] Skipped: {skipped_count} questions")
-    print(f"\n[OK] All questions are associated with Measurements topic for Year 5")
+    """
 
 if __name__ == "__main__":
     print("[INFO] Setting up Measurements topic for Year 5...\n")

@@ -15,6 +15,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cwa_school.settings')
 django.setup()
 
 from maths.models import Level, Topic, Question, Answer
+from question_utils import process_questions
 
 def setup_bodmas_topic():
     """Create BODMAS/PEMDAS topic and associate with Year 5"""
@@ -255,8 +256,18 @@ def add_bodmas_questions(bodmas_topic, level_5):
         },
     ]
     
-    print(f"\n[INFO] Adding {len(questions_data)} BODMAS/PEMDAS questions for Year 5...\n")
+    # Use shared utility function to process questions
+    results = process_questions(
+        level=level_5,
+        topic=bodmas_topic,
+        questions_data=questions_data,
+        verbose=True
+    )
     
+    print(f"\n[OK] All questions are associated with BODMAS/PEMDAS topic for Year 5")
+    
+    # Legacy code below - kept for reference but not used
+    """
     created_count = 0
     updated_count = 0
     
@@ -318,11 +329,7 @@ def add_bodmas_questions(bodmas_topic, level_5):
                 order=order
             )
             order += 1
-    
-    print(f"\n[SUMMARY]")
-    print(f"   [OK] Created: {created_count} questions")
-    print(f"   [UPDATE] Updated: {updated_count} questions")
-    print(f"\n[OK] All questions are associated with BODMAS/PEMDAS topic for Year 5")
+    """
 
 if __name__ == "__main__":
     print("[INFO] Setting up BODMAS/PEMDAS topic for Year 5...\n")

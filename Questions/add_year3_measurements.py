@@ -20,6 +20,7 @@ django.setup()
 from maths.models import Level, Topic, Question, Answer
 from django.core.files import File
 from django.conf import settings
+from question_utils import process_questions
 
 def setup_measurements_topic():
     """Create Measurements topic and associate with Year 3"""
@@ -251,8 +252,18 @@ def add_measurements_questions(measurements_topic, level_3):
         },
     ]
     
-    print(f"\n[INFO] Processing {len(questions_data)} Measurements questions for Year 3...\n")
+    # Use shared utility function to process questions
+    results = process_questions(
+        level=level_3,
+        topic=measurements_topic,
+        questions_data=questions_data,
+        verbose=True
+    )
     
+    print(f"\n[OK] All questions are associated with Measurements topic for Year 3")
+    
+    # Legacy code below - kept for reference but not used
+    """
     created_count = 0
     updated_count = 0
     skipped_count = 0
@@ -403,12 +414,7 @@ def add_measurements_questions(measurements_topic, level_3):
                         )
                         order += 1
                     print(f"      [ANSWERS] Created {len(all_answers)} answer(s)")
-    
-    print(f"\n[SUMMARY]")
-    print(f"   [CREATE] Created: {created_count} questions")
-    print(f"   [UPDATE] Updated: {updated_count} questions")
-    print(f"   [SKIP] Skipped: {skipped_count} questions")
-    print(f"\n[OK] All questions are associated with Measurements topic for Year 3")
+    """
 
 if __name__ == "__main__":
     print("[INFO] Setting up Measurements topic for Year 3...\n")

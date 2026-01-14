@@ -15,6 +15,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cwa_school.settings')
 django.setup()
 
 from maths.models import Level, Topic, Question, Answer
+from question_utils import process_questions
 
 def setup_place_values_topic():
     """Create Place Values topic and associate with Year 2"""
@@ -679,8 +680,18 @@ def add_place_values_questions(place_values_topic, level_2):
         },
     ]
     
-    print(f"\n📝 Adding {len(questions_data)} Place Values questions (counting and skip counting) for Year 2...\n")
+    # Use shared utility function to process questions
+    results = process_questions(
+        level=level_2,
+        topic=place_values_topic,
+        questions_data=questions_data,
+        verbose=True
+    )
     
+    print(f"\n✅ All questions are associated with Place Values topic for Year 2")
+    
+    # Legacy code below - kept for reference but not used
+    """
     created_count = 0
     skipped_count = 0
     
@@ -737,11 +748,7 @@ def add_place_values_questions(place_values_topic, level_2):
         
         print(f"  ✅ Created Question {i}: {q_data['question_text'][:50]}...")
         created_count += 1
-    
-    print(f"\n📊 Summary:")
-    print(f"   ✅ Created: {created_count} questions")
-    print(f"   ⏭️  Skipped: {skipped_count} questions (already exist)")
-    print(f"\n✅ All questions are associated with Place Values topic for Year 2")
+    """
 
 if __name__ == "__main__":
     print("🔄 Setting up Place Values topic for Year 2...\n")

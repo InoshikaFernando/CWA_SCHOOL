@@ -273,8 +273,6 @@ def add_measurements_questions(measurements_topic, level_5):
                         )
                         order += 1
                     print(f"      [ANSWERS] Created {len(all_answers)} answer(s)")
-    
-    """
 
 if __name__ == "__main__":
     print("[INFO] Setting up Measurements topic for Year 5...\n")

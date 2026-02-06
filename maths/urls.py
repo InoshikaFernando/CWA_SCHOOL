@@ -28,6 +28,7 @@ urlpatterns = [
     path("level/<int:level_number>/date-time/", views.date_time_questions, name="date_time_questions"),
     path("level/<int:level_number>/bodmas/", views.bodmas_questions, name="bodmas_questions"),
     path("level/<int:level_number>/whole-numbers/", views.whole_numbers_questions, name="whole_numbers_questions"),
+    path("level/<int:level_number>/integers/", views.integers_questions, name="integers_questions"),
     path("level/<int:level_number>/factors/", views.factors_questions, name="factors_questions"),
     path("level/<int:level_number>/angles/", views.angles_questions, name="angles_questions"),
     path("basic-facts/<str:subtopic_name>/", views.basic_facts_subtopic, name="basic_facts_subtopic"),

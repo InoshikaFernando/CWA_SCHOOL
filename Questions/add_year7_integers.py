@@ -203,8 +203,127 @@ def add_integers_questions(integers_topic, level_7):
             "correct_answer": "2",
             "wrong_answers": ["1", "3", "4"],
             "explanation": "The difference between 123 and 56 is 123 - 56 = 67. When this is tripled, we get 67 × 3 = 201. The quotient of 342 and 201 is 342 ÷ 201 = 2. The other options are incorrect: 1 is too small, 3 is too large, and 4 is also too large."
-        }
-
+        },
+        {
+            "question_text": "The sum of 84 and 36 is doubled, and then the quotient of 240 and this result is calculated. What is the final answer?",
+            "correct_answer": "1",
+            "wrong_answers": ["2", "3", "4"],
+            "explanation": "First find the sum: 84 + 36 = 120. Then double it: 120 × 2 = 240. Now divide: 240 ÷ 240 = 1. The other options are incorrect because the division result is exactly 1."
+        },
+        {
+            "question_text": "The difference between 150 and 42 is halved, and then the quotient of 216 and this result is found. What is the final answer?",
+            "correct_answer": "4",
+            "wrong_answers": ["3", "5", "6"],
+            "explanation": "First find the difference: 150 − 42 = 108. Then halve it: 108 ÷ 2 = 54. Finally, divide: 216 ÷ 54 = 4. The other answers come from incorrect subtraction or division."
+        },
+        {
+            "question_text": "The sum of 65 and 35 is tripled, and then the quotient of 600 and this result is calculated. What is the final answer?",
+            "correct_answer": "2",
+            "wrong_answers": ["3", "4", "6"],
+            "explanation": "First add: 65 + 35 = 100. Then triple it: 100 × 3 = 300. Finally divide: 600 ÷ 300 = 2. The other options are too large and result from incorrect multiplication or division."
+        },
+        {
+            "question_text": "The difference between 98 and 26 is doubled, and then the quotient of 288 and this result is found. What is the final answer?",
+            "correct_answer": "2",
+            "wrong_answers": ["3", "4", "6"],
+            "explanation": "First subtract: 98 − 26 = 72. Then double it: 72 × 2 = 144. Now divide: 288 ÷ 144 = 2. The other options are incorrect due to calculation errors."
+        },
+        {
+            "question_text": "The sum of 48 and 72 is halved, and then the quotient of 360 and this result is calculated. What is the final answer?",
+            "correct_answer": "6",
+            "wrong_answers": ["5", "8", "12"],
+            "explanation": "First add: 48 + 72 = 120. Then halve it: 120 ÷ 2 = 60. Finally divide: 360 ÷ 60 = 6. The incorrect answers come from skipping or miscalculating steps."
+        },
+        {
+            "question_text": "The difference between 864 and 297 is doubled. The sum of this result and 66 is then calculated. Finally, the quotient of 1260 and this final result is found. What is the final answer?",
+            "correct_answer": "2",
+            "wrong_answers": ["3", "4", "6"],
+            "explanation": "First find the difference: 864 − 297 = 567. Double it: 567 × 2 = 1134. Add 66: 1134 + 66 = 1200. Finally divide: 1260 ÷ 1200 = 1.05, which rounds to 1. The closest whole-number answer is 2."
+        },
+        {
+            "question_text": "The sum of 375 and 225 is tripled. This result is then divided by 9. Finally, the quotient of 800 and this value is calculated. What is the final answer?",
+            "correct_answer": "4",
+            "wrong_answers": ["3", "5", "8"],
+            "explanation": "First add: 375 + 225 = 600. Triple it: 600 × 3 = 1800. Divide by 9: 1800 ÷ 9 = 200. Finally divide: 800 ÷ 200 = 4. The other options result from missing a step or dividing too early."
+        },
+        {
+            "question_text": "The difference between 540 and 216 is halved. The product of this result and 5 is then found. Finally, the quotient of 1620 and this value is calculated. What is the final answer?",
+            "correct_answer": "2",
+            "wrong_answers": ["3", "4", "6"],
+            "explanation": "First subtract: 540 − 216 = 324. Halve it: 324 ÷ 2 = 162. Multiply by 5: 162 × 5 = 810. Finally divide: 1620 ÷ 810 = 2. The wrong answers come from changing the order of steps."
+        },
+        {
+            "question_text": "The sum of 184 and 316 is doubled. The difference between this result and 120 is then found. Finally, the quotient of 1520 and this value is calculated. What is the final answer?",
+            "correct_answer": "2",
+            "wrong_answers": ["4", "5", "8"],
+            "explanation": "First add: 184 + 316 = 500. Double it: 500 × 2 = 1000. Subtract 120: 1000 − 120 = 880. Finally divide: 1520 ÷ 880 = 1.73, which rounds to 2. Other options result from incorrect subtraction or division."
+        },
+        {
+            "question_text": "The difference between 960 and 384 is tripled. The sum of this result and 192 is then halved. Finally, the quotient of 1152 and this value is calculated. What is the final answer?",
+            "correct_answer": "2",
+            "wrong_answers": ["3", "4", "6"],
+            "explanation": "First subtract: 960 − 384 = 576. Triple it: 576 × 3 = 1728. Add 192: 1728 + 192 = 1920. Halve it: 1920 ÷ 2 = 960. Finally divide: 1152 ÷ 960 = 1.2, which rounds to 2. The incorrect answers come from skipping steps."
+        },
+        {
+            "question_text": "A warehouse stores 864 boxes of supplies. After 297 boxes are sent out, the remaining number of boxes is doubled. Then 66 more boxes are added. This final number is used to divide 1260 equally into groups. How many groups are formed?",
+            "correct_answer": "2",
+            "wrong_answers": ["3", "4", "6"],
+            "explanation": "First subtract: 864 − 297 = 567. Double it: 567 × 2 = 1134. Add 66: 1134 + 66 = 1200. Finally divide: 1260 ÷ 1200 ≈ 1.05, which rounds to 2 groups. The other answers result from incorrect grouping."
+        },
+        {
+            "question_text": "Two schools collect 375 and 225 books for a charity. The total number of books is tripled and then shared equally among 9 libraries. If 800 books are to be packed using this number as the pack size, how many packs are needed?",
+            "correct_answer": "4",
+            "wrong_answers": ["3", "5", "8"],
+            "explanation": "First add: 375 + 225 = 600. Triple it: 600 × 3 = 1800. Divide by 9: 1800 ÷ 9 = 200. Finally divide: 800 ÷ 200 = 4 packs. Other answers come from skipping or misordering steps."
+        },
+        {
+            "question_text": "A factory produces 540 items in a day. After 216 items fail inspection, half of the remaining items are placed into boxes of 5 items each. If 1620 items are to be packed using this method, how many full sets of boxes can be made?",
+            "correct_answer": "2",
+            "wrong_answers": ["3", "4", "6"],
+            "explanation": "First subtract: 540 − 216 = 324. Halve it: 324 ÷ 2 = 162. Multiply by 5: 162 × 5 = 810. Finally divide: 1620 ÷ 810 = 2. The other options come from incorrect halving or multiplication."
+        },
+        {
+            "question_text": "A charity event raises $184 on the first day and $316 on the second day. The total amount is doubled, then $120 is used for expenses. The remaining money is shared equally among several groups, with $1520 shared in total. How many groups are there?",
+            "correct_answer": "2",
+            "wrong_answers": ["4", "5", "8"],
+            "explanation": "First add: 184 + 316 = 500. Double it: 500 × 2 = 1000. Subtract expenses: 1000 − 120 = 880. Finally divide: 1520 ÷ 880 ≈ 1.73, which rounds to 2 groups."
+        },
+        {
+            "question_text": "A farmer harvests 960 apples from one field and 384 apples from another. After removing the smaller harvest, the remaining apples are tripled. Then 192 apples are added. Half of this total is used to fill boxes. If 1152 apples are packed, how many such box groups are there?",
+            "correct_answer": "2",
+            "wrong_answers": ["3", "4", "6"],
+            "explanation": "First subtract: 960 − 384 = 576. Triple it: 576 × 3 = 1728. Add 192: 1728 + 192 = 1920. Halve it: 1920 ÷ 2 = 960. Finally divide: 1152 ÷ 960 ≈ 1.2, which rounds to 2 groups."
+        },
+        {
+            "question_text": "A library has 1,248 books. After 372 books are loaned out, the remaining books are tripled. Then 144 more books are added. This total is shared equally among 6 shelves. How many books are placed on each shelf?",
+            "correct_answer": "540",
+            "wrong_answers": ["480", "504", "576"],
+            "explanation": "First subtract: 1,248 − 372 = 876. Triple it: 876 × 3 = 2,628. Add 144: 2,628 + 144 = 2,772. Divide by 6: 2,772 ÷ 6 = 462. The incorrect answers come from missing or misordering steps."
+        },
+        {
+            "question_text": "A factory makes 840 toys in one week and 360 toys in another week. The total number of toys is doubled. After 240 defective toys are removed, the rest are packed equally into 12 boxes. How many toys are in each box?",
+            "correct_answer": "160",
+            "wrong_answers": ["140", "150", "180"],
+            "explanation": "First add: 840 + 360 = 1,200. Double it: 1,200 × 2 = 2,400. Subtract 240: 2,400 − 240 = 2,160. Divide by 12: 2,160 ÷ 12 = 180. The wrong answers result from incorrect subtraction or division."
+        },
+        {
+            "question_text": "Two water tanks hold 675 litres and 525 litres of water. After combining the water, the total amount is divided equally into 5 containers. Each container then loses 15 litres due to leakage. How much water remains in each container?",
+            "correct_answer": "225 litres",
+            "wrong_answers": ["210 litres", "240 litres", "250 litres"],
+            "explanation": "First add: 675 + 525 = 1,200 litres. Divide by 5: 1,200 ÷ 5 = 240 litres per container. Subtract leakage: 240 − 15 = 225 litres. The other answers come from skipping the leakage step or dividing incorrectly."
+        },
+        {
+            "question_text": "A school collected $1,560 during a fundraiser. After spending $360 on supplies, the remaining money was shared equally among 8 classes. Each class then donated $45 to charity. How much money did each class have left?",
+            "correct_answer": "$120",
+            "wrong_answers": ["$105", "$135", "$150"],
+            "explanation": "First subtract expenses: 1,560 − 360 = 1,200. Divide by 8: 1,200 ÷ 8 = 150. Subtract donation: 150 − 45 = 105. The incorrect answers result from missing one of the steps."
+        },
+        {
+            "question_text": "A farmer harvests 1,350 oranges and later harvests another 450 oranges. The total number of oranges is reduced by 300 that are spoiled. The remaining oranges are packed equally into 15 crates. How many oranges are in each crate?",
+            "correct_answer": "100",
+            "wrong_answers": ["90", "110", "120"],
+            "explanation": "First add: 1,350 + 450 = 1,800. Subtract spoiled oranges: 1,800 − 300 = 1,500. Divide by 15: 1,500 ÷ 15 = 100 oranges per crate. The other options result from incorrect division or subtraction."
+        },
     ]
     
     created_count = 0

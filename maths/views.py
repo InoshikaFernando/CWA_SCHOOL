@@ -5529,9 +5529,9 @@ def integers_questions(request, level_number):
         session_id=attempt_id
     )
 
-    return render(request, "maths/practice_questions.html", {
+    return render(request, "maths/measurements_questions.html", {
         "level": level,
-        "question": current_question,
+        "current_question": current_question,
         "question_number": question_number,
         "total_questions": len(all_questions),
         "topic": integers_topic,
@@ -5823,9 +5823,9 @@ def trigonometry_questions(request, level_number):
         session_id=attempt_id
     )
 
-    return render(request, "maths/practice_questions.html", {
+    return render(request, "maths/measurements_questions.html", {
         "level": level,
-        "question": current_question,
+        "current_question": current_question,
         "question_number": question_number,
         "total_questions": len(all_questions),
         "topic": trigonometry_topic,

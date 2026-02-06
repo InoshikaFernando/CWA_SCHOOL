@@ -308,7 +308,7 @@ def add_trigonometry_questions(trigonometry_topic, level_8):
                 topic=trigonometry_topic,
                 question_text=question_text,
                 question_type="Multiple Choice",
-                difficulty="Medium",
+                difficulty=2,
                 points=1,
                 explanation=q_data["explanation"]
             )

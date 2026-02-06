@@ -2223,7 +2223,7 @@ def practice_questions(request, level_number):
     # Shuffle the questions
     random.shuffle(questions)
     
-    return render(request, "maths/practice_questions.html", {
+    return render(request, "maths/measurements_questions.html", {
         "level": level,
         "questions": questions,
         "total_questions": all_questions.count()

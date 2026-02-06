@@ -258,7 +258,7 @@ def add_integers_questions(integers_topic, level_7):
                 topic=integers_topic,
                 question_text=question_text,
                 question_type="Multiple Choice",
-                difficulty="Medium",
+                difficulty=2,
                 points=1,
                 explanation=q_data["explanation"]
             )

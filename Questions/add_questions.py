@@ -32,6 +32,7 @@ from add_year6_angles import setup_angles_topic as setup_year6_angles, add_angle
 from add_year7_measurements import setup_measurements_topic as setup_year7_measurements, add_measurements_questions as add_year7_measurements
 from add_year7_bodmas import setup_bodmas_topic as setup_year7_bodmas, add_bodmas_questions as add_year7_bodmas
 from add_year7_integers import setup_integers_topic as setup_year7_integers, add_integers_questions as add_year7_integers
+from add_year8_trigonometry import setup_trigonometry_topic as setup_year8_trigonometry, add_trigonometry_questions as add_year8_trigonometry
 
 def run_script_file(script_name, script_path):
     """
@@ -117,6 +118,9 @@ def run_all_question_scripts():
         ("Year 7 - Measurements", setup_year7_measurements, add_year7_measurements),
         ("Year 7 - BODMAS/PEMDAS", setup_year7_bodmas, add_year7_bodmas),
         ("Year 7 - Integers", setup_year7_integers, add_year7_integers),
+        
+        # Year 8
+        ("Year 8 - Trigonometry", setup_year8_trigonometry, add_year8_trigonometry),
     ]
     
     success_count = 0

@@ -508,6 +508,20 @@
                                     <p>Random questions from all topics</p>
                                 </a>
                             </div>
+                        {% elif level.level_number == 8 %}
+                            <!-- Year 8: Show Trigonometry and Take Quiz -->
+                            <div class="topic-card">
+                                <a href="{% url 'maths:trigonometry_questions' level.level_number %}">
+                                    <h4>Trigonometry</h4>
+                                    <p>Year {{ level.level_number }} - Trigonometry</p>
+                                </a>
+                            </div>
+                            <div class="topic-card">
+                                <a href="{% url 'maths:take_quiz' level.level_number %}">
+                                    <h4>Take Quiz</h4>
+                                    <p>Random questions from all topics</p>
+                                </a>
+                            </div>
                         {% else %}
                             <!-- Other years: Show nothing -->
                         {% endif %}

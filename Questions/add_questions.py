@@ -22,6 +22,7 @@ from add_year3_fractions import setup_fractions_topic, add_fractions_questions
 from add_year3_finance import setup_finance_topic, add_finance_questions
 from add_year3_date_time import setup_date_time_topic, add_date_time_questions
 from add_year4_fractions import setup_fractions_topic as setup_year4_fractions, add_fractions_questions as add_year4_fractions
+from add_year4_integers import setup_integers_topic as setup_year4_integers, add_integers_questions as add_year4_integers
 from add_year5_measurements import setup_measurements_topic as setup_year5_measurements, add_measurements_questions as add_year5_measurements
 from add_year5_bodmas import setup_bodmas_topic as setup_year5_bodmas, add_bodmas_questions as add_year5_bodmas
 from add_year6_measurements import setup_measurements_topic as setup_year6_measurements, add_measurements_questions as add_year6_measurements
@@ -102,6 +103,7 @@ def run_all_question_scripts():
         
         # Year 4
         ("Year 4 - Fractions", setup_year4_fractions, add_year4_fractions),
+        ("Year 4 - Integers", setup_year4_integers, add_year4_integers),
         
         # Year 5
         ("Year 5 - Measurements", setup_year5_measurements, add_year5_measurements),

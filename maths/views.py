@@ -5,7 +5,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db import transaction
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse, Http404, HttpResponseForbidden
+import subprocess
+import sys
+import os
+from django.conf import settings
 from django.views.decorators.http import require_http_methods
 import time
 from django.db.models import Q, Count, Sum, Max, Min, Avg
@@ -66,6 +70,29 @@ def calculate_age_from_dob(date_of_birth):
     if (today.month, today.day) < (date_of_birth.month, date_of_birth.day):
         age -= 1
     return age
+
+
+@login_required
+def run_add_year4_integers(request):
+    """Run the Questions/add_year4_integers.py script (staff only)."""
+    if not request.user.is_staff:
+        return HttpResponseForbidden("Permission denied")
+
+    project_root = getattr(settings, 'BASE_DIR', None)
+    if not project_root:
+        # Fallback: parent directory of this file's parent
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+    script_path = os.path.join(project_root, 'Questions', 'add_year4_integers.py')
+
+    if not os.path.exists(script_path):
+        return JsonResponse({'ok': False, 'error': f'Script not found: {script_path}'})
+
+    try:
+        result = subprocess.run([sys.executable, script_path], cwd=project_root, capture_output=True, text=True, timeout=300)
+        return JsonResponse({'ok': result.returncode == 0, 'returncode': result.returncode, 'stdout': result.stdout, 'stderr': result.stderr})
+    except Exception as e:
+        return JsonResponse({'ok': False, 'error': str(e)})
 
 def get_or_create_age_level(age):
     """Get or create a Level object for a specific age (for Basic Facts statistics)"""

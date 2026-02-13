@@ -20,6 +20,7 @@ django.setup()
 from maths.models import Level, Topic, Question, Answer
 from django.core.files import File
 from django.conf import settings
+from question_utils import process_questions
 
 
 def setup_integers_topic():
@@ -36,11 +37,16 @@ def setup_integers_topic():
         print("[ERROR] Year 4 level not found!")
         return None
 
+    print(f"[INFO] Found Year 4: {level_4}")
+
+    # Check if Integers already associated
     if level_4.topics.filter(name="Integers").exists():
         print("[INFO] Year 4 already has Integers topic associated.")
+        print(f"   Current topics for Year 4: {', '.join([t.name for t in level_4.topics.all()])}")
     else:
         level_4.topics.add(integers_topic)
         print(f"[OK] Successfully associated Integers topic with Year 4")
+        print(f"   Year 4 now has topics: {', '.join([t.name for t in level_4.topics.all()])}")
 
     return integers_topic, level_4
 
@@ -82,6 +88,7 @@ def add_integers_questions(integers_topic, level_4):
 
     created_count = 0
     updated_count = 0
+    skipped_count = 0
 
     for q_data in questions_data:
         question_text = q_data["question_text"]
@@ -148,10 +155,11 @@ def add_integers_questions(integers_topic, level_4):
             print(f"  [OK] Created: {safe_text}...")
             created_count += 1
 
-    print(f"\n[SUMMARY]")
-    print(f"   [OK] Created: {created_count} questions")
-    print(f"   [UPDATE] Updated: {updated_count} questions")
-    print(f"\n[OK] All Integers questions are associated with Year 4")
+            print(f"\n[SUMMARY]")
+            print(f"   [OK] Created: {created_count} questions")
+            print(f"   [UPDATE] Updated: {updated_count} questions")
+            print(f"   [SKIP] Skipped: {skipped_count} questions")
+            print(f"\n[OK] All Integers questions are associated with Year 4")
 
 
 if __name__ == "__main__":

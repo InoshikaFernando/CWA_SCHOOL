@@ -29,6 +29,44 @@ BASIC_FACTS_TOPIC_CONFIG = {
     "place-value-facts": {"start_level": 128, "level_count": 5},
 }
 
+# Year-to-topics mapping for dashboard display
+# Maps year number to list of (topic_name, url_name, display_name)
+YEAR_TOPICS_MAP = {
+    2: [
+        ("Measurements", "measurements_questions", "Measurements"),
+        ("Place Values", "place_values_questions", "Place Values"),
+    ],
+    3: [
+        ("Measurements", "measurements_questions", "Measurements"),
+        ("Fractions", "fractions_questions", "Fractions"),
+        ("Finance", "finance_questions", "Finance"),
+        ("Date and Time", "date_time_questions", "Date and Time"),
+    ],
+    4: [
+        ("Fractions", "fractions_questions", "Fractions"),
+        ("Integers", "integers_questions", "Integers"),
+    ],
+    5: [
+        ("Measurements", "measurements_questions", "Measurements"),
+        ("BODMAS/PEMDAS", "bodmas_questions", "BODMAS/PEMDAS"),
+    ],
+    6: [
+        ("Measurements", "measurements_questions", "Measurements"),
+        ("BODMAS/PEMDAS", "bodmas_questions", "BODMAS/PEMDAS"),
+        ("Whole Numbers", "whole_numbers_questions", "Whole Numbers"),
+        ("Factors", "factors_questions", "Factors"),
+        ("Angles", "angles_questions", "Angles"),
+    ],
+    7: [
+        ("Measurements", "measurements_questions", "Measurements"),
+        ("BODMAS/PEMDAS", "bodmas_questions", "BODMAS/PEMDAS"),
+        ("Integers", "integers_questions", "Integers"),
+    ],
+    8: [
+        ("Trigonometry", "trigonometry_questions", "Trigonometry"),
+    ],
+}
+
 
 def normalize_basic_facts_topic(topic_name):
     return slugify(topic_name or "").lower()
@@ -946,7 +984,8 @@ def dashboard_detail(request):
         "has_class": Enrollment.objects.filter(student=request.user).exists(),
         "progress_by_level": progress_by_level,
         "show_progress_table": True,
-        "show_all_content": False
+        "show_all_content": False,
+        "year_topics_map": YEAR_TOPICS_MAP
     })
 
 @login_required

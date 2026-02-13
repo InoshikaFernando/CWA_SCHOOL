@@ -357,181 +357,25 @@
             </div>
             <div class="accordion-content">
                 <div class="topics-grid">
-                    {% for level in levels_by_year|lookup:year %}
-                        {% if level.level_number == 2 %}
-                            <!-- Year 2: Show Measurements, Place Values, and Take Quiz -->
+                    {% if year_topics_map|lookup:year %}
+                        {% for level in levels_by_year|lookup:year %}
+                            {% for topic_name, url_name, display_name in year_topics_map|lookup:year %}
                             <div class="topic-card">
-                                <a href="{% url 'maths:measurements_questions' level.level_number %}">
-                                    <h4>Measurements</h4>
-                                    <p>Year {{ level.level_number }} - Measurements</p>
+                                <a href="{% url "maths:"|add:url_name level.level_number %}">
+                                    <h4>{{ display_name }}</h4>
+                                    <p>Year {{ level.level_number }} - {{ display_name }}</p>
                                 </a>
                             </div>
-                            <div class="topic-card">
-                                <a href="{% url 'maths:place_values_questions' level.level_number %}">
-                                    <h4>Place Values</h4>
-                                    <p>Year {{ level.level_number }} - Place Values</p>
-                                </a>
-                            </div>
+                            {% endfor %}
+                            <!-- Take Quiz card (same for all years) -->
                             <div class="topic-card">
                                 <a href="{% url 'maths:take_quiz' level.level_number %}">
                                     <h4>Take Quiz</h4>
                                     <p>Random questions from all topics</p>
                                 </a>
                             </div>
-                        {% elif level.level_number == 3 %}
-                            <!-- Year 3: Show Measurements, Fractions, Finance, Date and Time, and Take Quiz -->
-                            <div class="topic-card">
-                                <a href="{% url 'maths:measurements_questions' level.level_number %}">
-                                    <h4>Measurements</h4>
-                                    <p>Year {{ level.level_number }} - Measurements</p>
-                                </a>
-                            </div>
-                            <div class="topic-card">
-                                <a href="{% url 'maths:fractions_questions' level.level_number %}">
-                                    <h4>Fractions</h4>
-                                    <p>Year {{ level.level_number }} - Fractions</p>
-                                </a>
-                            </div>
-                            <div class="topic-card">
-                                <a href="{% url 'maths:finance_questions' level.level_number %}">
-                                    <h4>Finance</h4>
-                                    <p>Year {{ level.level_number }} - Finance</p>
-                                </a>
-                            </div>
-                            <div class="topic-card">
-                                <a href="{% url 'maths:date_time_questions' level.level_number %}">
-                                    <h4>Date and Time</h4>
-                                    <p>Year {{ level.level_number }} - Date and Time</p>
-                                </a>
-                            </div>
-                            <div class="topic-card">
-                                <a href="{% url 'maths:take_quiz' level.level_number %}">
-                                    <h4>Take Quiz</h4>
-                                    <p>Random questions from all topics</p>
-                                </a>
-                            </div>
-                        {% elif level.level_number == 4 %}
-                            <!-- Year 4: Show Fractions, Integers and Take Quiz -->
-                            <div class="topic-card">
-                                <a href="{% url 'maths:fractions_questions' level.level_number %}">
-                                    <h4>Fractions</h4>
-                                    <p>Year {{ level.level_number }} - Fractions</p>
-                                </a>
-                            </div>
-                            <div class="topic-card">
-                                <a href="{% url 'maths:integers_questions' level.level_number %}">
-                                    <h4>Integers</h4>
-                                    <p>Year {{ level.level_number }} - Integers</p>
-                                </a>
-                            </div>
-                            <div class="topic-card">
-                                <a href="{% url 'maths:take_quiz' level.level_number %}">
-                                    <h4>Take Quiz</h4>
-                                    <p>Random questions from all topics</p>
-                                </a>
-                            </div>
-                        {% elif level.level_number == 5 %}
-                            <!-- Year 5: Show Measurements, BODMAS/PEMDAS and Take Quiz -->
-                            <div class="topic-card">
-                                <a href="{% url 'maths:measurements_questions' level.level_number %}">
-                                    <h4>Measurements</h4>
-                                    <p>Year {{ level.level_number }} - Measurements</p>
-                                </a>
-                            </div>
-                            <div class="topic-card">
-                                <a href="{% url 'maths:bodmas_questions' level.level_number %}">
-                                    <h4>BODMAS/PEMDAS</h4>
-                                    <p>Year {{ level.level_number }} - Order of Operations</p>
-                                </a>
-                            </div>
-                            <div class="topic-card">
-                                <a href="{% url 'maths:take_quiz' level.level_number %}">
-                                    <h4>Take Quiz</h4>
-                                    <p>Random questions from all topics</p>
-                                </a>
-                            </div>
-                        {% elif level.level_number == 6 %}
-                            <!-- Year 6: Show Measurements, BODMAS/PEMDAS, Whole Numbers and Take Quiz -->
-                            <div class="topic-card">
-                                <a href="{% url 'maths:measurements_questions' level.level_number %}">
-                                    <h4>Measurements</h4>
-                                    <p>Year {{ level.level_number }} - Measurements</p>
-                                </a>
-                            </div>
-                            <div class="topic-card">
-                                <a href="{% url 'maths:bodmas_questions' level.level_number %}">
-                                    <h4>BODMAS/PEMDAS</h4>
-                                    <p>Year {{ level.level_number }} - Order of Operations</p>
-                                </a>
-                            </div>
-                            <div class="topic-card">
-                                <a href="{% url 'maths:whole_numbers_questions' level.level_number %}">
-                                    <h4>Whole Numbers</h4>
-                                    <p>Year {{ level.level_number }} - Whole Numbers</p>
-                                </a>
-                            </div>
-                            <div class="topic-card">
-                                <a href="{% url 'maths:factors_questions' level.level_number %}">
-                                    <h4>Factors</h4>
-                                    <p>Year {{ level.level_number }} - Factors</p>
-                                </a>
-                            </div>
-                            <div class="topic-card">
-                                <a href="{% url 'maths:angles_questions' level.level_number %}">
-                                    <h4>Angles</h4>
-                                    <p>Year {{ level.level_number }} - Angles</p>
-                                </a>
-                            </div>
-                            <div class="topic-card">
-                                <a href="{% url 'maths:take_quiz' level.level_number %}">
-                                    <h4>Take Quiz</h4>
-                                    <p>Random questions from all topics</p>
-                                </a>
-                            </div>
-                        {% elif level.level_number == 7 %}
-                            <!-- Year 7: Show Measurements, BODMAS and Take Quiz -->
-                            <div class="topic-card">
-                                <a href="{% url 'maths:measurements_questions' level.level_number %}">
-                                    <h4>Measurements</h4>
-                                    <p>Year {{ level.level_number }} - Measurements</p>
-                                </a>
-                            </div>
-                            <div class="topic-card">
-                                <a href="{% url 'maths:bodmas_questions' level.level_number %}">
-                                    <h4>BODMAS/PEMDAS</h4>
-                                    <p>Year {{ level.level_number }} - BODMAS/PEMDAS</p>
-                                </a>
-                            </div>
-                            <div class="topic-card">
-                                <a href="{% url 'maths:integers_questions' level.level_number %}">
-                                    <h4>Integers</h4>
-                                    <p>Year {{ level.level_number }} - Integers</p>
-                                </a>
-                            </div>
-                            <div class="topic-card">
-                                <a href="{% url 'maths:take_quiz' level.level_number %}">
-                                    <h4>Take Quiz</h4>
-                                    <p>Random questions from all topics</p>
-                                </a>
-                            </div>
-                        {% elif level.level_number == 8 %}
-                            <!-- Year 8: Show Trigonometry and Take Quiz -->
-                            <div class="topic-card">
-                                <a href="{% url 'maths:trigonometry_questions' level.level_number %}">
-                                    <h4>Trigonometry</h4>
-                                    <p>Year {{ level.level_number }} - Trigonometry</p>
-                                </a>
-                            </div>
-                            <div class="topic-card">
-                                <a href="{% url 'maths:take_quiz' level.level_number %}">
-                                    <h4>Take Quiz</h4>
-                                    <p>Random questions from all topics</p>
-                                </a>
-                            </div>
-                        {% else %}
-                            <!-- Other years: Show nothing -->
-                        {% endif %}
-                    {% endfor %}
+                        {% endfor %}
+                    {% endif %}
                 </div>
             </div>
         </div>

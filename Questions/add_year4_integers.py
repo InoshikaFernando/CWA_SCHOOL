@@ -84,6 +84,96 @@ def add_integers_questions(integers_topic, level_4):
             "wrong_answers": ["24", "25", "27"],
             "explanation": "45 minus 19 equals 26."
         },
+        {
+            "question_text": "There are 28 apples shared equally among 4 children. How many apples does each child get?",
+            "correct_answer": "7",
+            "wrong_answers": ["6", "14", "4"],
+            "explanation": "28 ÷ 4 = 7. Each child gets 7 apples."
+        },
+        {
+            "question_text": "A teacher has 20 pencils and gives them equally to 5 students. How many pencils does each student get?",
+            "correct_answer": "4",
+            "wrong_answers": ["5", "10", "15"],
+            "explanation": "20 ÷ 5 = 4. Each student gets 4 pencils."
+        },
+        {
+            "question_text": "24 cookies are packed equally into 6 boxes. How many cookies are in each box?",
+            "correct_answer": "4",
+            "wrong_answers": ["6", "12", "3"],
+            "explanation": "24 ÷ 6 = 4. Each box has 4 cookies."
+        },
+        {
+            "question_text": "There are 32 balloons divided equally among 8 friends. How many balloons does each friend get?",
+            "correct_answer": "4",
+            "wrong_answers": ["8", "6", "2"],
+            "explanation": "32 ÷ 8 = 4. Each friend gets 4 balloons."
+        },
+        {
+            "question_text": "A baker makes 36 cupcakes and puts them equally into 9 trays. How many cupcakes are on each tray?",
+            "correct_answer": "4",
+            "wrong_answers": ["6", "9", "12"],
+            "explanation": "36 ÷ 9 = 4. Each tray has 4 cupcakes."
+        },
+        {
+            "question_text": "There are 40 sweets shared equally among 5 children. How many sweets does each child get?",
+            "correct_answer": "8",
+            "wrong_answers": ["5", "10", "6"],
+            "explanation": "40 ÷ 5 = 8. Each child gets 8 sweets."
+        },
+        {
+            "question_text": "30 books are placed equally on 6 shelves. How many books are on each shelf?",
+            "correct_answer": "5",
+            "wrong_answers": ["6", "10", "4"],
+            "explanation": "30 ÷ 6 = 5. Each shelf has 5 books."
+        },
+        {
+            "question_text": "There are 45 stickers shared equally among 9 students. How many stickers does each student get?",
+            "correct_answer": "5",
+            "wrong_answers": ["9", "6", "4"],
+            "explanation": "45 ÷ 9 = 5. Each student gets 5 stickers."
+        },
+        {
+            "question_text": "A box has 48 crayons divided equally into 6 packs. How many crayons are in each pack?",
+            "correct_answer": "8",
+            "wrong_answers": ["6", "12", "10"],
+            "explanation": "48 ÷ 6 = 8. Each pack has 8 crayons."
+        },
+        {
+            "question_text": "There are 56 oranges shared equally among 7 baskets. How many oranges are in each basket?",
+            "correct_answer": "8",
+            "wrong_answers": ["7", "14", "6"],
+            "explanation": "56 ÷ 7 = 8. Each basket has 8 oranges."
+        },
+        {
+            "question_text": "A teacher arranges 36 chairs into 4 equal rows. How many chairs are in each row?",
+            "correct_answer": "9",
+            "wrong_answers": ["6", "8", "12"],
+            "explanation": "36 ÷ 4 = 9. Each row has 9 chairs."
+        },
+        {
+            "question_text": "24 muffins are shared equally among 3 plates. How many muffins are on each plate?",
+            "correct_answer": "8",
+            "wrong_answers": ["6", "12", "4"],
+            "explanation": "24 ÷ 3 = 8. Each plate has 8 muffins."
+        },
+        {
+            "question_text": "There are 63 beads divided equally into 9 strings. How many beads are on each string?",
+            "correct_answer": "7",
+            "wrong_answers": ["9", "6", "8"],
+            "explanation": "63 ÷ 9 = 7. Each string has 7 beads."
+        },
+        {
+            "question_text": "A farmer puts 50 eggs equally into 10 boxes. How many eggs are in each box?",
+            "correct_answer": "5",
+            "wrong_answers": ["10", "8", "4"],
+            "explanation": "50 ÷ 10 = 5. Each box has 5 eggs."
+        },
+        {
+            "question_text": "There are 72 marbles shared equally among 8 children. How many marbles does each child get?",
+            "correct_answer": "9",
+            "wrong_answers": ["8", "12", "6"],
+            "explanation": "72 ÷ 8 = 9. Each child gets 9 marbles."
+        }
     ]
 
     created_count = 0

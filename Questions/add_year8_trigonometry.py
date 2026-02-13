@@ -218,7 +218,72 @@ def add_trigonometry_questions(trigonometry_topic, level_8):
             "wrong_answers": ["0.6", "0.4", "1.2"],
             "explanation": "Using sin²(θ) + cos²(θ) = 1: sin²(θ) = 1 - 0.36 = 0.64, so sin(θ) = 0.8."
         },
-        
+        {
+            "question_text": "A right-angled triangle has sides of 6 cm and 8 cm. What is the length of the hypotenuse?",
+            "correct_answer": "10 cm",
+            "wrong_answers": ["12 cm", "14 cm", "9 cm"],
+            "explanation": "Using Pythagoras’ theorem: √(6² + 8²) = √(36 + 64) = √100 = 10 cm."
+        },
+        {
+            "question_text": "The hypotenuse of a right-angled triangle is 13 cm and one side is 5 cm. What is the length of the other side?",
+            "correct_answer": "12 cm",
+            "wrong_answers": ["10 cm", "8 cm", "18 cm"],
+            "explanation": "Using Pythagoras’ theorem: √(13² − 5²) = √(169 − 25) = √144 = 12 cm."
+        },
+        {
+            "question_text": "The hypotenuse of a right-angled triangle is 13 cm and one side is 5 cm. What is the length of the other side?",
+            "correct_answer": "12 cm",
+            "wrong_answers": ["10 cm", "8 cm", "18 cm"],
+            "explanation": "Using Pythagoras’ theorem: √(13² − 5²) = √(169 − 25) = √144 = 12 cm."
+        },
+        {
+            "question_text": "A ladder is 10 m long and reaches a wall 8 m high. How far is the bottom of the ladder from the wall?",
+            "correct_answer": "6 m",
+            "wrong_answers": ["4 m", "12 m", "18 m"],
+            "explanation": "Using Pythagoras’ theorem: √(10² − 8²) = √(100 − 64) = √36 = 6 m."
+        },
+        {
+            "question_text": "In a right-angled triangle, the angle is 30° and the hypotenuse is 10 cm. What is the length of the opposite side?",
+            "correct_answer": "5 cm",
+            "wrong_answers": ["8.7 cm", "6 cm", "10 cm"],
+            "explanation": "Using sine: sin 30° = opposite ÷ hypotenuse, so opposite = 10 × 0.5 = 5 cm."
+        },
+        {
+            "question_text": "In a right-angled triangle, the angle is 60° and the hypotenuse is 12 cm. What is the length of the adjacent side?",
+            "correct_answer": "6 cm",
+            "wrong_answers": ["10.4 cm", "8 cm", "12 cm"],
+            "explanation": "Using cosine: cos 60° = adjacent ÷ hypotenuse, so adjacent = 12 × 0.5 = 6 cm."
+        },
+        {
+            "question_text": "A right-angled triangle has an angle of 45° and an adjacent side of 7 cm. What is the length of the opposite side?",
+            "correct_answer": "7 cm",
+            "wrong_answers": ["4.9 cm", "9.9 cm", "14 cm"],
+            "explanation": "Using tangent: tan 45° = opposite ÷ adjacent = 1, so opposite = 7 cm."
+        },
+        {
+            "question_text": "A right-angled triangle has a hypotenuse of 15 cm and an angle of 40°. What is the length of the opposite side (to 1 decimal place)? Assume sin(40°) = 0.643.",
+            "correct_answer": "9.6 cm",
+            "wrong_answers": ["11.5 cm", "7.2 cm", "6.4 cm"],
+            "explanation": "Using sine: opposite = 15 × sin 40° ≈ 15 × 0.643 = 9.6 cm."
+        },
+        {
+            "question_text": "A right-angled triangle has an adjacent side of 9 cm and an angle of 35°. What is the length of the hypotenuse (to 1 decimal place)? Assume cos(35°) = 0.819.",
+            "correct_answer": "11.0 cm",
+            "wrong_answers": ["7.4 cm", "9.0 cm", "12.6 cm"],
+            "explanation": "Using cosine: hypotenuse = 9 ÷ cos 35° ≈ 9 ÷ 0.819 = 11.0 cm."
+        },
+        {
+            "question_text": "Which formula represents Pythagoras’ theorem?",
+            "correct_answer": "a² + b² = c²",
+            "wrong_answers": ["a + b = c²", "a² − b² = c²", "c² − a = b²"],
+            "explanation": "In a right-angled triangle, the square of the hypotenuse equals the sum of the squares of the other two sides."
+        },
+        {
+            "question_text": "Which trigonometric ratio is used to find the opposite side when the angle and hypotenuse are known?",
+            "correct_answer": "Sine",
+            "wrong_answers": ["Cosine", "Tangent", "Pythagoras"],
+            "explanation": "Sine relates the opposite side to the hypotenuse: sin = opposite ÷ hypotenuse."
+        },
         {
             "question_text": "What is sin(90°)?",
             "correct_answer": "1",

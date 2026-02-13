@@ -5,7 +5,9 @@ register = template.Library()
 @register.filter
 def lookup(dictionary, key):
     """Template filter to lookup dictionary values by key"""
-    return dictionary.get(key, [])
+    if dictionary is None:
+        return None
+    return dictionary.get(key, None)
 
 @register.filter
 def basic_facts_level(level_number):

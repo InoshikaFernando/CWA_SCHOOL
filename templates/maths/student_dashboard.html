@@ -357,25 +357,27 @@
             </div>
             <div class="accordion-content">
                 <div class="topics-grid">
-                    {% if year_topics_map|lookup:year %}
-                        {% for level in levels_by_year|lookup:year %}
-                            {% for topic_name, url_name, display_name in year_topics_map|lookup:year %}
-                            <div class="topic-card">
-                                <a href="{% url "maths:"|add:url_name level.level_number %}">
-                                    <h4>{{ display_name }}</h4>
-                                    <p>Year {{ level.level_number }} - {{ display_name }}</p>
-                                </a>
-                            </div>
+                    {% with year_topics=year_topics_map|lookup:year %}
+                        {% if year_topics %}
+                            {% for level in levels_by_year|lookup:year %}
+                                {% for topic_name, url_name, display_name in year_topics %}
+                                <div class="topic-card">
+                                    <a href="{% url "maths:"|add:url_name level.level_number %}">
+                                        <h4>{{ display_name }}</h4>
+                                        <p>Year {{ level.level_number }} - {{ display_name }}</p>
+                                    </a>
+                                </div>
+                                {% endfor %}
+                                <!-- Take Quiz card (same for all years) -->
+                                <div class="topic-card">
+                                    <a href="{% url 'maths:take_quiz' level.level_number %}">
+                                        <h4>Take Quiz</h4>
+                                        <p>Random questions from all topics</p>
+                                    </a>
+                                </div>
                             {% endfor %}
-                            <!-- Take Quiz card (same for all years) -->
-                            <div class="topic-card">
-                                <a href="{% url 'maths:take_quiz' level.level_number %}">
-                                    <h4>Take Quiz</h4>
-                                    <p>Random questions from all topics</p>
-                                </a>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
+                        {% endif %}
+                    {% endwith %}
                 </div>
             </div>
         </div>

@@ -411,11 +411,17 @@
                                 </a>
                             </div>
                         {% elif level.level_number == 4 %}
-                            <!-- Year 4: Show Fractions and Take Quiz -->
+                            <!-- Year 4: Show Fractions, Integers and Take Quiz -->
                             <div class="topic-card">
                                 <a href="{% url 'maths:fractions_questions' level.level_number %}">
                                     <h4>Fractions</h4>
                                     <p>Year {{ level.level_number }} - Fractions</p>
+                                </a>
+                            </div>
+                            <div class="topic-card">
+                                <a href="{% url 'maths:integers_questions' level.level_number %}">
+                                    <h4>Integers</h4>
+                                    <p>Year {{ level.level_number }} - Integers</p>
                                 </a>
                             </div>
                             <div class="topic-card">

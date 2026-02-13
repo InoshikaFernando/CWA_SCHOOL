@@ -550,7 +550,8 @@ def dashboard(request):
         "has_class": Enrollment.objects.filter(student=request.user).exists(),
         "progress_by_level": [],
         "show_progress_table": False,
-        "show_all_content": True
+        "show_all_content": True,
+        "year_topics_map": YEAR_TOPICS_MAP
     })
 
 @login_required

@@ -66,6 +66,7 @@ YEAR_TOPICS_MAP = {
     8: [
         ("Trigonometry", "trigonometry_questions", "Trigonometry"),
         ("Integers", "integers_questions", "Integers"),
+        ("Factors", "factors_questions", "Factors"),
     ],
 }
 

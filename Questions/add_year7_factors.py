@@ -310,22 +310,30 @@ def add_factors_questions(factors_topic, level_7):
 
 
 if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser(description='Add/Update Year 7 Factors questions')
-    parser.add_argument('--execute', action='store_true', help='Actually perform the operations')
-    args = parser.parse_args()
-
-    if not args.execute:
-        print("[DRY RUN] Use --execute to actually add/update questions")
-        print()
-
+    print("[INFO] Setting up Factors topic for Year 7...\n")
     result = setup_factors_topic()
+    
     if result:
-        topic, level = result
-        if args.execute:
-            add_factors_questions(topic, level)
-        else:
-            print("[DRY RUN] Would add/update questions here")
-    else:
-        print("[ERROR] Failed to setup topic")
+        factors_topic, level_7 = result
+        print("\n" + "="*60)
+        add_factors_questions(factors_topic, level_7)
+        print("\n[OK] Done!")
+    # import argparse
+
+    # parser = argparse.ArgumentParser(description='Add/Update Year 7 Factors questions')
+    # parser.add_argument('--execute', action='store_true', help='Actually perform the operations')
+    # args = parser.parse_args()
+
+    # if not args.execute:
+    #     print("[DRY RUN] Use --execute to actually add/update questions")
+    #     print()
+
+    # result = setup_factors_topic()
+    # if result:
+    #     topic, level = result
+    #     if args.execute:
+    #         add_factors_questions(topic, level)
+    #     else:
+    #         print("[DRY RUN] Would add/update questions here")
+    # else:
+    #     print("[ERROR] Failed to setup topic")

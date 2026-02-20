@@ -1,0 +1,200 @@
+[
+    {
+        "question_text": "What is the LCM of 3 and 4?",
+        "question_type": "multiple_choice",
+        "correct_answer": "12",
+        "wrong_answers": [
+            "6",
+            "8",
+            "24"
+        ],
+        "explanation": "Multiples of 3: 3, 6, 9, 12. Multiples of 4: 4, 8, 12. Lowest common multiple is 12."
+    },
+    {
+        "question_text": "What is the LCM of 5 and 10?",
+        "question_type": "multiple_choice",
+        "correct_answer": "10",
+        "wrong_answers": [
+            "5",
+            "20",
+            "15"
+        ],
+        "explanation": "Multiples of 5: 5, 10, 15. Multiples of 10: 10, 20, 30. LCM is 10."
+    },
+    {
+        "question_text": "What is the LCM of 6 and 8?",
+        "question_type": "multiple_choice",
+        "correct_answer": "24",
+        "wrong_answers": [
+            "12",
+            "16",
+            "48"
+        ],
+        "explanation": "Multiples of 6: 6, 12, 18, 24. Multiples of 8: 8, 16, 24. LCM is 24."
+    },
+    {
+        "question_text": "What is the LCM of 9 and 12?",
+        "question_type": "multiple_choice",
+        "correct_answer": "36",
+        "wrong_answers": [
+            "18",
+            "24",
+            "48"
+        ],
+        "explanation": "Multiples of 9: 9, 18, 27, 36. Multiples of 12: 12, 24, 36. LCM is 36."
+    },
+    {
+        "question_text": "What is the LCM of 7 and 9?",
+        "question_type": "multiple_choice",
+        "correct_answer": "63",
+        "wrong_answers": [
+            "27",
+            "45",
+            "72"
+        ],
+        "explanation": "Multiples of 7: 7, 14, 21, 28, 35, 42, 49, 56, 63. Multiples of 9: 9, 18, 27, 36, 45, 54, 63. LCM is 63."
+    },
+    {
+        "question_text": "A bus arrives every 12 minutes. Another arrives every 18 minutes. After how many minutes will both buses arrive together?",
+        "question_type": "multiple_choice",
+        "correct_answer": "36 minutes",
+        "wrong_answers": [
+            "24 minutes",
+            "48 minutes",
+            "72 minutes"
+        ],
+        "explanation": "LCM of 12 and 18 is 36, so they meet every 36 minutes."
+    },
+    {
+        "question_text": "Two lights flash every 5 seconds and 8 seconds. When will they flash together?",
+        "question_type": "multiple_choice",
+        "correct_answer": "40 seconds",
+        "wrong_answers": [
+            "20 seconds",
+            "30 seconds",
+            "50 seconds"
+        ],
+        "explanation": "LCM of 5 and 8 is 40."
+    },
+    {
+        "question_text": "A gardener waters roses every 6 days and sunflowers every 15 days. When will both be watered on the same day again?",
+        "question_type": "multiple_choice",
+        "correct_answer": "30 days",
+        "wrong_answers": [
+            "21 days",
+            "45 days",
+            "60 days"
+        ],
+        "explanation": "LCM of 6 and 15 is 30."
+    },
+    {
+        "question_text": "What is the HCF of 8 and 12?",
+        "question_type": "multiple_choice",
+        "correct_answer": "4",
+        "wrong_answers": [
+            "2",
+            "6",
+            "8"
+        ],
+        "explanation": "Factors of 8: 1, 2, 4, 8. Factors of 12: 1, 2, 3, 4, 6, 12. Highest common factor is 4."
+    },
+    {
+        "question_text": "What is the HCF of 15 and 20?",
+        "question_type": "multiple_choice",
+        "correct_answer": "5",
+        "wrong_answers": [
+            "10",
+            "15",
+            "20"
+        ],
+        "explanation": "Factors of 15: 1, 3, 5, 15. Factors of 20: 1, 2, 4, 5, 10, 20. HCF is 5."
+    },
+    {
+        "question_text": "What is the HCF of 18 and 24?",
+        "question_type": "multiple_choice",
+        "correct_answer": "6",
+        "wrong_answers": [
+            "3",
+            "12",
+            "9"
+        ],
+        "explanation": "Common factors of 18 and 24 are 1, 2, 3, 6. Highest is 6."
+    },
+    {
+        "question_text": "What is the HCF of 9 and 27?",
+        "question_type": "multiple_choice",
+        "correct_answer": "9",
+        "wrong_answers": [
+            "3",
+            "6",
+            "27"
+        ],
+        "explanation": "Factors of 9: 1, 3, 9. Factors of 27: 1, 3, 9, 27. HCF is 9."
+    },
+    {
+        "question_text": "What is the HCF of 16 and 40?",
+        "question_type": "multiple_choice",
+        "correct_answer": "8",
+        "wrong_answers": [
+            "4",
+            "6",
+            "10"
+        ],
+        "explanation": "Common factors of 16 and 40: 1, 2, 4, 8. Highest is 8."
+    },
+    {
+        "question_text": "What is the HCF of 21 and 28?",
+        "question_type": "multiple_choice",
+        "correct_answer": "7",
+        "wrong_answers": [
+            "3",
+            "14",
+            "21"
+        ],
+        "explanation": "Common factors of 21 and 28: 1, 7. Highest is 7."
+    },
+    {
+        "question_text": "What is the HCF of 30 and 45?",
+        "question_type": "multiple_choice",
+        "correct_answer": "15",
+        "wrong_answers": [
+            "5",
+            "10",
+            "30"
+        ],
+        "explanation": "Common factors of 30 and 45: 1, 3, 5, 15. Highest is 15."
+    },
+    {
+        "question_text": "What is the HCF of 12, 18, and 24?",
+        "question_type": "multiple_choice",
+        "correct_answer": "6",
+        "wrong_answers": [
+            "3",
+            "4",
+            "12"
+        ],
+        "explanation": "Common factors: 1, 2, 3, 6. Highest is 6."
+    },
+    {
+        "question_text": "What is the HCF of 14 and 49?",
+        "question_type": "multiple_choice",
+        "correct_answer": "7",
+        "wrong_answers": [
+            "14",
+            "21",
+            "28"
+        ],
+        "explanation": "Common factors of 14 and 49: 1, 7. Highest is 7."
+    },
+    {
+        "question_text": "What is the HCF of 32 and 56?",
+        "question_type": "multiple_choice",
+        "correct_answer": "8",
+        "wrong_answers": [
+            "4",
+            "16",
+            "32"
+        ],
+        "explanation": "Common factors of 32 and 56: 1, 2, 4, 8. Highest is 8."
+    }
+]

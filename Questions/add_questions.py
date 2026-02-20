@@ -35,6 +35,7 @@ from add_year7_bodmas import setup_bodmas_topic as setup_year7_bodmas, add_bodma
 from add_year7_integers import setup_integers_topic as setup_year7_integers, add_integers_questions as add_year7_integers
 from add_year8_integers import setup_integers_topic as setup_year8_integers, add_integers_questions as add_year8_integers
 from add_year8_trigonometry import setup_trigonometry_topic as setup_year8_trigonometry, add_trigonometry_questions as add_year8_trigonometry
+from add_questions_from_json import process_all as process_all_json, list_expected_files
 
 def run_script_file(script_name, script_path):
     """
@@ -178,14 +179,43 @@ def run_all_question_scripts():
             error_count += 1
             errors.append(f"{script_name}: {str(e)}")
     
+    # Finally, process JSON-based question files
+    print("\n" + "=" * 80)
+    print("Processing JSON question files")
+    print("=" * 80)
+    print()
+
+    try:
+        json_result = process_all_json(verbose=True)
+        json_created = json_result.get("created", 0)
+        json_updated = json_result.get("updated", 0)
+        json_skipped = json_result.get("skipped", 0)
+        json_errors = json_result.get("errors", 0)
+
+        if json_errors == 0:
+            print(f"\n[OK] JSON questions processed successfully")
+            success_count += 1
+        else:
+            print(f"\n[WARNING] JSON questions had {json_errors} error(s)")
+            error_count += 1
+            errors.append(f"JSON questions: {json_errors} error(s)")
+    except Exception as e:
+        print(f"\n[ERROR] Failed to process JSON questions: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        error_count += 1
+        errors.append(f"JSON questions: {str(e)}")
+        json_created = json_updated = json_skipped = 0
+
     # Summary
     print("\n" + "=" * 80)
     print("SUMMARY")
     print("=" * 80)
-    total_scripts = len(function_scripts) + len(file_scripts)
+    total_scripts = len(function_scripts) + len(file_scripts) + 1  # +1 for JSON
     print(f"Total scripts: {total_scripts}")
     print(f"Successful: {success_count}")
     print(f"Failed: {error_count}")
+    print(f"\nJSON questions: Created={json_created}, Updated={json_updated}, Skipped={json_skipped}")
     
     if errors:
         print("\nErrors encountered:")

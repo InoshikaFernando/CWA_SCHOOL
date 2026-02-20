@@ -1,0 +1,87 @@
+[
+    {
+        "question_text": "Find the unknown length.",
+        "question_type": "multiple_choice",
+        "correct_answer": "2cm",
+        "wrong_answers": [
+            "3cm",
+            "4cm",
+            "5cm"
+        ],
+        "explanation": "Use the given measurements to find the unknown length.",
+        "image_path": "questions/year5/measurements/image1.png"
+    },
+    {
+        "question_text": "Find the unknown length.",
+        "question_type": "multiple_choice",
+        "correct_answer": "5cm",
+        "wrong_answers": [
+            "2cm",
+            "3cm",
+            "4cm"
+        ],
+        "explanation": "Use the given measurements to find the unknown length.",
+        "image_path": "questions/year5/measurements/image2.png"
+    },
+    {
+        "question_text": "Find the unknown length.",
+        "question_type": "multiple_choice",
+        "correct_answer": "32cm",
+        "wrong_answers": [
+            "27cm",
+            "30cm",
+            "35cm"
+        ],
+        "explanation": "Use the given measurements to find the unknown length.",
+        "image_path": "questions/year5/measurements/image3.png"
+    },
+    {
+        "question_text": "Find the unknown length.",
+        "question_type": "multiple_choice",
+        "correct_answer": "6cm",
+        "wrong_answers": [
+            "5cm",
+            "4cm",
+            "3cm"
+        ],
+        "explanation": "Use the given measurements to find the unknown length.",
+        "image_path": "questions/year5/measurements/image4.png"
+    },
+    {
+        "question_text": "Find the unknown length.",
+        "question_type": "multiple_choice",
+        "correct_answer": "2cm",
+        "wrong_answers": [
+            "1cm",
+            "3cm",
+            "4cm"
+        ],
+        "explanation": "Use the given measurements to find the unknown length.",
+        "image_path": "questions/year5/measurements/image5.png"
+    },
+    {
+        "question_text": "What is the height of the tide at 3:00 p.m. in the afternoon?",
+        "question_type": "multiple_choice",
+        "correct_answer": "1.8 meters",
+        "wrong_answers": [
+            "1.2 meters",
+            "2.1 meters",
+            "1.5 meters",
+            "0.9 meters"
+        ],
+        "explanation": "Read the tide height from the graph at 3:00 p.m.",
+        "image_path": "questions/year5/measurements/image.png"
+    },
+    {
+        "question_text": "What is the height of the tide at 7:00 p.m.?",
+        "question_type": "multiple_choice",
+        "correct_answer": "3.4",
+        "wrong_answers": [
+            "3.5",
+            "3.3",
+            "3.6"
+        ],
+        "explanation": "Read the tide height from the graph at 7:00 p.m.",
+        "image_path": "questions/year5/measurements/image.png"
+    }
+]

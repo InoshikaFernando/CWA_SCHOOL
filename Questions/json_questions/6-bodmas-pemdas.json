@@ -1,0 +1,618 @@
+[
+    {
+        "question_text": "I add 2, then multiply it by 5. The result is 40. What was the number I thought of?",
+        "question_type": "multiple_choice",
+        "correct_answer": "6",
+        "wrong_answers": [
+            "8",
+            "10",
+            "4"
+        ],
+        "explanation": "Work backwards: 40 ÷ 5 = 8, then 8 - 2 = 6. So the original number was 6."
+    },
+    {
+        "question_text": "I multiply it by 7, then I subtract 12. The result is 9. What was the number I thought of?",
+        "question_type": "multiple_choice",
+        "correct_answer": "3",
+        "wrong_answers": [
+            "1",
+            "5",
+            "2"
+        ],
+        "explanation": "Work backwards: 9 + 12 = 21, then 21 ÷ 7 = 3. So the original number was 3."
+    },
+    {
+        "question_text": "I add 11, then multiply it by 7. The result is 63. What was the number I thought of?",
+        "question_type": "multiple_choice",
+        "correct_answer": "-2",
+        "wrong_answers": [
+            "2",
+            "0",
+            "-4"
+        ],
+        "explanation": "Work backwards: 63 ÷ 7 = 9, then 9 - 11 = -2. So the original number was -2."
+    },
+    {
+        "question_text": "I add 7, then double it. The result is 20. What was the number I thought of?",
+        "question_type": "multiple_choice",
+        "correct_answer": "3",
+        "wrong_answers": [
+            "5",
+            "1",
+            "7"
+        ],
+        "explanation": "Work backwards: 20 ÷ 2 = 10, then 10 - 7 = 3. So the original number was 3."
+    },
+    {
+        "question_text": "I add 20, double it and subtract 25. The result is 75. What was the number I thought of?",
+        "question_type": "multiple_choice",
+        "correct_answer": "30",
+        "wrong_answers": [
+            "25",
+            "35",
+            "20"
+        ],
+        "explanation": "Work backwards: 75 + 25 = 100, then 100 ÷ 2 = 50, then 50 - 20 = 30. So the original number was 30."
+    },
+    {
+        "question_text": "I think of a number. I multiply it by 4 and add 9. My answer is 7 times bigger than the number I started with. What number am I thinking of?",
+        "question_type": "multiple_choice",
+        "correct_answer": "3",
+        "wrong_answers": [
+            "2",
+            "4",
+            "5"
+        ],
+        "explanation": "Let the number be x. Then 4x + 9 = 7x. Solving: 9 = 7x - 4x, so 9 = 3x, therefore x = 3."
+    },
+    {
+        "question_text": "I think of a number. If I multiply the number by 6 and subtract 4, I get the same answer as multiplying it by 3 and adding 14. What number am I thinking of?",
+        "question_type": "multiple_choice",
+        "correct_answer": "6",
+        "wrong_answers": [
+            "4",
+            "8",
+            "5"
+        ],
+        "explanation": "Let the number be x. Then 6x - 4 = 3x + 14. Solving: 6x - 3x = 14 + 4, so 3x = 18, therefore x = 6."
+    },
+    {
+        "question_text": "Evaluate: 4² + 3³",
+        "question_type": "multiple_choice",
+        "correct_answer": "43",
+        "wrong_answers": [
+            "25",
+            "49",
+            "35"
+        ],
+        "explanation": "4² = 16 and 3³ = 27. So 16 + 27 = 43"
+    },
+    {
+        "question_text": "Calculate: 456 ÷ 6",
+        "question_type": "multiple_choice",
+        "correct_answer": "76",
+        "wrong_answers": [
+            "75",
+            "77",
+            "74"
+        ],
+        "explanation": "Dividing: 456 ÷ 6 = 76"
+    },
+    {
+        "question_text": "Evaluate: √100 + 2²",
+        "question_type": "multiple_choice",
+        "correct_answer": "14",
+        "wrong_answers": [
+            "12",
+            "16",
+            "10"
+        ],
+        "explanation": "√100 = 10 and 2² = 4. So 10 + 4 = 14"
+    },
+    {
+        "question_text": "Write down what BIDMAS/BODMAS stands for.",
+        "question_type": "multiple_choice",
+        "correct_answer": "Brackets, Indices/Orders, Division, Multiplication, Addition, Subtraction",
+        "wrong_answers": [
+            "Brackets, Division, Multiplication, Addition, Subtraction",
+            "Brackets, Orders, Division, Multiplication, Addition, Subtraction",
+            "Brackets, Indices, Division, Multiplication, Addition, Subtraction"
+        ],
+        "explanation": "BIDMAS/BODMAS stands for: Brackets, Indices/Orders, Division, Multiplication, Addition, Subtraction. This is the order of operations in mathematics."
+    },
+    {
+        "question_text": "Calculate: 9 + 2 × 5",
+        "question_type": "multiple_choice",
+        "correct_answer": "19",
+        "wrong_answers": [
+            "55",
+            "35",
+            "25"
+        ],
+        "explanation": "Using BODMAS: Multiplication comes before addition. 2 × 5 = 10, then 9 + 10 = 19."
+    },
+    {
+        "question_text": "Calculate: 12 ÷ √16 + 15",
+        "question_type": "multiple_choice",
+        "correct_answer": "18",
+        "wrong_answers": [
+            "16",
+            "20",
+            "14"
+        ],
+        "explanation": "Using BODMAS: Square root comes first. √16 = 4, then 12 ÷ 4 = 3, then 3 + 15 = 18."
+    },
+    {
+        "question_text": "Using the digits 4, 6 and 8 exactly once, as well as any operations, create a calculation to which the answer is 12.",
+        "question_type": "multiple_choice",
+        "correct_answer": "6 × 8 ÷ 4 = 12",
+        "wrong_answers": [
+            "8 + 4 = 12",
+            "48 ÷ 4 = 12",
+            "6 + 6 = 12"
+        ],
+        "explanation": "One solution is 6 × 8 ÷ 4 = 48 ÷ 4 = 12. This uses all three digits (4, 6, 8) exactly once."
+    },
+    {
+        "question_text": "I think of a number. I add 48 and then divide by 3. Finally, I square root my answer and the result is 9. What number am I thinking of?",
+        "question_type": "multiple_choice",
+        "correct_answer": "195",
+        "wrong_answers": [
+            "189",
+            "171",
+            "207"
+        ],
+        "explanation": "Work backwards: If √(result) = 9, then result = 9² = 81. If (number + 48) ÷ 3 = 81, then number + 48 = 81 × 3 = 243. So number = 243 - 48 = 195."
+    },
+    {
+        "question_text": "I think of a number. If I multiply the number by 7 and subtract 10, I get the same answer as if I multiply the number by 3 and subtract 2. What number am I thinking of?",
+        "question_type": "multiple_choice",
+        "correct_answer": "2",
+        "wrong_answers": [
+            "3",
+            "4",
+            "5"
+        ],
+        "explanation": "Let the number be x. Then 7x - 10 = 3x - 2. Solving: 7x - 3x = -2 + 10, so 4x = 8, therefore x = 2."
+    },
+    {
+        "question_text": "I think of a number. If I multiply the number by 4 and subtract 2, I get the same answer as multiplying the number by 2 and adding 8. What number am I thinking of?",
+        "question_type": "multiple_choice",
+        "correct_answer": "5",
+        "wrong_answers": [
+            "4",
+            "6",
+            "3"
+        ],
+        "explanation": "Let the number be x. Then 4x - 2 = 2x + 8. Solving: 4x - 2x = 8 + 2, so 2x = 10, therefore x = 5."
+    },
+    {
+        "question_text": "I think of a number. I double it, add 15, and the result is 41. What was the number I thought of?",
+        "question_type": "multiple_choice",
+        "correct_answer": "13",
+        "wrong_answers": [
+            "14",
+            "12",
+            "11"
+        ],
+        "explanation": "Work backwards: 41 - 15 = 26, then 26 ÷ 2 = 13. So the original number was 13."
+    },
+    {
+        "question_text": "I multiply a number by 5, then subtract 8. The result is 32. What was the number I thought of?",
+        "question_type": "multiple_choice",
+        "correct_answer": "8",
+        "wrong_answers": [
+            "7",
+            "9",
+            "6"
+        ],
+        "explanation": "Work backwards: 32 + 8 = 40, then 40 ÷ 5 = 8. So the original number was 8."
+    },
+    {
+        "question_text": "I triple a number, then add 6. The result is the same as doubling the number and adding 14. What number am I thinking of?",
+        "question_type": "multiple_choice",
+        "correct_answer": "8",
+        "wrong_answers": [
+            "6",
+            "7",
+            "9"
+        ],
+        "explanation": "Let the number be x. Then 3x + 6 = 2x + 14. Solving gives x = 8."
+    },
+    {
+        "question_text": "Evaluate: (5 + 3) × 4",
+        "question_type": "multiple_choice",
+        "correct_answer": "32",
+        "wrong_answers": [
+            "17",
+            "20",
+            "12"
+        ],
+        "explanation": "Brackets first: (5 + 3) = 8, then 8 × 4 = 32."
+    },
+    {
+        "question_text": "Calculate: 18 ÷ 3 × 2",
+        "question_type": "multiple_choice",
+        "correct_answer": "12",
+        "wrong_answers": [
+            "3",
+            "9",
+            "6"
+        ],
+        "explanation": "Division and multiplication are done left to right. 18 ÷ 3 = 6, then 6 × 2 = 12."
+    },
+    {
+        "question_text": "Evaluate: (12 - 4)² ÷ 8",
+        "question_type": "multiple_choice",
+        "correct_answer": "8",
+        "wrong_answers": [
+            "10",
+            "6",
+            "12"
+        ],
+        "explanation": "Brackets first: (12 - 4) = 8. Then 8² = 64, and 64 ÷ 8 = 8."
+    },
+    {
+        "question_text": "Evaluate: 5 × (9 - 3) + 2²",
+        "question_type": "multiple_choice",
+        "correct_answer": "34",
+        "wrong_answers": [
+            "42",
+            "32",
+            "30"
+        ],
+        "explanation": "Brackets first: (9 - 3) = 6. Then 5 × 6 = 30, and 2² = 4. Finally 30 + 4 = 34."
+    },
+    {
+        "question_text": "I think of a number. If I divide it by 4 and then add 7, the result is 12. What was the number I thought of?",
+        "question_type": "multiple_choice",
+        "correct_answer": "20",
+        "wrong_answers": [
+            "16",
+            "24",
+            "12"
+        ],
+        "explanation": "Work backwards: 12 - 7 = 5, then 5 × 4 = 20. So the number was 20."
+    },
+    {
+        "question_text": "Calculate: 3 × (6 + 2) - 4²",
+        "question_type": "multiple_choice",
+        "correct_answer": "8",
+        "wrong_answers": [
+            "20",
+            "16",
+            "10"
+        ],
+        "explanation": "Brackets first: (6 + 2) = 8. Then 3 × 8 = 24, and 4² = 16. Finally 24 - 16 = 8."
+    },
+    {
+        "question_text": "Evaluate: 2³ + (10 - 4) × 2",
+        "question_type": "multiple_choice",
+        "correct_answer": "20",
+        "wrong_answers": [
+            "18",
+            "22",
+            "24"
+        ],
+        "explanation": "Powers first: 2³ = 8. Brackets next: (10 - 4) = 6. Then 6 × 2 = 12. Finally 8 + 12 = 20."
+    },
+    {
+        "question_text": "I think of a number. If I add 9, multiply by 2, and subtract 5, I get 31. What was the number I thought of?",
+        "question_type": "multiple_choice",
+        "correct_answer": "9",
+        "wrong_answers": [
+            "8",
+            "10",
+            "12"
+        ],
+        "explanation": "Work backwards: 31 + 5 = 36, then 36 ÷ 2 = 18, then 18 - 9 = 9. So the number was 9."
+    },
+    {
+        "question_text": "Calculate: (3 + 5) × (2 + 6)",
+        "question_type": "multiple_choice",
+        "correct_answer": "64",
+        "wrong_answers": [
+            "32",
+            "48",
+            "56"
+        ],
+        "explanation": "Brackets first: (3 + 5) = 8 and (2 + 6) = 8. Then 8 × 8 = 64."
+    },
+    {
+        "question_text": "Evaluate: (9 - 3)² ÷ 9",
+        "question_type": "multiple_choice",
+        "correct_answer": "4",
+        "wrong_answers": [
+            "6",
+            "2",
+            "9"
+        ],
+        "explanation": "Brackets first: (9 - 3) = 6. Then 6² = 36. Finally 36 ÷ 9 = 4."
+    },
+    {
+        "question_text": "I think of a number. I multiply it by 5, then divide by 2, and finally subtract 10. The result is 15. What was the number I thought of?",
+        "question_type": "multiple_choice",
+        "correct_answer": "10",
+        "wrong_answers": [
+            "8",
+            "12",
+            "15"
+        ],
+        "explanation": "Work backwards: 15 + 10 = 25, then 25 × 2 = 50, then 50 ÷ 5 = 10."
+    },
+    {
+        "question_text": "Evaluate: 10 + (6 × 3) - 4²",
+        "question_type": "multiple_choice",
+        "correct_answer": "12",
+        "wrong_answers": [
+            "14",
+            "18",
+            "10"
+        ],
+        "explanation": "Brackets first: (6 × 3) = 18. Then powers: 4² = 16. Finally 10 + 18 - 16 = 12."
+    },
+    {
+        "question_text": "Simplify (8 + 12) - 5",
+        "question_type": "multiple_choice",
+        "correct_answer": "15",
+        "wrong_answers": [
+            "10",
+            "17",
+            "25"
+        ],
+        "explanation": "8 + 12 = 20, then 20 - 5 = 15."
+    },
+    {
+        "question_text": "Simplify 64 - (30 + 5)",
+        "question_type": "multiple_choice",
+        "correct_answer": "29",
+        "wrong_answers": [
+            "34",
+            "30",
+            "28"
+        ],
+        "explanation": "30 + 5 = 35, then 64 - 35 = 29."
+    },
+    {
+        "question_text": "Simplify (8 + 12) + (6 + 4)",
+        "question_type": "multiple_choice",
+        "correct_answer": "30",
+        "wrong_answers": [
+            "20",
+            "28",
+            "26"
+        ],
+        "explanation": "8 + 12 = 20 and 6 + 4 = 10. Total = 30."
+    },
+    {
+        "question_text": "Simplify (5 + 7) × 3",
+        "question_type": "multiple_choice",
+        "correct_answer": "36",
+        "wrong_answers": [
+            "30",
+            "24",
+            "32"
+        ],
+        "explanation": "5 + 7 = 12, then 12 × 3 = 36."
+    },
+    {
+        "question_text": "Simplify 18 × (42 ÷ 7)",
+        "question_type": "multiple_choice",
+        "correct_answer": "108",
+        "wrong_answers": [
+            "54",
+            "126",
+            "84"
+        ],
+        "explanation": "42 ÷ 7 = 6, then 18 × 6 = 108."
+    },
+    {
+        "question_text": "Simplify (62 + 10) ÷ (36 ÷ 4)",
+        "question_type": "multiple_choice",
+        "correct_answer": "8",
+        "wrong_answers": [
+            "6",
+            "12",
+            "9"
+        ],
+        "explanation": "62 + 10 = 72 and 36 ÷ 4 = 9, then 72 ÷ 9 = 8."
+    },
+    {
+        "question_text": "Simplify 12 + 13 + 5 - 7",
+        "question_type": "multiple_choice",
+        "correct_answer": "23",
+        "wrong_answers": [
+            "24",
+            "25",
+            "21"
+        ],
+        "explanation": "12 + 13 + 5 = 30, then 30 - 7 = 23."
+    },
+    {
+        "question_text": "Simplify 64 - 12 - 6 - 4",
+        "question_type": "multiple_choice",
+        "correct_answer": "42",
+        "wrong_answers": [
+            "40",
+            "48",
+            "52"
+        ],
+        "explanation": "64 - 12 = 52; 52 - 6 = 46; 46 - 4 = 42."
+    },
+    {
+        "question_text": "Simplify 8 × 2 × 2 × 3",
+        "question_type": "multiple_choice",
+        "correct_answer": "96",
+        "wrong_answers": [
+            "48",
+            "72",
+            "64"
+        ],
+        "explanation": "8×2=16, 16×2=32, 32×3=96."
+    },
+    {
+        "question_text": "Write the basic numeral: 9 + 2 × 5 + 7",
+        "question_type": "multiple_choice",
+        "correct_answer": "26",
+        "wrong_answers": [
+            "21",
+            "29",
+            "24"
+        ],
+        "explanation": "2×5=10; 9+10+7=26."
+    },
+    {
+        "question_text": "Write the basic numeral: 32 + 18 × 5",
+        "question_type": "multiple_choice",
+        "correct_answer": "122",
+        "wrong_answers": [
+            "50",
+            "140",
+            "90"
+        ],
+        "explanation": "18×5=90; 32+90=122."
+    },
+    {
+        "question_text": "Write the basic numeral: 85 - 18 ÷ 9 + 20",
+        "question_type": "multiple_choice",
+        "correct_answer": "103",
+        "wrong_answers": [
+            "87",
+            "101",
+            "95"
+        ],
+        "explanation": "18÷9=2; 85-2=83; 83+20=103."
+    },
+    {
+        "question_text": "Write the basic numeral: 12 × (8 - 3) ÷ (17 - 7)",
+        "question_type": "multiple_choice",
+        "correct_answer": "6",
+        "wrong_answers": [
+            "12",
+            "10",
+            "9"
+        ],
+        "explanation": "8-3=5; 17-7=10; 12×5=60; 60÷10=6."
+    },
+    {
+        "question_text": "Write the basic numeral: (34 + 14) ÷ 6",
+        "question_type": "multiple_choice",
+        "correct_answer": "8",
+        "wrong_answers": [
+            "6",
+            "10",
+            "9"
+        ],
+        "explanation": "34+14=48; 48÷6=8."
+    },
+    {
+        "question_text": "Write the basic numeral: 84 - 5(15 - 3) + 25",
+        "question_type": "multiple_choice",
+        "correct_answer": "49",
+        "wrong_answers": [
+            "39",
+            "59",
+            "45"
+        ],
+        "explanation": "15-3=12; 5×12=60; 84-60=24; 24+25=49."
+    },
+    {
+        "question_text": "Write the basic numeral: 64 + 2 × (28 - 8 × 2)",
+        "question_type": "multiple_choice",
+        "correct_answer": "72",
+        "wrong_answers": [
+            "44",
+            "96",
+            "52"
+        ],
+        "explanation": "8×2=16; 28-16=12; 2×12=24; 64+24=72."
+    },
+    {
+        "question_text": "Write the basic numeral: 96 ÷ (4 + 8) × 5",
+        "question_type": "multiple_choice",
+        "correct_answer": "40",
+        "wrong_answers": [
+            "20",
+            "60",
+            "50"
+        ],
+        "explanation": "4+8=12; 96÷12=8; 8×5=40."
+    },
+    {
+        "question_text": "Write the basic numeral: 8 × (28 + 8) ÷ 4",
+        "question_type": "multiple_choice",
+        "correct_answer": "72",
+        "wrong_answers": [
+            "64",
+            "48",
+            "80"
+        ],
+        "explanation": "28+8=36; 36÷4=9; 9×8=72."
+    },
+    {
+        "question_text": "Use the order of operations to simplify: [(10 + 5) ÷ 3] × 7",
+        "question_type": "multiple_choice",
+        "correct_answer": "35",
+        "wrong_answers": [
+            "21",
+            "49",
+            "45"
+        ],
+        "explanation": "10+5=15; 15÷3=5; 5×7=35."
+    },
+    {
+        "question_text": "Use the order of operations to simplify: 30 × [(36 ÷ 9) × 2] - 6",
+        "question_type": "multiple_choice",
+        "correct_answer": "234",
+        "wrong_answers": [
+            "216",
+            "200",
+            "250"
+        ],
+        "explanation": "36÷9=4; 4×2=8; 30×8=240; 240-6=234."
+    },
+    {
+        "question_text": "Use the order of operations to simplify: [(4 + 8) × (19 - 14)] ÷ 4",
+        "question_type": "multiple_choice",
+        "correct_answer": "15",
+        "wrong_answers": [
+            "20",
+            "12",
+            "10"
+        ],
+        "explanation": "4+8=12; 19-14=5; 12×5=60; 60÷4=15."
+    },
+    {
+        "question_text": "Use the order of operations to simplify: ([24 + 11] ÷ 7) × 9",
+        "question_type": "multiple_choice",
+        "correct_answer": "45",
+        "wrong_answers": [
+            "30",
+            "36",
+            "54"
+        ],
+        "explanation": "24+11=35; 35÷7=5; 5×9=45."
+    },
+    {
+        "question_text": "Use the order of operations to simplify: [8 + (8 × 8)] ÷ 8",
+        "question_type": "multiple_choice",
+        "correct_answer": "9",
+        "wrong_answers": [
+            "8",
+            "10",
+            "11"
+        ],
+        "explanation": "8×8=64; 64+8=72; 72÷8=9."
+    },
+    {
+        "question_text": "Use the order of operations to simplify: 6 × [(2 + 14) × (13 - 6)]",
+        "question_type": "multiple_choice",
+        "correct_answer": "612",
+        "wrong_answers": [
+            "420",
+            "504",
+            "300"
+        ],
+        "explanation": "2+14=16; 13-6=7; 16×7=112; 112×6=612."
+    }
+]

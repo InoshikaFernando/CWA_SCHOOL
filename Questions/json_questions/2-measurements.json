@@ -1,0 +1,178 @@
+[
+    {
+        "question_text": "What is the length of the pencil?\n\n[Choose the best estimate]",
+        "question_type": "multiple_choice",
+        "correct_answer": "About 15 cm",
+        "wrong_answers": [
+            "About 5 cm",
+            "About 30 cm",
+            "About 50 cm"
+        ],
+        "explanation": "A typical pencil is about 15-18 cm long."
+    },
+    {
+        "question_text": "What would you use to measure the length of your desk?\n\nA) A ruler\nB) A thermometer\nC) A clock\nD) A scale",
+        "question_type": "multiple_choice",
+        "correct_answer": "A ruler",
+        "wrong_answers": [
+            "A thermometer",
+            "A clock",
+            "A scale"
+        ],
+        "explanation": "A ruler is used to measure length."
+    },
+    {
+        "question_text": "Which measurement would you use to measure how tall your friend is?\n\nA) cm\nB) m\nC) g\nD) kg",
+        "question_type": "multiple_choice",
+        "correct_answer": "m",
+        "wrong_answers": [
+            "l",
+            "g",
+            "kg"
+        ],
+        "explanation": "We measure height in meters (m) or centimeters (cm). For a person's height, meters is more appropriate."
+    },
+    {
+        "question_text": "A rope is 10 metres long. Another rope is 15 metres long. What is the total length?",
+        "question_type": "multiple_choice",
+        "correct_answer": "25 metres",
+        "wrong_answers": [
+            "20 metres",
+            "30 metres",
+            "35 metres"
+        ],
+        "explanation": "To find the total, add: 10 + 15 = 25 metres."
+    },
+    {
+        "question_text": "Which unit would you use to measure the length of a pencil?",
+        "question_type": "multiple_choice",
+        "correct_answer": "centimeters",
+        "wrong_answers": [
+            "meters",
+            "kilometers",
+            "liters"
+        ],
+        "explanation": "A pencil is small, so we use centimeters to measure it."
+    },
+    {
+        "question_text": "Which unit would you use to measure the weight of an apple?",
+        "question_type": "multiple_choice",
+        "correct_answer": "grams",
+        "wrong_answers": [
+            "kilograms",
+            "meters",
+            "liters"
+        ],
+        "explanation": "An apple is light, so we use grams to measure its weight."
+    },
+    {
+        "question_text": "Which unit would you use to measure the capacity of a water bottle?",
+        "question_type": "multiple_choice",
+        "correct_answer": "liters",
+        "wrong_answers": [
+            "kilograms",
+            "meters",
+            "grams"
+        ],
+        "explanation": "We use liters to measure how much liquid a container can hold."
+    },
+    {
+        "question_text": "Which unit would you use to measure how tall you are?",
+        "question_type": "multiple_choice",
+        "correct_answer": "centimeters",
+        "wrong_answers": [
+            "kilograms",
+            "liters",
+            "kilometers"
+        ],
+        "explanation": "We measure height in centimeters or meters."
+    },
+    {
+        "question_text": "Which unit would you use to measure the weight of a toy car?",
+        "question_type": "multiple_choice",
+        "correct_answer": "grams",
+        "wrong_answers": [
+            "liters",
+            "meters",
+            "kilometers"
+        ],
+        "explanation": "A toy car is light, so we use grams to measure its weight."
+    },
+    {
+        "question_text": "Which unit would you use to measure the length of your bed?",
+        "question_type": "multiple_choice",
+        "correct_answer": "meters",
+        "wrong_answers": [
+            "grams",
+            "liters",
+            "centimeters"
+        ],
+        "explanation": "A bed is big, so we use meters to measure its length."
+    },
+    {
+        "question_text": "Which is the shortest?\n\nA) Your finger\nB) A spoon\nC) A book\nD) A door",
+        "question_type": "multiple_choice",
+        "correct_answer": "Your finger",
+        "wrong_answers": [
+            "A spoon",
+            "A book",
+            "A door"
+        ],
+        "explanation": "Your finger is the shortest object among the options."
+    },
+    {
+        "question_text": "How many centimetres are in 1 metre?",
+        "question_type": "multiple_choice",
+        "correct_answer": "100 cm",
+        "wrong_answers": [
+            "10 cm",
+            "50 cm",
+            "1000 cm"
+        ],
+        "explanation": "1 metre equals 100 centimetres."
+    },
+    {
+        "question_text": "If a pencil is 12 cm long and you cut off 4 cm, how much is left?",
+        "question_type": "multiple_choice",
+        "correct_answer": "8 cm",
+        "wrong_answers": [
+            "4 cm",
+            "6 cm",
+            "16 cm"
+        ],
+        "explanation": "Subtract 4 cm from 12 cm: 12 - 4 = 8 cm."
+    },
+    {
+        "question_text": "Which would be about 1 metre long?\n\nA) Your thumb\nB) A book\nC) Your arm span\nD) A car",
+        "question_type": "multiple_choice",
+        "correct_answer": "Your arm span",
+        "wrong_answers": [
+            "Your thumb",
+            "A book",
+            "A car"
+        ],
+        "explanation": "Your arm span (the distance from fingertip to fingertip with arms outstretched) is approximately 1 metre for most people."
+    },
+    {
+        "question_text": "What is the longest?\n\nA) A paperclip (3 cm)\nB) A pencil (15 cm)\nC) A pen (12 cm)\nD) A straw (20 cm)",
+        "question_type": "multiple_choice",
+        "correct_answer": "A straw (20 cm)",
+        "wrong_answers": [
+            "A paperclip (3 cm)",
+            "A pencil (15 cm)",
+            "A pen (12 cm)"
+        ],
+        "explanation": "A straw at 20 cm is the longest among the options."
+    },
+    {
+        "question_text": "Estimate: How long is a typical toothbrush?\n\nA) 10 cm\nB) 20 cm\nC) 30 cm\nD) 40 cm",
+        "question_type": "multiple_choice",
+        "correct_answer": "20 cm",
+        "wrong_answers": [
+            "10 cm",
+            "30 cm",
+            "40 cm"
+        ],
+        "explanation": "A typical toothbrush is approximately 20 cm long."
+    }
+]

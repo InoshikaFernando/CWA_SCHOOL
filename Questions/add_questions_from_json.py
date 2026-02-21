@@ -50,6 +50,7 @@ YEAR_TOPICS_MAP = {
     4: [
         ("Fractions", "fractions_questions", "Fractions"),
         ("Integers", "integers_questions", "Integers"),
+        ("Place Values", "place_values_questions", "Place Values"),
     ],
     5: [
         ("Measurements", "measurements_questions", "Measurements"),

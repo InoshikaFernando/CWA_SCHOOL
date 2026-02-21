@@ -64,14 +64,24 @@ def backfill_topics():
                 safe_text = question.question_text[:50].encode('ascii', 'ignore').decode('ascii')
                 print(f"  [OK] Assigned BODMAS to: {safe_text}...")
         
-        # Check for Place Values
+        # Check for Place Values (Year 2 patterns + Year 4 patterns)
         if not topic_assigned and (
             'complete the following sequence' in q_text_lower or
             'counting on' in q_text_lower or
             'counting back' in q_text_lower or
             'skip counting' in q_text_lower or
             'tens and ones' in q_text_lower or
-            'how many tens' in q_text_lower
+            'how many tens' in q_text_lower or
+            'place value' in q_text_lower or
+            'hundreds + ' in q_text_lower or
+            'hundreds =' in q_text_lower or
+            'tens place' in q_text_lower or
+            'hundreds place' in q_text_lower or
+            'thousands place' in q_text_lower or
+            'ones place' in q_text_lower or
+            'value of the digit' in q_text_lower or
+            'where is the digit' in q_text_lower or
+            ('hundreds' in q_text_lower and 'tens' in q_text_lower and 'ones' in q_text_lower)
         ) and not any(pattern in q_text_lower for pattern in [
             'which unit would you use', 'measure the length', 'centimeter', 'meter', 'kilometer'
         ]):

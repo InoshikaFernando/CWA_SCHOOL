@@ -3633,17 +3633,17 @@ def place_values_questions(request, level_number):
         messages.error(request, "You don't have access to this level.")
         return redirect("maths:dashboard")
     
-    # Get Place Values topic
-    place_values_topic = Topic.objects.filter(name="Place Values").first()
-    if not place_values_topic:
+    # Get all Place Values topics (there may be duplicates with different IDs)
+    place_values_topics = Topic.objects.filter(name="Place Values")
+    if not place_values_topics.exists():
         messages.error(request, "Place Values topic not found.")
         return redirect("maths:dashboard")
+    place_values_topic = place_values_topics.first()
     
     # Get all Place Values questions for this level
-    # Use topic field directly instead of text pattern matching
     all_questions_query = Question.objects.filter(
         level=level,
-        topic=place_values_topic
+        topic__name="Place Values"
     ).prefetch_related('answers')
     
     # Question limits per year
@@ -3663,7 +3663,7 @@ def place_values_questions(request, level_number):
         # Validate existing session questions are still Place Values questions (check by topic)
         existing_question_ids = request.session.get(questions_session_key, [])
         if existing_question_ids:
-            existing_questions = Question.objects.filter(id__in=existing_question_ids, level=level, topic=place_values_topic)
+            existing_questions = Question.objects.filter(id__in=existing_question_ids, level=level, topic__name="Place Values")
             # Check if all questions have the Place Values topic
             if existing_questions.count() != len(existing_question_ids):
                 # Some questions don't have the Place Values topic - clear session and start fresh
@@ -3702,7 +3702,7 @@ def place_values_questions(request, level_number):
         questions_dict = {q.id: q for q in Question.objects.filter(
             id__in=question_ids,
             level=level,
-            topic=place_values_topic
+            topic__name="Place Values"
         ).prefetch_related('answers')}
         all_questions = [questions_dict[qid] for qid in question_ids if qid in questions_dict]
 

@@ -2332,7 +2332,7 @@ def practice_questions(request, level_number):
     # Shuffle the questions
     random.shuffle(questions)
     
-    return render(request, "maths/measurements_questions.html", {
+    return render(request, "maths/measurements_quiz.html", {
         "level": level,
         "questions": questions,
         "total_questions": all_questions.count()
@@ -2542,7 +2542,7 @@ def topic_questions(request, level_number, topic_name):
         beat_record = previous_best_points is not None and final_points > previous_best_points
         is_first_attempt = previous_best_points is None
 
-        return render(request, "maths/measurements_questions.html", {
+        return render(request, "maths/measurements_quiz.html", {
             "level": level,
             "completed": True,
             "total_score": total_score,
@@ -2595,7 +2595,7 @@ def topic_questions(request, level_number, topic_name):
     else:
         shuffled_answers = list(current_question.answers.all())
 
-    return render(request, "maths/measurements_questions.html", {
+    return render(request, "maths/measurements_quiz.html", {
         "level": level,
         "current_question": current_question,
         "question_number": question_number,

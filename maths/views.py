@@ -1899,6 +1899,9 @@ def take_quiz(request, level_number):
     
     if is_basic_facts:
         if request.method == "GET":
+            # Reset timer on every new quiz load
+            request.session[timer_session_key] = time.time()
+
             # Generate 10 questions
             questions_data = []
             for i in range(10):
@@ -1920,6 +1923,9 @@ def take_quiz(request, level_number):
     else:
         # For regular quizzes, get questions from database and store in session
         if request.method == "GET":
+            # Reset timer on every new quiz load
+            request.session[timer_session_key] = time.time()
+
             # Get all questions for this level from database (all topics)
             # Use prefetch_related to avoid N+1 queries when accessing answers
             all_questions = list(level.questions.all().prefetch_related('answers'))
@@ -2370,18 +2376,12 @@ def topic_questions(request, level_number, topic_name):
     questions_session_key = f"{topic_slug}_question_ids"
     timer_start = request.session.get(timer_session_key)
 
-    if question_number == 1 and timer_start:
-        existing_question_ids = request.session.get(questions_session_key, [])
-        if existing_question_ids:
-            existing_questions = Question.objects.filter(
-                id__in=existing_question_ids, level=level, topic=topic_obj
-            )
-            if existing_questions.count() != len(existing_question_ids):
-                _clear_session_keys(
-                    request.session,
-                    timer_session_key, questions_session_key, 'current_attempt_id',
-                )
-                timer_start = None
+    if question_number == 1:
+        _clear_session_keys(
+            request.session,
+            timer_session_key, questions_session_key, 'current_attempt_id',
+        )
+        timer_start = None
 
     if question_number == 1 and not timer_start:
         request.session[timer_session_key] = time.time()

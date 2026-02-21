@@ -394,5 +394,181 @@
             "18"
         ],
         "explanation": "If 2/5 = 10, divide 10 by 2 to find 1/5 = 5. Then 4/5 = 5 × 4 = 20."
+    },
+    {
+        "question_text": "Today, Nina is working on her reading homework. She needs to read 3 pages. What fraction represents each page of the reading homework?",
+        "question_type": "multiple_choice",
+        "correct_answer": "1/3",
+        "wrong_answers": [
+            "1/2",
+            "1/4",
+            "3/1"
+        ],
+        "explanation": "There are 3 equal pages to read. Each page is 1 out of 3 equal parts, which is 1/3."
+    },
+    {
+        "question_text": "Sam has to complete 4 math questions. What fraction of the work is one question?",
+        "question_type": "multiple_choice",
+        "correct_answer": "1/4",
+        "wrong_answers": [
+            "1/2",
+            "1/3",
+            "4/1"
+        ],
+        "explanation": "There are 4 equal questions. One question is 1 out of 4 equal parts, which is 1/4."
+    },
+    {
+        "question_text": "Lily cut a sandwich into 2 equal pieces. What fraction is one piece?",
+        "question_type": "multiple_choice",
+        "correct_answer": "1/2",
+        "wrong_answers": [
+            "1/3",
+            "2/1",
+            "1/4"
+        ],
+        "explanation": "The sandwich is divided into 2 equal parts. One part is 1/2."
+    },
+    {
+        "question_text": "A chocolate bar is divided into 5 equal pieces. What fraction is one piece?",
+        "question_type": "multiple_choice",
+        "correct_answer": "1/5",
+        "wrong_answers": [
+            "1/4",
+            "5/1",
+            "1/2"
+        ],
+        "explanation": "There are 5 equal pieces. One piece is 1 out of 5, which is 1/5."
+    },
+    {
+        "question_text": "A pizza is cut into 8 equal slices. What fraction is one slice?",
+        "question_type": "multiple_choice",
+        "correct_answer": "1/8",
+        "wrong_answers": [
+            "1/6",
+            "8/1",
+            "1/4"
+        ],
+        "explanation": "There are 8 equal slices. One slice is 1 out of 8, which is 1/8."
+    },
+    {
+        "question_text": "Tom needs to finish 6 spelling words. What fraction of the work is one word?",
+        "question_type": "multiple_choice",
+        "correct_answer": "1/6",
+        "wrong_answers": [
+            "1/5",
+            "6/1",
+            "1/3"
+        ],
+        "explanation": "There are 6 equal words to complete. One word is 1 out of 6, which is 1/6."
+    },
+    {
+        "question_text": "There are 8 cars parked on Lola's street. 2 of the cars are red. What fraction of the cars are red?",
+        "question_type": "multiple_choice",
+        "correct_answer": "2/8",
+        "wrong_answers": [
+            "1/8",
+            "2/6",
+            "6/8"
+        ],
+        "explanation": "2 out of 8 cars are red. So the fraction is 2/8. (This can also be simplified to 1/4.)"
+    },
+    {
+        "question_text": "There are 10 apples in a basket. 3 of the apples are green. What fraction of the apples are green?",
+        "question_type": "multiple_choice",
+        "correct_answer": "3/10",
+        "wrong_answers": [
+            "3/7",
+            "7/10",
+            "1/3"
+        ],
+        "explanation": "3 out of 10 apples are green. So the fraction is 3/10."
+    },
+    {
+        "question_text": "There are 6 students in a group. 4 are wearing hats. What fraction of the students are wearing hats?",
+        "question_type": "multiple_choice",
+        "correct_answer": "4/6",
+        "wrong_answers": [
+            "2/6",
+            "6/4",
+            "1/6"
+        ],
+        "explanation": "4 out of 6 students are wearing hats. So the fraction is 4/6. (This can also be simplified to 2/3.)"
+    },
+    {
+        "question_text": "There are 12 balloons at a party. 5 are blue. What fraction of the balloons are blue?",
+        "question_type": "multiple_choice",
+        "correct_answer": "5/12",
+        "wrong_answers": [
+            "7/12",
+            "5/7",
+            "1/12"
+        ],
+        "explanation": "5 out of 12 balloons are blue. So the fraction is 5/12."
+    },
+    {
+        "question_text": "There are 9 books on a shelf. 3 are storybooks. What fraction of the books are storybooks?",
+        "question_type": "multiple_choice",
+        "correct_answer": "3/9",
+        "wrong_answers": [
+            "1/9",
+            "6/9",
+            "9/3"
+        ],
+        "explanation": "3 out of 9 books are storybooks. So the fraction is 3/9. (This can also be simplified to 1/3.)"
+    },
+    {
+        "question_text": "There are 9 people waiting for the train. One-third of them have an umbrella. How many people waiting for the train have an umbrella?",
+        "question_type": "multiple_choice",
+        "correct_answer": "3",
+        "wrong_answers": [
+            "1",
+            "6",
+            "9"
+        ],
+        "explanation": "One-third means divide by 3. 9 ÷ 3 = 3. So 3 people have an umbrella."
+    },
+    {
+        "question_text": "There are 12 students in a class. One-fourth of them bring lunch from home. How many students bring lunch from home?",
+        "question_type": "multiple_choice",
+        "correct_answer": "3",
+        "wrong_answers": [
+            "4",
+            "6",
+            "12"
+        ],
+        "explanation": "One-fourth means divide by 4. 12 ÷ 4 = 3. So 3 students bring lunch from home."
+    },
+    {
+        "question_text": "There are 15 cookies on a plate. One-third of them are chocolate. How many cookies are chocolate?",
+        "question_type": "multiple_choice",
+        "correct_answer": "5",
+        "wrong_answers": [
+            "3",
+            "10",
+            "15"
+        ],
+        "explanation": "One-third means divide by 3. 15 ÷ 3 = 5. So 5 cookies are chocolate."
+    },
+    {
+        "question_text": "There are 8 balloons. One-half of them are red. How many balloons are red?",
+        "question_type": "multiple_choice",
+        "correct_answer": "4",
+        "wrong_answers": [
+            "2",
+            "6",
+            "8"
+        ],
+        "explanation": "One-half means divide by 2. 8 ÷ 2 = 4. So 4 balloons are red."
+    },
+    {
+        "question_text": "There are 20 pencils in a box. One-fifth of them are new. How many pencils are new?",
+        "question_type": "multiple_choice",
+        "correct_answer": "4",
+        "wrong_answers": [
+            "5",
+            "10",
+            "20"
+        ],
+        "explanation": "One-fifth means divide by 5. 20 ÷ 5 = 4. So 4 pencils are new."
     }
 ]

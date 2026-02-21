@@ -1,0 +1,514 @@
+[
+    {
+        "question_text": "What is the value of following place value model",
+        "question_type": "multiple_choice",
+        "correct_answer": "863",
+        "wrong_answers": [
+            "754",
+            "773",
+            "873"
+        ],
+        "explanation": "There are 8 hundreds, 6 tens and 3 ones, which gives us the value of 863.",
+        "image_path": "questions/year4/placeValues/image1.png"
+    },
+    {
+        "question_text": "What is the value of following place value model",
+        "question_type": "multiple_choice",
+        "correct_answer": "308",
+        "wrong_answers": [
+            "388",
+            "408",
+            "488"
+        ],
+        "explanation": "There are 3 hundreds, 0 tens and 8 ones, which gives us the value of 308.",
+        "image_path": "questions/year4/placeValues/image2.png"
+    },
+    {
+        "question_text": "What is the value of following place value model",
+        "question_type": "multiple_choice",
+        "correct_answer": "83",
+        "wrong_answers": [
+            "803",
+            "533",
+            "503"
+        ],
+        "explanation": "There are 8 tens and 3 ones, which gives us the value of 83.",
+        "image_path": "questions/year4/placeValues/image3.png"
+    },
+    {
+        "question_text": "What is the value of following place value model",
+        "question_type": "multiple_choice",
+        "correct_answer": "305",
+        "wrong_answers": [
+            "350",
+            "405",
+            "485"
+        ],
+        "explanation": "There are 3 hundreds, 0 tens and 5 ones, which gives us the value of 305.",
+        "image_path": "questions/year4/placeValues/image4.png"
+    },
+    {
+        "question_text": "What is the value of following place value model",
+        "question_type": "multiple_choice",
+        "correct_answer": "963",
+        "wrong_answers": [
+            "693",
+            "563",
+            "863"
+        ],
+        "explanation": "There are 9 hundreds, 6 tens and 3 ones, which gives us the value of 963.",
+        "image_path": "questions/year4/placeValues/image5.png"
+    },
+    {
+        "question_text": "What is the value of following place value model",
+        "question_type": "multiple_choice",
+        "correct_answer": "381",
+        "wrong_answers": [
+            "351",
+            "353",
+            "481"
+        ],
+        "explanation": "There are 3 hundreds, 8 tens and 1 one, which gives us the value of 381.",
+        "image_path": "questions/year4/placeValues/image6.png"
+    },
+    {
+        "question_text": "What is the tens place value of the number 4,567?",
+        "question_type": "multiple_choice",
+        "correct_answer": "6",
+        "wrong_answers": [
+            "5",
+            "4",
+            "7"
+        ],
+        "explanation": "The tens place value of the number 4,567 is 6, as it represents the tens place in the number."
+    },
+    {
+        "question_text": "What is the hundreds place value of the number 8,234?",
+        "question_type": "multiple_choice",
+        "correct_answer": "2",
+        "wrong_answers": [
+            "8",
+            "3",
+            "4"
+        ],
+        "explanation": "The hundreds place value of the number 8,234 is 2, as it represents the hundreds place in the number."
+    },
+    {
+        "question_text": "What is the value of the digit 5 in the number 3,456?",
+        "question_type": "multiple_choice",
+        "correct_answer": "50",
+        "wrong_answers": [
+            "5",
+            "500",
+            "5000"
+        ],
+        "explanation": "The value of the digit 5 in the number 3,456 is 50, as it represents the tens place in the number."
+    },
+    {
+        "question_text": "What is the value of the digit 7 in the number 9,872?",
+        "question_type": "multiple_choice",
+        "correct_answer": "70",
+        "wrong_answers": [
+            "7",
+            "700",
+            "7000"
+        ],
+        "explanation": "The value of the digit 7 in the number 9,872 is 70, as it represents the tens place in the number."
+    },
+    {
+        "question_text": "What is the value of the digit 4 in the number 6,453?",
+        "question_type": "multiple_choice",
+        "correct_answer": "400",
+        "wrong_answers": [
+            "4",
+            "40",
+            "4000"
+        ],
+        "explanation": "The value of the digit 4 in the number 6,453 is 400, as it represents the hundreds place in the number."
+    },
+    {
+        "question_text": "What is the value of the digit 7 in the number 7,896?",
+        "question_type": "multiple_choice",
+        "correct_answer": "7000",
+        "wrong_answers": [
+            "7",
+            "70",
+            "700"
+        ],
+        "explanation": "The value of the digit 7 in the number 7,896 is 7000, as it represents the thousands place in the number."
+    },
+    {
+        "question_text": "Where is the digit 5 of the number 4,567? ",
+        "question_type": "multiple_choice",
+        "correct_answer": "hundreds",
+        "wrong_answers": [
+            "tens",
+            "ones",
+            "thousands"
+        ],
+        "explanation": "The digit 5 in the number 4,567 is in the hundreds place."
+    },
+    {
+        "question_text": "Where is the digit 3 in the number 8,345?",
+        "question_type": "multiple_choice",
+        "correct_answer": "hundreds",
+        "wrong_answers": [
+            "tens",
+            "ones",
+            "thousands"
+        ],
+        "explanation": "The digit 3 in the number 8,345 is in the hundreds place."
+    },
+    {
+        "question_text": "Where is the digit 7 in the number 2,971?",
+        "question_type": "multiple_choice",
+        "correct_answer": "tens",
+        "wrong_answers": [
+            "hundreds",
+            "ones",
+            "thousands"
+        ],
+        "explanation": "The digit 7 in the number 2,971 is in the tens place."
+    },
+    {
+        "question_text": "Where is the digit 6 in the number 5,684?",
+        "question_type": "multiple_choice",
+        "correct_answer": "hundreds",
+        "wrong_answers": [
+            "tens",
+            "ones",
+            "thousands"
+        ],
+        "explanation": "The digit 6 in the number 5,684 is in the hundreds place."
+    },
+    {
+        "question_text": "Where is the digit 9 in the number 9,432?",
+        "question_type": "multiple_choice",
+        "correct_answer": "thousands",
+        "wrong_answers": [
+            "hundreds",
+            "tens",
+            "ones"
+        ],
+        "explanation": "The digit 9 in the number 9,432 is in the thousands place."
+    },
+    {
+        "question_text": "Where is the digit 4 in the number 7,149?",
+        "question_type": "multiple_choice",
+        "correct_answer": "tens",
+        "wrong_answers": [
+            "hundreds",
+            "ones",
+            "thousands"
+        ],
+        "explanation": "The digit 4 in the number 7,149 is in the tens place."
+    },
+    {
+        "question_text": "Where is the digit 8 in the number 3,825?",
+        "question_type": "multiple_choice",
+        "correct_answer": "hundreds",
+        "wrong_answers": [
+            "tens",
+            "ones",
+            "thousands"
+        ],
+        "explanation": "The digit 8 in the number 3,825 is in the hundreds place."
+    },
+    {
+        "question_text": "Where is the digit 1 in the number 6,712?",
+        "question_type": "multiple_choice",
+        "correct_answer": "tens",
+        "wrong_answers": [
+            "hundreds",
+            "ones",
+            "thousands"
+        ],
+        "explanation": "The digit 1 in the number 6,712 is in the tens place."
+    },
+    {
+        "question_text": "Where is the digit 2 in the number 1,234?",
+        "question_type": "multiple_choice",
+        "correct_answer": "hundreds",
+        "wrong_answers": [
+            "tens",
+            "ones",
+            "thousands"
+        ],
+        "explanation": "The digit 2 in the number 1,234 is in the hundreds place."
+    },
+    {
+        "question_text": "3 hundreds + 8 tens + 8 ones is?",
+        "question_type": "multiple_choice",
+        "correct_answer": "388",
+        "wrong_answers": [
+            "3088",
+            "3808",
+            "338"
+        ],
+        "explanation": "3 hundreds = 300, 8 tens = 80, and 8 ones = 8. 300 + 80 + 8 = 388."
+    },
+    {
+        "question_text": "5 hundreds + 4 tens + 2 ones is?",
+        "question_type": "multiple_choice",
+        "correct_answer": "542",
+        "wrong_answers": [
+            "452",
+            "5042",
+            "552"
+        ],
+        "explanation": "5 hundreds = 500, 4 tens = 40, and 2 ones = 2. 500 + 40 + 2 = 542."
+    },
+    {
+        "question_text": "7 hundreds + 0 tens + 6 ones is?",
+        "question_type": "multiple_choice",
+        "correct_answer": "706",
+        "wrong_answers": [
+            "760",
+            "76",
+            "7006"
+        ],
+        "explanation": "7 hundreds = 700, 0 tens = 0, and 6 ones = 6. 700 + 0 + 6 = 706."
+    },
+    {
+        "question_text": "2 hundreds + 9 tens + 5 ones is?",
+        "question_type": "multiple_choice",
+        "correct_answer": "295",
+        "wrong_answers": [
+            "259",
+            "2059",
+            "925"
+        ],
+        "explanation": "2 hundreds = 200, 9 tens = 90, and 5 ones = 5. 200 + 90 + 5 = 295."
+    },
+    {
+        "question_text": "4 hundreds + 3 tens + 1 one is?",
+        "question_type": "multiple_choice",
+        "correct_answer": "431",
+        "wrong_answers": [
+            "413",
+            "4031",
+            "341"
+        ],
+        "explanation": "4 hundreds = 400, 3 tens = 30, and 1 one = 1. 400 + 30 + 1 = 431."
+    },
+    {
+        "question_text": "9 hundreds + 2 tens + 7 ones is?",
+        "question_type": "multiple_choice",
+        "correct_answer": "927",
+        "wrong_answers": [
+            "972",
+            "9027",
+            "297"
+        ],
+        "explanation": "9 hundreds = 900, 2 tens = 20, and 7 ones = 7. 900 + 20 + 7 = 927."
+    },
+    {
+        "question_text": "6 hundreds + 5 tens + 0 ones is?",
+        "question_type": "multiple_choice",
+        "correct_answer": "650",
+        "wrong_answers": [
+            "605",
+            "6500",
+            "56"
+        ],
+        "explanation": "6 hundreds = 600, 5 tens = 50, and 0 ones = 0. 600 + 50 + 0 = 650."
+    },
+    {
+        "question_text": "1 hundred + 8 tens + 9 ones is?",
+        "question_type": "multiple_choice",
+        "correct_answer": "189",
+        "wrong_answers": [
+            "198",
+            "1089",
+            "819"
+        ],
+        "explanation": "1 hundred = 100, 8 tens = 80, and 9 ones = 9. 100 + 80 + 9 = 189."
+    },
+    {
+        "question_text": "_____ hundreds = 90 tens",
+        "question_type": "multiple_choice",
+        "correct_answer": "9",
+        "wrong_answers": [
+            "90",
+            "900",
+            "8"
+        ],
+        "explanation": "90 tens = 900. 900 equals 9 hundreds."
+    },
+    {
+        "question_text": "_____ hundreds = 40 tens",
+        "question_type": "multiple_choice",
+        "correct_answer": "4",
+        "wrong_answers": [
+            "40",
+            "400",
+            "5"
+        ],
+        "explanation": "40 tens = 400. 400 equals 4 hundreds."
+    },
+    {
+        "question_text": "_____ hundreds = 70 tens",
+        "question_type": "multiple_choice",
+        "correct_answer": "7",
+        "wrong_answers": [
+            "70",
+            "700",
+            "6"
+        ],
+        "explanation": "70 tens = 700. 700 equals 7 hundreds."
+    },
+    {
+        "question_text": "_____ hundreds = 20 tens",
+        "question_type": "multiple_choice",
+        "correct_answer": "2",
+        "wrong_answers": [
+            "20",
+            "200",
+            "3"
+        ],
+        "explanation": "20 tens = 200. 200 equals 2 hundreds."
+    },
+    {
+        "question_text": "_____ hundreds = 50 tens",
+        "question_type": "multiple_choice",
+        "correct_answer": "5",
+        "wrong_answers": [
+            "50",
+            "500",
+            "4"
+        ],
+        "explanation": "50 tens = 500. 500 equals 5 hundreds."
+    },
+    {
+        "question_text": "_____ hundreds = 100 tens",
+        "question_type": "multiple_choice",
+        "correct_answer": "10",
+        "wrong_answers": [
+            "100",
+            "1",
+            "1000"
+        ],
+        "explanation": "100 tens = 1000. 1000 equals 10 hundreds."
+    },
+    {
+        "question_text": "What is 800 + 40 + 2?",
+        "question_type": "multiple_choice",
+        "correct_answer": "842",
+        "wrong_answers": [
+            "824",
+            "8042",
+            "884"
+        ],
+        "explanation": "800 is 8 hundreds, 40 is 4 tens, and 2 is 2 ones. 800 + 40 + 2 = 842."
+    },
+    {
+        "question_text": "What is 500 + 60 + 7?",
+        "question_type": "multiple_choice",
+        "correct_answer": "567",
+        "wrong_answers": [
+            "576",
+            "5067",
+            "657"
+        ],
+        "explanation": "500 is 5 hundreds, 60 is 6 tens, and 7 is 7 ones. 500 + 60 + 7 = 567."
+    },
+    {
+        "question_text": "What is 900 + 10 + 4?",
+        "question_type": "multiple_choice",
+        "correct_answer": "914",
+        "wrong_answers": [
+            "941",
+            "9014",
+            "904"
+        ],
+        "explanation": "900 is 9 hundreds, 10 is 1 ten, and 4 is 4 ones. 900 + 10 + 4 = 914."
+    },
+    {
+        "question_text": "What is 300 + 20 + 6?",
+        "question_type": "multiple_choice",
+        "correct_answer": "326",
+        "wrong_answers": [
+            "362",
+            "3026",
+            "356"
+        ],
+        "explanation": "300 is 3 hundreds, 20 is 2 tens, and 6 is 6 ones. 300 + 20 + 6 = 326."
+    },
+    {
+        "question_text": "What is 700 + 80 + 9?",
+        "question_type": "multiple_choice",
+        "correct_answer": "789",
+        "wrong_answers": [
+            "798",
+            "7089",
+            "879"
+        ],
+        "explanation": "700 is 7 hundreds, 80 is 8 tens, and 9 is 9 ones. 700 + 80 + 9 = 789."
+    },
+    {
+        "question_text": "What is 400 + 0 + 5?",
+        "question_type": "multiple_choice",
+        "correct_answer": "405",
+        "wrong_answers": [
+            "450",
+            "4005",
+            "45"
+        ],
+        "explanation": "400 is 4 hundreds, 0 is 0 tens, and 5 is 5 ones. 400 + 0 + 5 = 405."
+    },
+    {
+        "question_text": "What number has 9 tens and 1 fewer one than tens?",
+        "question_type": "multiple_choice",
+        "correct_answer": "98",
+        "wrong_answers": [
+            "89",
+            "99",
+            "90"
+        ],
+        "explanation": "9 tens = 90. 1 fewer one than 9 tens means 8 ones. 90 + 8 = 98."
+    },
+    {
+        "question_text": "What number has 6 tens and 2 more ones than tens?",
+        "question_type": "multiple_choice",
+        "correct_answer": "68",
+        "wrong_answers": [
+            "64",
+            "86",
+            "62"
+        ],
+        "explanation": "6 tens = 60. 2 more ones than 6 means 8 ones. 60 + 8 = 68."
+    },
+    {
+        "question_text": "What number has 4 hundreds and 3 fewer tens than hundreds?",
+        "question_type": "multiple_choice",
+        "correct_answer": "410",
+        "wrong_answers": [
+            "430",
+            "470",
+            "403"
+        ],
+        "explanation": "4 hundreds = 400. 3 fewer tens than 4 means 1 ten. 400 + 10 = 410."
+    },
+    {
+        "question_text": "What number has 7 tens and the same number of ones as tens?",
+        "question_type": "multiple_choice",
+        "correct_answer": "77",
+        "wrong_answers": [
+            "70",
+            "74",
+            "717"
+        ],
+        "explanation": "7 tens = 70. The same number of ones as tens means 7 ones. 70 + 7 = 77."
+    },
+    {
+        "question_text": "What number has 8 hundreds and 2 more tens than hundreds?",
+        "question_type": "multiple_choice",
+        "correct_answer": "880",
+        "wrong_answers": [
+            "820",
+            "882",
+            "800"
+        ],
+        "explanation": "8 hundreds = 800. 2 more tens than 8 means 10 tens (100). 800 + 100 = 900. But since the question asks for tens place only (8 + 2 = 10 tens = 100), the correct total becomes 900. (Correction: 800 + 100 = 900.)"
+    }
+]

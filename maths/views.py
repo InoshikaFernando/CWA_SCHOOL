@@ -74,6 +74,20 @@ YEAR_TOPICS_MAP = {
 
 YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
 
+TOPIC_SESSION_SLUGS = {
+    "Measurements": "measurements",
+    "Whole Numbers": "whole_numbers",
+    "Factors": "factors",
+    "Angles": "angles",
+    "Place Values": "place_values",
+    "Fractions": "fractions",
+    "BODMAS/PEMDAS": "bodmas",
+    "Date and Time": "date_time",
+    "Finance": "finance",
+    "Integers": "integers",
+    "Trigonometry": "trigonometry",
+}
+
 
 def normalize_basic_facts_topic(topic_name):
     return slugify(topic_name or "").lower()
@@ -2351,7 +2365,7 @@ def topic_questions(request, level_number, topic_name):
 
     question_number = int(request.GET.get('q', 1))
 
-    topic_slug = slugify(topic_name)
+    topic_slug = TOPIC_SESSION_SLUGS.get(topic_name, slugify(topic_name))
     timer_session_key = f"{topic_slug}_timer_start"
     questions_session_key = f"{topic_slug}_question_ids"
     timer_start = request.session.get(timer_session_key)
@@ -2373,7 +2387,19 @@ def topic_questions(request, level_number, topic_name):
         request.session[timer_session_key] = time.time()
         request.session['current_attempt_id'] = str(uuid.uuid4())
 
-        all_questions_list = list(all_questions_query)
+        all_questions_list = []
+        for q in all_questions_query:
+            answer_count = q.answers.count()
+            correct_count = q.answers.filter(is_correct=True).count()
+            wrong_count = q.answers.filter(is_correct=False).count()
+            if answer_count == 0:
+                continue
+            if correct_count == 0:
+                continue
+            if q.question_type in ['multiple_choice', 'true_false'] and wrong_count == 0:
+                continue
+            all_questions_list.append(q)
+
         if len(all_questions_list) > question_limit:
             selected_questions = select_questions_stratified(all_questions_list, question_limit)
         else:

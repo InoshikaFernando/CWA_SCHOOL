@@ -33,7 +33,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'cwa_school.settings')
 import django
 django.setup()
 
-from maths.models import Level, Topic
+from maths.models import Level, Topic, Question
 from question_utils import process_questions
 
 YEAR_TOPICS_MAP = {
@@ -216,6 +216,54 @@ def setup_topic_and_level(year, topic_name):
     return topic, level
 
 
+def backfill_topicless_questions(level, topic, questions_data, verbose=True):
+    """
+    Find existing questions that match by level and question_text but have no
+    topic set, and assign the given topic to them.
+
+    This prevents duplicates when questions were previously loaded without a
+    topic and ensures they are picked up by topic-based filtering in views.
+
+    Args:
+        level: Level object
+        topic: Topic object
+        questions_data: List of question data dicts (from JSON)
+        verbose: Print status messages
+
+    Returns:
+        Number of questions backfilled
+    """
+    question_texts = [q.get("question_text", "").strip() for q in questions_data]
+    question_texts = [t for t in question_texts if t]
+
+    topicless = Question.objects.filter(
+        level=level,
+        topic__isnull=True,
+        question_text__in=question_texts,
+    )
+
+    count = topicless.count()
+    if count == 0:
+        if verbose:
+            print(f"[INFO] No topicless questions to backfill for this level.")
+        return 0
+
+    if verbose:
+        print(f"[BACKFILL] Found {count} question(s) without a topic. Assigning '{topic.name}'...")
+
+    for question in topicless:
+        question.topic = topic
+        question.save()
+        if verbose:
+            safe_text = question.question_text[:60].encode('ascii', 'ignore').decode('ascii')
+            print(f"  [BACKFILL] {safe_text}...")
+
+    if verbose:
+        print(f"[BACKFILL] Assigned topic to {count} existing question(s).")
+
+    return count
+
+
 def process_json_file(filepath, verbose=True):
     """
     Load questions from a JSON file and add them to the database.
@@ -255,12 +303,20 @@ def process_json_file(filepath, verbose=True):
 
     topic, level = result
 
+    backfill_count = backfill_topicless_questions(
+        level=level,
+        topic=topic,
+        questions_data=questions_data,
+        verbose=verbose,
+    )
+
     results = process_questions(
         level=level,
         topic=topic,
         questions_data=questions_data,
         verbose=verbose,
     )
+    results['backfilled'] = backfill_count
 
     if verbose:
         print(f"\n[OK] Completed Year {year} - {topic_name}")
@@ -307,7 +363,7 @@ def process_all(verbose=True):
     Returns:
         Dictionary with total counts
     """
-    total = {"created": 0, "updated": 0, "skipped": 0, "errors": 0}
+    total = {"created": 0, "updated": 0, "skipped": 0, "backfilled": 0, "errors": 0}
 
     for year, topic_name, filename, exists in list_expected_files():
         if not exists:
@@ -324,6 +380,7 @@ def process_all(verbose=True):
             total["created"] += result.get("created", 0)
             total["updated"] += result.get("updated", 0)
             total["skipped"] += result.get("skipped", 0)
+            total["backfilled"] += result.get("backfilled", 0)
 
     return total
 
@@ -342,7 +399,7 @@ def process_year(year, verbose=True):
         print(f"[ERROR] Year {year} not in YEAR_TOPICS_MAP")
         return None
 
-    total = {"created": 0, "updated": 0, "skipped": 0, "errors": 0}
+    total = {"created": 0, "updated": 0, "skipped": 0, "backfilled": 0, "errors": 0}
 
     for topic_name, _, _ in YEAR_TOPICS_MAP[year]:
         filepath = get_json_filepath(year, topic_name)
@@ -360,6 +417,7 @@ def process_year(year, verbose=True):
             total["created"] += result.get("created", 0)
             total["updated"] += result.get("updated", 0)
             total["skipped"] += result.get("skipped", 0)
+            total["backfilled"] += result.get("backfilled", 0)
 
     return total
 
@@ -440,7 +498,8 @@ Examples:
 
         print(f"\n{'=' * 60}")
         print(f"RESULTS: Created={result['created']}, "
-              f"Updated={result['updated']}, Skipped={result['skipped']}")
+              f"Updated={result['updated']}, Skipped={result['skipped']}, "
+              f"Backfilled={result.get('backfilled', 0)}")
         return
 
     if args.year:
@@ -456,6 +515,8 @@ Examples:
     print(f"  Created: {result['created']}")
     print(f"  Updated: {result['updated']}")
     print(f"  Skipped: {result['skipped']}")
+    if result.get('backfilled', 0) > 0:
+        print(f"  Backfilled: {result['backfilled']}")
     if result.get("errors", 0) > 0:
         print(f"  Errors: {result['errors']}")
 

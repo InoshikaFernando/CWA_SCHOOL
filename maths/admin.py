@@ -1,6 +1,6 @@
 ﻿from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, Topic, Level, ClassRoom, Enrollment, BasicFactsResult, TimeLog
+from .models import CustomUser, Topic, Level, ClassRoom, Enrollment, BasicFactsResult, TimeLog, Question, Answer
 
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
@@ -25,6 +25,17 @@ class TimeLogAdmin(admin.ModelAdmin):
     list_filter = ("last_reset_date", "last_activity")
     search_fields = ("student__username",)
     readonly_fields = ("last_reset_date", "last_activity")
+
+class AnswerInline(admin.TabularInline):
+    model = Answer
+    extra = 1
+
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    list_display = ("question_text", "level", "topic", "question_type", "difficulty", "points")
+    list_filter = ("level", "topic", "question_type", "difficulty")
+    search_fields = ("question_text",)
+    inlines = [AnswerInline]
 
 admin.site.register(Topic)
 admin.site.register(Level)

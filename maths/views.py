@@ -3640,27 +3640,11 @@ def place_values_questions(request, level_number):
         return redirect("maths:dashboard")
     
     # Get all Place Values questions for this level
-    # Filter to only include Place Values questions by matching their specific patterns
-    # Place Values questions contain: "complete the following sequence", "counting", "tens and ones", "skip counting"
-    # Also exclude measurement questions explicitly
-    all_questions_query = Question.objects.filter(level=level).filter(
-        Q(question_text__icontains='complete the following sequence') |
-        Q(question_text__icontains='counting on') |
-        Q(question_text__icontains='counting back') |
-        Q(question_text__icontains='skip counting') |
-        Q(question_text__icontains='tens and ones') |
-        Q(question_text__icontains='How many tens')
-    ).exclude(
-        Q(question_text__icontains='Which unit would you use') |
-        Q(question_text__icontains='measure the length') |
-        Q(question_text__icontains='measure the width') |
-        Q(question_text__icontains='measure the height') |
-        Q(question_text__icontains='centimeter') |
-        Q(question_text__icontains='meter') |
-        Q(question_text__icontains='kilometer') |
-        Q(question_text__icontains='liter') |
-        Q(question_text__icontains='gram')
-    )
+    # Use topic field directly instead of text pattern matching
+    all_questions_query = Question.objects.filter(
+        level=level,
+        topic=place_values_topic
+    ).prefetch_related('answers')
     
     # Question limits per year
     YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
@@ -3674,23 +3658,15 @@ def place_values_questions(request, level_number):
     questions_session_key = "place_values_question_ids"
     timer_start = request.session.get(timer_session_key)
     
-    # Clear session if questions don't match Place Values patterns (safety check)
+    # Clear session if questions don't match Place Values topic (safety check)
     if question_number == 1 and timer_start:
-        # Validate existing session questions are still Place Values questions
+        # Validate existing session questions are still Place Values questions (check by topic)
         existing_question_ids = request.session.get(questions_session_key, [])
         if existing_question_ids:
-            existing_questions = Question.objects.filter(id__in=existing_question_ids, level=level)
-            # Check if any question doesn't match Place Values pattern
-            invalid_questions = existing_questions.exclude(
-                Q(question_text__icontains='complete the following sequence') |
-                Q(question_text__icontains='counting on') |
-                Q(question_text__icontains='counting back') |
-                Q(question_text__icontains='skip counting') |
-                Q(question_text__icontains='tens and ones') |
-                Q(question_text__icontains='How many tens')
-            )
-            if invalid_questions.exists():
-                # Clear session and start fresh
+            existing_questions = Question.objects.filter(id__in=existing_question_ids, level=level, topic=place_values_topic)
+            # Check if all questions have the Place Values topic
+            if existing_questions.count() != len(existing_question_ids):
+                # Some questions don't have the Place Values topic - clear session and start fresh
                 if timer_session_key in request.session:
                     del request.session[timer_session_key]
                 if questions_session_key in request.session:
@@ -3722,44 +3698,14 @@ def place_values_questions(request, level_number):
     question_ids = request.session.get(questions_session_key, [])
     
     # Convert to list and maintain the order from session
-    # Validate that all questions are Place Values questions
     if question_ids:
-        all_questions = []
-        # Use bulk query with prefetch_related to avoid N+1 queries
         questions_dict = {q.id: q for q in Question.objects.filter(
             id__in=question_ids,
-            level=level
+            level=level,
+            topic=place_values_topic
         ).prefetch_related('answers')}
-        
-        # Filter by text patterns and maintain order from session
-        all_questions = []
-        for qid in question_ids:
-            if qid not in questions_dict:
-                continue
-            question = questions_dict[qid]
-            # Verify this is a Place Values question
-            is_place_value = (
-                'complete the following sequence' in question.question_text.lower() or
-                'counting on' in question.question_text.lower() or
-                'counting back' in question.question_text.lower() or
-                'skip counting' in question.question_text.lower() or
-                'tens and ones' in question.question_text.lower() or
-                'how many tens' in question.question_text.lower()
-            )
-            # Exclude measurement questions
-            is_measurement = (
-                'which unit would you use' in question.question_text.lower() or
-                'measure the length' in question.question_text.lower() or
-                'measure the width' in question.question_text.lower() or
-                'centimeter' in question.question_text.lower() or
-                'meter' in question.question_text.lower() or
-                'kilometer' in question.question_text.lower() or
-                'liter' in question.question_text.lower()
-            )
-            if is_place_value and not is_measurement:
-                all_questions.append(question)
-        
-        # If we filtered out questions, clear session and start fresh
+        all_questions = [questions_dict[qid] for qid in question_ids if qid in questions_dict]
+
         if len(all_questions) != len(question_ids):
             if timer_session_key in request.session:
                 del request.session[timer_session_key]
@@ -3767,7 +3713,6 @@ def place_values_questions(request, level_number):
                 del request.session[questions_session_key]
             if 'current_attempt_id' in request.session:
                 del request.session['current_attempt_id']
-            # Redirect to question 1 with fresh questions
             return redirect(f"{request.path}?q=1")
     else:
         # Fallback if no session

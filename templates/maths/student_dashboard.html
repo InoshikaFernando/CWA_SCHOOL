@@ -362,7 +362,7 @@
                             {% for level in levels_by_year|lookup:year %}
                                 {% for topic_name, url_name, display_name in year_topics %}
                                 <div class="topic-card">
-                                    <a href="{% url url_name level.level_number %}">
+                                    <a href="{% url "maths:"|add:url_name level.level_number %}">
                                         <h4>{{ display_name }}</h4>
                                         <p>Year {{ level.level_number }} - {{ display_name }}</p>
                                     </a>

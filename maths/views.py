@@ -21,6 +21,7 @@ import threading
 from django.utils.text import slugify
 from .models import Topic, Level, ClassRoom, Enrollment, CustomUser, Question, Answer, StudentAnswer, BasicFactsResult, TimeLog, TopicLevelStatistics, StudentFinalAnswer
 from .forms import CreateClassForm, StudentSignUpForm, TeacherSignUpForm, TeacherCenterRegistrationForm, IndividualStudentRegistrationForm, StudentBulkRegistrationForm, QuestionForm, AnswerFormSet, UserProfileForm, UserPasswordChangeForm
+from .constants import YEAR_TOPICS_MAP
 
 BASIC_FACTS_TOPIC_CONFIG = {
     "addition": {"start_level": 100, "level_count": 7},
@@ -28,50 +29,6 @@ BASIC_FACTS_TOPIC_CONFIG = {
     "multiplication": {"start_level": 114, "level_count": 7},
     "division": {"start_level": 121, "level_count": 7},
     "place-value-facts": {"start_level": 128, "level_count": 5},
-}
-
-# Year-to-topics mapping for dashboard display
-# Maps year number to list of (topic_name, url_name, display_name)
-YEAR_TOPICS_MAP = {
-    2: [
-        ("Measurements", "measurements_questions", "Measurements"),
-        ("Place Values", "place_values_questions", "Place Values"),
-    ],
-    3: [
-        ("Measurements", "measurements_questions", "Measurements"),
-        ("Fractions", "fractions_questions", "Fractions"),
-        ("Finance", "finance_questions", "Finance"),
-        ("Date and Time", "date_time_questions", "Date and Time"),
-    ],
-    4: [
-        ("Fractions", "fractions_questions", "Fractions"),
-        ("Integers", "integers_questions", "Integers"),
-        ("Place Values", "place_values_questions", "Place Values"),
-    ],
-    5: [
-        ("Measurements", "measurements_questions", "Measurements"),
-        ("BODMAS/PEMDAS", "bodmas_questions", "BODMAS/PEMDAS"),
-    ],
-    6: [
-        ("Measurements", "measurements_questions", "Measurements"),
-        ("BODMAS/PEMDAS", "bodmas_questions", "BODMAS/PEMDAS"),
-        ("Whole Numbers", "whole_numbers_questions", "Whole Numbers"),
-        ("Factors", "factors_questions", "Factors"),
-        ("Angles", "angles_questions", "Angles"),
-    ],
-    7: [
-        ("Measurements", "measurements_questions", "Measurements"),
-        ("BODMAS/PEMDAS", "bodmas_questions", "BODMAS/PEMDAS"),
-        ("Integers", "integers_questions", "Integers"),
-        ("Factors", "factors_questions", "Factors"),
-        ("Fractions", "fractions_questions", "Fractions")
-    ],
-    8: [
-        ("Trigonometry", "trigonometry_questions", "Trigonometry"),
-        ("Integers", "integers_questions", "Integers"),
-        ("Factors", "factors_questions", "Factors"),
-        ("Fractions", "fractions_questions", "Fractions")
-    ],
 }
 
 YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}

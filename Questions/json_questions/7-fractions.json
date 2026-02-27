@@ -1,0 +1,442 @@
+[
+    {
+        "question_text": "Calculate: 6/12 + 7/12",
+        "question_type": "multiple_choice",
+        "correct_answer": "13/12",
+        "wrong_answers": [
+            "13/24",
+            "1",
+            "12/13"
+        ],
+        "explanation": "The denominators are the same, so add the numerators: 6 + 7 = 13."
+    },
+    {
+        "question_text": "Calculate: 5/8 - 1/4",
+        "question_type": "multiple_choice",
+        "correct_answer": "3/8",
+        "wrong_answers": [
+            "4/8",
+            "1/8",
+            "1/2"
+        ],
+        "explanation": "Convert 1/4 to 2/8, then subtract: 5/8 − 2/8 = 3/8."
+    },
+    {
+        "question_text": "Calculate: 11/12 - 2/3",
+        "question_type": "multiple_choice",
+        "correct_answer": "1/4",
+        "wrong_answers": [
+            "9/12",
+            "3/12",
+            "1/3"
+        ],
+        "explanation": "Convert 2/3 to 8/12, then subtract: 11/12 − 8/12 = 3/12 = 1/4."
+    },
+    {
+        "question_text": "Calculate: 2 3/5 + 3/10",
+        "question_type": "multiple_choice",
+        "correct_answer": "2 9/10",
+        "wrong_answers": [
+            "2 6/15",
+            "3 1/10",
+            "2 3/10"
+        ],
+        "explanation": "Convert 3/5 to 6/10, then add: 6/10 + 3/10 = 9/10. Final answer is 2 9/10."
+    },
+    {
+        "question_text": "Calculate: 3/4 + 5/8",
+        "question_type": "multiple_choice",
+        "correct_answer": "11/8",
+        "wrong_answers": [
+            "8/12",
+            "10/8",
+            "1 1/8"
+        ],
+        "explanation": "Convert 3/4 to 6/8, then add: 6/8 + 5/8 = 11/8."
+    },
+    {
+        "question_text": "Calculate: 7/9 - 1/3",
+        "question_type": "multiple_choice",
+        "correct_answer": "4/9",
+        "wrong_answers": [
+            "6/9",
+            "2/6",
+            "1/9"
+        ],
+        "explanation": "Convert 1/3 to 3/9, then subtract: 7/9 − 3/9 = 4/9."
+    },
+    {
+        "question_text": "Calculate: 5/6 + 1/3",
+        "question_type": "multiple_choice",
+        "correct_answer": "7/6",
+        "wrong_answers": [
+            "6/9",
+            "1",
+            "5/9"
+        ],
+        "explanation": "Convert 1/3 to 2/6, then add: 5/6 + 2/6 = 7/6."
+    },
+    {
+        "question_text": "Calculate: 9/10 - 3/5",
+        "question_type": "multiple_choice",
+        "correct_answer": "3/10",
+        "wrong_answers": [
+            "6/10",
+            "1/2",
+            "2/5"
+        ],
+        "explanation": "Convert 3/5 to 6/10, then subtract: 9/10 − 6/10 = 3/10."
+    },
+    {
+        "question_text": "Calculate: 1 1/2 + 3/4",
+        "question_type": "multiple_choice",
+        "correct_answer": "2 1/4",
+        "wrong_answers": [
+            "1 4/6",
+            "2 3/4",
+            "1 7/8"
+        ],
+        "explanation": "Convert 1/2 to 2/4, then add: 2/4 + 3/4 = 5/4 = 1 1/4. Total = 2 1/4."
+    },
+    {
+        "question_text": "Calculate: 4/5 - 2/10",
+        "question_type": "multiple_choice",
+        "correct_answer": "3/5",
+        "wrong_answers": [
+            "2/5",
+            "6/10",
+            "1/5"
+        ],
+        "explanation": "Convert 4/5 to 8/10, then subtract: 8/10 − 2/10 = 6/10 = 3/5."
+    },
+    {
+        "question_text": "Calculate: 2 1/4 + 1/2",
+        "question_type": "multiple_choice",
+        "correct_answer": "2 3/4",
+        "wrong_answers": [
+            "3 1/4",
+            "2 2/6",
+            "2 1/2"
+        ],
+        "explanation": "Convert 1/2 to 2/4, then add: 1/4 + 2/4 = 3/4."
+    },
+    {
+        "question_text": "Calculate: 13/15 - 4/5",
+        "question_type": "multiple_choice",
+        "correct_answer": "1/15",
+        "wrong_answers": [
+            "9/15",
+            "3/15",
+            "1/3"
+        ],
+        "explanation": "Convert 4/5 to 12/15, then subtract: 13/15 − 12/15 = 1/15."
+    },
+    {
+        "question_text": "Write 3/5 and 2/4 as equivalent fractions with a common denominator.",
+        "question_type": "multiple_choice",
+        "correct_answer": "12/20 and 10/20",
+        "wrong_answers": [
+            "6/10 and 2/10",
+            "3/20 and 2/20",
+            "9/15 and 8/15"
+        ],
+        "explanation": "The lowest common denominator of 5 and 4 is 20. Convert 3/5 = 12/20 and 2/4 = 10/20."
+    },
+    {
+        "question_text": "Write 5/8 and 3/4 as equivalent fractions with a common denominator.",
+        "question_type": "multiple_choice",
+        "correct_answer": "5/8 and 6/8",
+        "wrong_answers": [
+            "10/16 and 3/16",
+            "5/32 and 3/32",
+            "15/24 and 9/24"
+        ],
+        "explanation": "The lowest common denominator of 8 and 4 is 8. Convert 3/4 = 6/8."
+    },
+    {
+        "question_text": "Write 2/10 and 1/15 as equivalent fractions with a common denominator.",
+        "question_type": "multiple_choice",
+        "correct_answer": "6/30 and 2/30",
+        "wrong_answers": [
+            "4/25 and 1/25",
+            "2/150 and 1/150",
+            "3/20 and 2/20"
+        ],
+        "explanation": "The lowest common denominator of 10 and 15 is 30. Convert 2/10 = 6/30 and 1/15 = 2/30."
+    },
+    {
+        "question_text": "Write 2/3 and 1/8 as equivalent fractions with a common denominator.",
+        "question_type": "multiple_choice",
+        "correct_answer": "16/24 and 3/24",
+        "wrong_answers": [
+            "8/12 and 1/12",
+            "2/24 and 1/24",
+            "6/18 and 2/18"
+        ],
+        "explanation": "The lowest common denominator of 3 and 8 is 24. Convert 2/3 = 16/24 and 1/8 = 3/24."
+    },
+    {
+        "question_text": "Compare: 3/7 and 2/3",
+        "question_type": "multiple_choice",
+        "correct_answer": "<",
+        "wrong_answers": [
+            ">",
+            "=",
+            "cannot compare"
+        ],
+        "explanation": "Convert to a common denominator: 3/7 = 9/21, 2/3 = 14/21. Since 9/21 < 14/21, 3/7 < 2/3."
+    },
+    {
+        "question_text": "Compare: 2/5 and 1/2",
+        "question_type": "multiple_choice",
+        "correct_answer": "<",
+        "wrong_answers": [
+            ">",
+            "=",
+            "cannot compare"
+        ],
+        "explanation": "Common denominator: 2/5 = 4/10, 1/2 = 5/10. Since 4/10 < 5/10, 2/5 < 1/2."
+    },
+    {
+        "question_text": "Compare: 8/6 and 4/6",
+        "question_type": "multiple_choice",
+        "correct_answer": ">",
+        "wrong_answers": [
+            "<",
+            "=",
+            "cannot compare"
+        ],
+        "explanation": "Denominators are the same. Compare numerators: 8 > 4, so 8/6 > 4/6."
+    },
+    {
+        "question_text": "Yesterday Cody read 1/3 of the novel War and Peace. Today, he read 1/6 of the novel. How much has he read in total?",
+        "question_type": "multiple_choice",
+        "correct_answer": "1/2",
+        "wrong_answers": ["2/9", "1/6", "1/3"],
+        "explanation": "Common denominator of 3 and 6 is 6. 1/3 = 2/6. Add: 2/6 + 1/6 = 3/6 = 1/2."
+    },
+    {
+        "question_text": "A pizza was cut into 8 equal slices. Sarah ate 3 slices on Monday and 2 slices on Tuesday. What fraction of the pizza did she eat in total?",
+        "question_type": "multiple_choice",
+        "correct_answer": "5/8",
+        "wrong_answers": ["1/2", "3/5", "2/8"],
+        "explanation": "Add the slices eaten: 3 + 2 = 5 slices. Total slices = 8. Fraction = 5/8."
+    },
+    {
+        "question_text": "Tom jogged 2/5 km in the morning and 3/10 km in the evening. How far did he jog in total?",
+        "question_type": "multiple_choice",
+        "correct_answer": "7/10",
+        "wrong_answers": ["1/2", "5/15", "3/5"],
+        "explanation": "Common denominator of 5 and 10 is 10. 2/5 = 4/10. Add 4/10 + 3/10 = 7/10."
+    },
+    {
+        "question_text": "A water tank is 3/4 full. If 1/8 of it is used, what fraction of the tank is left?",
+        "question_type": "multiple_choice",
+        "correct_answer": "5/8",
+        "wrong_answers": ["1/2", "2/3", "7/8"],
+        "explanation": "Common denominator of 4 and 8 is 8. 3/4 = 6/8. Subtract 1/8: 6/8 − 1/8 = 5/8."
+    },
+    {
+        "question_text": "Lucy baked a cake and gave 1/3 to her friend and 1/6 to her neighbor. What fraction of the cake did she give away?",
+        "question_type": "multiple_choice",
+        "correct_answer": "1/2",
+        "wrong_answers": ["1/4", "1/6", "2/9"],
+        "explanation": "Common denominator of 3 and 6 is 6. 1/3 = 2/6. Add 2/6 + 1/6 = 3/6 = 1/2."
+    },
+    {
+        "question_text": "A ribbon is 7/8 m long. If 3/8 m is cut off, how much ribbon remains?",
+        "question_type": "multiple_choice",
+        "correct_answer": "4/8",
+        "wrong_answers": ["1/2", "5/8", "3/4"],
+        "explanation": "Subtract: 7/8 − 3/8 = 4/8 = 1/2."
+    },
+    {
+        "question_text": "A tank is 2/3 full of oil. 1/9 of the tank is used. What fraction of the tank is now full?",
+        "question_type": "multiple_choice",
+        "correct_answer": "5/9",
+        "wrong_answers": ["1/2", "2/9", "3/4"],
+        "explanation": "Common denominator of 3 and 9 is 9. 2/3 = 6/9. Subtract 1/9: 6/9 − 1/9 = 5/9."
+    },
+    {
+        "question_text": "A bag contains 5/6 kg of apples. If 1/2 kg is removed, how much is left?",
+        "question_type": "multiple_choice",
+        "correct_answer": "1/3",
+        "wrong_answers": ["1/2", "2/6", "1/6"],
+        "explanation": "Common denominator of 6 and 2 is 6. 1/2 = 3/6. Subtract: 5/6 − 3/6 = 2/6 = 1/3."
+    },
+    {
+        "question_text": "Jack drank 3/10 of a bottle of juice in the morning and 1/5 in the afternoon. How much did he drink in total?",
+        "question_type": "multiple_choice",
+        "correct_answer": "1/2",
+        "wrong_answers": ["4/10", "2/5", "3/5"],
+        "explanation": "Convert 1/5 = 2/10. Add: 3/10 + 2/10 = 5/10 = 1/2."
+    },
+    {
+        "question_text": "A classroom has 2/3 of the students wearing blue uniforms and 1/6 wearing red. What fraction of students are wearing blue or red uniforms?",
+        "question_type": "multiple_choice",
+        "correct_answer": "5/6",
+        "wrong_answers": ["1/2", "2/9", "3/6"],
+        "explanation": "Common denominator of 3 and 6 is 6. 2/3 = 4/6. Add 4/6 + 1/6 = 5/6."
+    },
+    {
+        "question_text": "Maura pours 2/3 of a cup of water into a pot 7 times. How many cups in total? Write as a mixed number.",
+        "question_type": "multiple_choice",
+        "correct_answer": "4 2/3",
+        "wrong_answers": ["14/3", "4 1/3", "5"],
+        "explanation": "2/3 × 7 = 14/3 = 4 2/3."
+    },
+    {
+        "question_text": "A recipe calls for 3/4 teaspoon of salt. If the recipe is made 5 times, how much salt is used in total?",
+        "question_type": "multiple_choice",
+        "correct_answer": "3 3/4 teaspoons",
+        "wrong_answers": ["15/4", "3 1/2", "4"],
+        "explanation": "3/4 × 5 = 15/4 = 3 3/4."
+    },
+    {
+        "question_text": "Emma reads 2/5 of a book each day. How much will she have read in 8 days?",
+        "question_type": "multiple_choice",
+        "correct_answer": "3 1/5",
+        "wrong_answers": ["16/5", "3", "3 3/5"],
+        "explanation": "2/5 × 8 = 16/5 = 3 1/5."
+    },
+    {
+        "question_text": "A gardener waters 5/6 of a litre of plants every day for 6 days. Total litres of water used?",
+        "question_type": "multiple_choice",
+        "correct_answer": "5",
+        "wrong_answers": ["25/6", "4 5/6", "5 1/6"],
+        "explanation": "5/6 × 6 = 30/6 = 5 litres."
+    },
+    {
+        "question_text": "Liam runs 7/8 km each day for 4 days. How far does he run in total?",
+        "question_type": "multiple_choice",
+        "correct_answer": "3 1/2 km",
+        "wrong_answers": ["28/8 km", "3 3/4 km", "4 km"],
+        "explanation": "7/8 × 4 = 28/8 = 3 1/2."
+    },
+    {
+        "question_text": "A baker uses 1/3 kg of flour for one cake. If she bakes 9 cakes, how much flour does she use in total?",
+        "question_type": "multiple_choice",
+        "correct_answer": "3 kg",
+        "wrong_answers": ["3 1/3 kg", "2 3/3 kg", "9/3 kg"],
+        "explanation": "1/3 × 9 = 9/3 = 3 kg."
+    },
+    {
+        "question_text": "A car travels 5/12 of a kilometre every minute. How far does it travel in 12 minutes?",
+        "question_type": "multiple_choice",
+        "correct_answer": "5 km",
+        "wrong_answers": ["60/12 km", "6 km", "12/5 km"],
+        "explanation": "5/12 × 12 = 60/12 = 5 km."
+    },
+    {
+        "question_text": "Sofia drinks 2/7 litre of juice every day. How much juice will she drink in 14 days?",
+        "question_type": "multiple_choice",
+        "correct_answer": "4 litres",
+        "wrong_answers": ["28/7 litres", "3 6/7 litres", "2 litres"],
+        "explanation": "2/7 × 14 = 28/7 = 4 litres."
+    },
+    {
+        "question_text": "A ribbon is 3/5 m long. If you cut 5 pieces of this length, what is the total length?",
+        "question_type": "multiple_choice",
+        "correct_answer": "3 m",
+        "wrong_answers": ["15/5 m", "2 3/5 m", "4 m"],
+        "explanation": "3/5 × 5 = 15/5 = 3 m."
+    },
+    {
+        "question_text": "A swimming pool is filled with 7/10 of a litre of water per minute. How much water is added in 10 minutes?",
+        "question_type": "multiple_choice",
+        "correct_answer": "7 litres",
+        "wrong_answers": ["70/10 litres", "7 1/10 litres", "6 10/10 litres"],
+        "explanation": "7/10 × 10 = 70/10 = 7 litres."
+    },
+    {
+        "question_text": "A student eats 1/6 of a cake each day. How much cake does he eat in 12 days?",
+        "question_type": "multiple_choice",
+        "correct_answer": "2 cakes",
+        "wrong_answers": ["12/6 cakes", "1 6/6 cakes", "3 cakes"],
+        "explanation": "1/6 × 12 = 12/6 = 2 cakes."
+    },
+    {
+        "question_text": "A gardener plants 5/9 of a row with flowers each day. How much of the row is planted in 9 days?",
+        "question_type": "multiple_choice",
+        "correct_answer": "5 rows",
+        "wrong_answers": ["45/9 rows", "5 1/9 rows", "4 5/9 rows"],
+        "explanation": "5/9 × 9 = 45/9 = 5 rows."
+    },
+    {
+        "question_text": "Calculate: 1/2 × 3/8",
+        "question_type": "multiple_choice",
+        "correct_answer": "3/16",
+        "wrong_answers": ["1/10", "1/4", "5/16"],
+        "explanation": "Multiply numerators and denominators: 1×3 / 2×8 = 3/16."
+    },
+    {
+        "question_text": "Calculate: 4/5 × 1/3",
+        "question_type": "multiple_choice",
+        "correct_answer": "4/15",
+        "wrong_answers": ["1/8", "1/15", "5/12"],
+        "explanation": "Multiply numerators and denominators: 4×1 / 5×3 = 4/15."
+    },
+    {
+        "question_text": "Calculate: 1/6 × 2/5",
+        "question_type": "multiple_choice",
+        "correct_answer": "1/15",
+        "wrong_answers": ["2/11", "2/30", "1/12"],
+        "explanation": "Multiply numerators and denominators: 1×2 / 6×5 = 2/30 = 1/15."
+    },
+    {
+        "question_text": "Calculate: 3/4 × 2/6",
+        "question_type": "multiple_choice",
+        "correct_answer": "1/4",
+        "wrong_answers": ["5/12", "1/2", "2/12"],
+        "explanation": "Multiply: 3×2 / 4×6 = 6/24 = 1/4."
+    },
+    {
+        "question_text": "Calculate: (1/4) × (-4/5)",
+        "question_type": "multiple_choice",
+        "correct_answer": "-1/5",
+        "wrong_answers": ["1/5", "-4/9", "1/4"],
+        "explanation": "Multiply numerators and denominators: 1×(-4)/4×5 = -4/20 = -1/5."
+    },
+    {
+        "question_text": "Calculate: (-3/5) × (-2/3)",
+        "question_type": "multiple_choice",
+        "correct_answer": "2/5",
+        "wrong_answers": ["-6/15", "-2/5", "3/5"],
+        "explanation": "Multiplying two negatives gives positive: 3×2 / 5×3 = 6/15 = 2/5."
+    },
+    {
+        "question_text": "A rug covers 2/5 of the width of a room and 4/7 of the length. What fraction of the floor does the rug cover?",
+        "question_type": "multiple_choice",
+        "correct_answer": "8/35",
+        "wrong_answers": ["6/12", "4/11", "1/2"],
+        "explanation": "Multiply the fractions: 2/5 × 4/7 = 8/35."
+    },
+    {
+        "question_text": "A table occupies 3/4 of the width and 1/2 of the length of a dining room. What fraction of the floor area does it cover?",
+        "question_type": "multiple_choice",
+        "correct_answer": "3/8",
+        "wrong_answers": ["1/4", "1/2", "5/8"],
+        "explanation": "Fraction of area = width × length = 3/4 × 1/2 = 3/8."
+    },
+    {
+        "question_text": "A play mat takes up 5/6 of the width and 2/3 of the length of a nursery floor. What fraction of the floor does it cover?",
+        "question_type": "multiple_choice",
+        "correct_answer": "5/9",
+        "wrong_answers": ["10/18", "7/9", "1/2"],
+        "explanation": "Multiply: 5/6 × 2/3 = 10/18 = 5/9."
+    },
+    {
+        "question_text": "A carpet covers 1/2 of the bedroom width and 3/8 of the length. How much of the floor area does the carpet cover?",
+        "question_type": "multiple_choice",
+        "correct_answer": "3/16",
+        "wrong_answers": ["1/4", "5/16", "1/2"],
+        "explanation": "Multiply: 1/2 × 3/8 = 3/16."
+    },
+    {
+        "question_text": "A small sofa occupies 2/3 of the width and 3/10 of the length of a living room. What fraction of the floor does it occupy?",
+        "question_type": "multiple_choice",
+        "correct_answer": "1/5",
+        "wrong_answers": ["1/2", "3/10", "2/13"],
+        "explanation": "Multiply the fractions: 2/3 × 3/10 = 6/30 = 1/5."
+    }
+]

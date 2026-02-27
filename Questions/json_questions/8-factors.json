@@ -108,5 +108,247 @@
             "(x - 12)(x + 1)"
         ],
         "explanation": "-4 and 3 multiply to -12 and add to -1."
+    },
+    {
+        "question_text": "Factorise: x² - x - 6",
+        "question_type": "multiple_choice",
+        "correct_answer": "(x - 3)(x + 2)",
+        "wrong_answers": [
+            "(x - 2)(x + 3)",
+            "(x - 1)(x - 6)",
+            "(x + 3)(x + 2)"
+        ],
+        "explanation": "Two numbers that multiply to -6 and add to -1 are -3 and 2."
+    },
+    {
+        "question_text": "Factorise: x² - 6x + 5",
+        "question_type": "multiple_choice",
+        "correct_answer": "(x - 1)(x - 5)",
+        "wrong_answers": [
+            "(x - 2)(x - 3)",
+            "(x + 1)(x - 5)",
+            "(x - 1)(x + 5)"
+        ],
+        "explanation": "Two numbers that multiply to 5 and add to -6 are -1 and -5."
+    },
+    {
+        "question_text": "Factorise: 2x⁶ + 8x⁵ + 7x⁴",
+        "question_type": "multiple_choice",
+        "correct_answer": "x⁴(2x² + 8x + 7)",
+        "wrong_answers": [
+            "x⁴(2x + 7)(x + 1)",
+            "2x⁴(x² + 4x + 7)",
+            "x²(2x⁴ + 8x³ + 7x²)"
+        ],
+        "explanation": "The highest common factor is x⁴."
+    },
+    {
+        "question_text": "Factorise: x² + 5x + 6",
+        "question_type": "multiple_choice",
+        "correct_answer": "(x + 2)(x + 3)",
+        "wrong_answers": [
+            "(x + 1)(x + 6)",
+            "(x + 2)(x + 4)",
+            "(x - 2)(x - 3)"
+        ],
+        "explanation": "Two numbers that multiply to 6 and add to 5 are 2 and 3."
+    },
+    {
+        "question_text": "Factorise: x² - 6x - 7",
+        "question_type": "multiple_choice",
+        "correct_answer": "(x - 7)(x + 1)",
+        "wrong_answers": [
+            "(x - 1)(x - 7)",
+            "(x + 7)(x - 1)",
+            "(x - 3)(x - 4)"
+        ],
+        "explanation": "Two numbers that multiply to -7 and add to -6 are -7 and 1."
+    },
+    {
+        "question_text": "Factorise: x² + 10x - 11",
+        "question_type": "multiple_choice",
+        "correct_answer": "(x + 11)(x - 1)",
+        "wrong_answers": [
+            "(x + 1)(x - 11)",
+            "(x + 5)(x + 5)",
+            "(x - 11)(x - 1)"
+        ],
+        "explanation": "Two numbers that multiply to -11 and add to 10 are 11 and -1."
+    },
+    {
+        "question_text": "Factorise: x² + 4x - 5",
+        "question_type": "multiple_choice",
+        "correct_answer": "(x + 5)(x - 1)",
+        "wrong_answers": [
+            "(x - 5)(x + 1)",
+            "(x + 2)(x - 3)",
+            "(x + 1)(x + 5)"
+        ],
+        "explanation": "Two numbers that multiply to -5 and add to 4 are 5 and -1."
+    },
+    {
+        "question_text": "Factorise: x² - 4x - 5",
+        "question_type": "multiple_choice",
+        "correct_answer": "(x - 5)(x + 1)",
+        "wrong_answers": [
+            "(x - 1)(x - 5)",
+            "(x + 5)(x - 1)",
+            "(x - 2)(x - 3)"
+        ],
+        "explanation": "Two numbers that multiply to -5 and add to -4 are -5 and 1."
+    },
+    {
+        "question_text": "Factorise: 5x⁵ - 80x",
+        "question_type": "multiple_choice",
+        "correct_answer": "5x(x - 2)(x + 2)(x² + 4)",
+        "wrong_answers": [
+            "5x(x - 4)(x + 4)",
+            "5(x⁴ - 16)",
+            "5x(x² - 4)"
+        ],
+        "explanation": "Factor out 5x, then use difference of squares."
+    },
+    {
+        "question_text": "Factorise: x³ - 3x² - 4x + 12",
+        "question_type": "multiple_choice",
+        "correct_answer": "(x - 2)(x + 2)(x - 3)",
+        "wrong_answers": [
+            "(x - 3)(x - 4)(x + 1)",
+            "(x - 2)(x - 2)(x - 3)",
+            "(x + 2)(x - 3)"
+        ],
+        "explanation": "Factor by grouping, then use difference of squares."
+    },
+    {
+        "question_text": "Factorise: 8x² - 98",
+        "question_type": "multiple_choice",
+        "correct_answer": "2(2x - 7)(2x + 7)",
+        "wrong_answers": [
+            "(4x - 7)(2x + 7)",
+            "2(4x² - 49)",
+            "(2x - 7)(2x - 7)"
+        ],
+        "explanation": "Factor out 2, then use difference of squares."
+    },
+    {
+        "question_text": "Factorise: x² - 10x - 96",
+        "question_type": "multiple_choice",
+        "correct_answer": "(x - 16)(x + 6)",
+        "wrong_answers": [
+            "(x - 12)(x + 8)",
+            "(x - 8)(x + 12)",
+            "(x - 6)(x - 16)"
+        ],
+        "explanation": "Two numbers that multiply to -96 and add to -10 are -16 and 6."
+    },
+    {
+        "question_text": "Factorise: x² + 10x - 96",
+        "question_type": "multiple_choice",
+        "correct_answer": "(x + 16)(x - 6)",
+        "wrong_answers": [
+            "(x + 12)(x - 8)",
+            "(x + 6)(x - 16)",
+            "(x + 8)(x - 12)"
+        ],
+        "explanation": "Two numbers that multiply to -96 and add to 10 are 16 and -6."
+    },
+    {
+        "question_text": "Factorise: 18z³ - 21z² + 30z - 35",
+        "question_type": "multiple_choice",
+        "correct_answer": "(6z - 7)(3z² + 5)",
+        "wrong_answers": [
+            "(3z - 7)(6z² + 5)",
+            "(6z + 7)(3z² - 5)",
+            "(3z² - 5)(6z + 7)"
+        ],
+        "explanation": "Factor by grouping to find the common binomial (6z - 7)."
+    },
+    {
+        "question_text": "Factorise: x² + 4x - 45",
+        "question_type": "multiple_choice",
+        "correct_answer": "(x + 9)(x - 5)",
+        "wrong_answers": [
+            "(x + 5)(x - 9)",
+            "(x + 15)(x - 3)",
+            "(x - 9)(x - 5)"
+        ],
+        "explanation": "Two numbers that multiply to -45 and add to 4 are 9 and -5."
+    },
+    {
+        "question_text": "Factorise: x² + 9x - 36",
+        "question_type": "multiple_choice",
+        "correct_answer": "(x + 12)(x - 3)",
+        "wrong_answers": [
+            "(x + 6)(x - 6)",
+            "(x + 4)(x - 9)",
+            "(x - 12)(x + 3)"
+        ],
+        "explanation": "Two numbers that multiply to -36 and add to 9 are 12 and -3."
+    },
+    {
+        "question_text": "Factorise: 12x³ - 16x² + 3x - 4",
+        "question_type": "multiple_choice",
+        "correct_answer": "(3x - 4)(4x² + 1)",
+        "wrong_answers": [
+            "(4x - 3)(3x² + 1)",
+            "(3x + 4)(4x² - 1)",
+            "(3x - 4)(2x² + 2)"
+        ],
+        "explanation": "Factor by grouping to find the common binomial (3x - 4)."
+    },
+    {
+        "question_text": "Factorise: x² + 11x - 80",
+        "question_type": "multiple_choice",
+        "correct_answer": "(x + 16)(x - 5)",
+        "wrong_answers": [
+            "(x + 10)(x - 8)",
+            "(x + 8)(x - 10)",
+            "(x - 16)(x - 5)"
+        ],
+        "explanation": "Two numbers that multiply to -80 and add to 11 are 16 and -5."
+    },
+    {
+        "question_text": "Factorise: 7x² - 15x + 2",
+        "question_type": "multiple_choice",
+        "correct_answer": "(7x - 1)(x - 2)",
+        "wrong_answers": [
+            "(7x - 2)(x - 1)",
+            "(7x + 1)(x - 2)",
+            "(x - 7)(x - 2)"
+        ],
+        "explanation": "Split the middle term to factor correctly."
+    },
+    {
+        "question_text": "Factorise: 8x² - 6x + 1",
+        "question_type": "multiple_choice",
+        "correct_answer": "(4x - 1)(2x - 1)",
+        "wrong_answers": [
+            "(4x + 1)(2x - 1)",
+            "(8x - 1)(x - 1)",
+            "(2x - 1)(2x - 1)"
+        ],
+        "explanation": "Multiply to check: 8x² - 6x + 1."
+    },
+    {
+        "question_text": "Factorise: 8x² - 11x + 3",
+        "question_type": "multiple_choice",
+        "correct_answer": "(8x - 3)(x - 1)",
+        "wrong_answers": [
+            "(4x - 3)(2x - 1)",
+            "(8x + 3)(x - 1)",
+            "(8x - 1)(x - 3)"
+        ],
+        "explanation": "Split the middle term to get the correct factors."
+    },
+    {
+        "question_text": "Factorise: 12x² - 8x + 1",
+        "question_type": "multiple_choice",
+        "correct_answer": "(6x - 1)(2x - 1)",
+        "wrong_answers": [
+            "(3x - 1)(4x - 1)",
+            "(6x + 1)(2x - 1)",
+            "(12x - 1)(x - 1)"
+        ],
+        "explanation": "Multiply to confirm: 12x² - 8x + 1."
     }
 ]

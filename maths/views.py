@@ -2315,7 +2315,8 @@ def practice_questions(request, level_number):
 @login_required
 @require_http_methods(["POST"])
 def submit_topic_answer(request):
-    """AJAX endpoint to save a student's answer for a topic question."""
+    """AJAX endpoint to save a student's answer for a topic question.
+    Returns correctness info so the client never needs to know answers upfront."""
     data = json.loads(request.body)
     question_id = data.get('question_id')
     answer_id = data.get('answer_id')
@@ -2324,6 +2325,11 @@ def submit_topic_answer(request):
 
     try:
         question = Question.objects.get(id=question_id)
+
+        # Verify the student has access to this question's level
+        allowed = student_allowed_levels(request.user)
+        if allowed is not None and not allowed.filter(pk=question.level.pk).exists():
+            return JsonResponse({'success': False, 'error': 'Access denied'}, status=403)
 
         if answer_id:
             answer = Answer.objects.get(id=answer_id, question=question)
@@ -2337,7 +2343,20 @@ def submit_topic_answer(request):
                     'session_id': attempt_id
                 }
             )
-            return JsonResponse({'success': True, 'is_correct': answer.is_correct})
+            # Find the correct answer text to return to client
+            correct_answer_text = ''
+            if not answer.is_correct:
+                correct_obj = question.answers.filter(is_correct=True).first()
+                if correct_obj:
+                    correct_answer_text = correct_obj.answer_text
+
+            return JsonResponse({
+                'success': True,
+                'is_correct': answer.is_correct,
+                'correct_answer_id': question.answers.filter(is_correct=True).first().id if not answer.is_correct else None,
+                'correct_answer_text': correct_answer_text,
+                'explanation': question.explanation or '',
+            })
 
         elif text_answer and question.question_type == 'short_answer':
             StudentAnswer.objects.update_or_create(
@@ -2350,7 +2369,7 @@ def submit_topic_answer(request):
                     'session_id': attempt_id
                 }
             )
-            return JsonResponse({'success': True, 'is_correct': True})
+            return JsonResponse({'success': True, 'is_correct': True, 'explanation': question.explanation or ''})
 
     except (Question.DoesNotExist, Answer.DoesNotExist):
         return JsonResponse({'success': False, 'error': 'Invalid question or answer'}, status=400)
@@ -2515,7 +2534,6 @@ def topic_questions(request, level_number, topic_name):
         answers_data = [{
             'id': a.id,
             'answer_text': a.answer_text,
-            'is_correct': a.is_correct,
         } for a in answers_list]
         questions_json_data.append({
             'id': q.id,
@@ -2523,7 +2541,6 @@ def topic_questions(request, level_number, topic_name):
             'question_type': q.question_type,
             'image_url': q.image.url if q.image else None,
             'points': q.points,
-            'explanation': q.explanation or '',
             'answers': answers_data,
         })
 

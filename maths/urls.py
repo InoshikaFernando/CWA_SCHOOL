@@ -35,4 +35,5 @@ urlpatterns = [
     path("basic-facts/<str:subtopic_name>/", views.basic_facts_subtopic, name="basic_facts_subtopic"),
     path("profile/", views.user_profile, name="user_profile"),
     path("api/update-time-log/", views.update_time_log, name="update_time_log"),
+    path("api/submit-topic-answer/", views.submit_topic_answer, name="submit_topic_answer"),
 ]

@@ -2313,10 +2313,58 @@ def practice_questions(request, level_number):
 
 
 @login_required
+@require_http_methods(["POST"])
+def submit_topic_answer(request):
+    """AJAX endpoint to save a student's answer for a topic question."""
+    data = json.loads(request.body)
+    question_id = data.get('question_id')
+    answer_id = data.get('answer_id')
+    text_answer = data.get('text_answer')
+    attempt_id = data.get('attempt_id', '')
+
+    try:
+        question = Question.objects.get(id=question_id)
+
+        if answer_id:
+            answer = Answer.objects.get(id=answer_id, question=question)
+            StudentAnswer.objects.update_or_create(
+                student=request.user,
+                question=question,
+                defaults={
+                    'selected_answer': answer,
+                    'is_correct': answer.is_correct,
+                    'points_earned': question.points if answer.is_correct else 0,
+                    'session_id': attempt_id
+                }
+            )
+            return JsonResponse({'success': True, 'is_correct': answer.is_correct})
+
+        elif text_answer and question.question_type == 'short_answer':
+            StudentAnswer.objects.update_or_create(
+                student=request.user,
+                question=question,
+                defaults={
+                    'text_answer': text_answer,
+                    'is_correct': True,
+                    'points_earned': question.points,
+                    'session_id': attempt_id
+                }
+            )
+            return JsonResponse({'success': True, 'is_correct': True})
+
+    except (Question.DoesNotExist, Answer.DoesNotExist):
+        return JsonResponse({'success': False, 'error': 'Invalid question or answer'}, status=400)
+
+    return JsonResponse({'success': False, 'error': 'Missing data'}, status=400)
+
+
+@login_required
 def topic_questions(request, level_number, topic_name):
     """Generic view for all topic-based questions (Measurements, Whole Numbers,
     Factors, Angles, Place Values, Fractions, BODMAS/PEMDAS, Date and Time,
-    Finance, Integers, Trigonometry). Accepts level_number and topic_name."""
+    Finance, Integers, Trigonometry). Accepts level_number and topic_name.
+    All questions are prefetched on initial load and rendered client-side for
+    faster question navigation."""
     level = get_object_or_404(Level, level_number=level_number)
 
     allowed = student_allowed_levels(request.user)
@@ -2335,128 +2383,24 @@ def topic_questions(request, level_number, topic_name):
 
     question_limit = YEAR_QUESTION_COUNTS.get(level.level_number, 10)
 
-    question_number = int(request.GET.get('q', 1))
-
     topic_slug = TOPIC_SESSION_SLUGS.get(topic_name, slugify(topic_name))
     timer_session_key = f"{topic_slug}_timer_start"
     questions_session_key = f"{topic_slug}_question_ids"
-    timer_start = request.session.get(timer_session_key)
 
-    # Only reset session on a genuine fresh start: GET request for question 1
-    # without checked or completed params. This prevents clearing the session
-    # during POST (check_answer), the ?checked=1 redirect, or ?completed=1.
-    is_fresh_start = (
-        question_number == 1
-        and request.method == "GET"
-        and not request.GET.get('checked')
-        and not request.GET.get('completed')
-    )
-
-    if is_fresh_start:
-        _clear_session_keys(
-            request.session,
-            timer_session_key, questions_session_key, 'current_attempt_id',
-        )
-        timer_start = None
-
-    if is_fresh_start and not timer_start:
-        request.session[timer_session_key] = time.time()
-        request.session['current_attempt_id'] = str(uuid.uuid4())
-
-        all_questions_list = []
-        for q in all_questions_query:
-            answer_count = q.answers.count()
-            correct_count = q.answers.filter(is_correct=True).count()
-            wrong_count = q.answers.filter(is_correct=False).count()
-            if answer_count == 0:
-                continue
-            if correct_count == 0:
-                continue
-            if q.question_type in ['multiple_choice', 'true_false'] and wrong_count == 0:
-                continue
-            all_questions_list.append(q)
-
-        if len(all_questions_list) > question_limit:
-            selected_questions = select_questions_stratified(all_questions_list, question_limit)
-        else:
-            selected_questions = all_questions_list
-
-        random.shuffle(selected_questions)
-        request.session[questions_session_key] = [q.id for q in selected_questions]
-
-    question_ids = request.session.get(questions_session_key, [])
-
-    if question_ids:
-        questions_dict = {q.id: q for q in Question.objects.filter(
-            id__in=question_ids,
-            level=level,
-            topic=topic_obj
-        ).prefetch_related('answers')}
-        all_questions = [questions_dict[qid] for qid in question_ids if qid in questions_dict]
-
-        if len(all_questions) != len(question_ids):
-            _clear_session_keys(
-                request.session,
-                timer_session_key, questions_session_key, 'current_attempt_id',
-            )
-            return redirect(f"{request.path}?q=1")
-    else:
-        all_questions = []
-
-    if request.method == "POST":
-        action = request.POST.get('action')
-
-        if action == 'check_answer':
-            question_id = request.POST.get('question_id')
-            answer_id = request.POST.get('answer_id')
-            text_answer = request.POST.get('text_answer')
-
-            if question_id:
-                try:
-                    question = Question.objects.get(id=question_id, level=level)
-
-                    if answer_id:
-                        answer = Answer.objects.get(id=answer_id, question=question)
-                        attempt_id = request.session.get('current_attempt_id', '')
-                        StudentAnswer.objects.update_or_create(
-                            student=request.user,
-                            question=question,
-                            defaults={
-                                'selected_answer': answer,
-                                'is_correct': answer.is_correct,
-                                'points_earned': question.points if answer.is_correct else 0,
-                                'session_id': attempt_id
-                            }
-                        )
-                        return redirect(f"{request.path}?q={question_number}&checked=1&answer_id={answer_id}")
-
-                    elif text_answer and question.question_type == 'short_answer':
-                        attempt_id = request.session.get('current_attempt_id', '')
-                        StudentAnswer.objects.update_or_create(
-                            student=request.user,
-                            question=question,
-                            defaults={
-                                'text_answer': text_answer,
-                                'is_correct': True,
-                                'points_earned': question.points,
-                                'session_id': attempt_id
-                            }
-                        )
-                        return redirect(f"{request.path}?q={question_number}&checked=1&text_answer={text_answer}")
-
-                except (Question.DoesNotExist, Answer.DoesNotExist):
-                    messages.error(request, "Invalid question or answer.")
-
-        elif action == 'next_question':
-            next_question = question_number + 1
-            if next_question <= len(all_questions):
-                return redirect(f"{request.path}?q={next_question}")
-            else:
-                return redirect(f"{request.path}?completed=1")
-
+    # Handle completion (GET ?completed=1) - keep server-side for scoring
     completed = request.GET.get('completed') == '1'
-
     if completed:
+        question_ids = request.session.get(questions_session_key, [])
+        if question_ids:
+            questions_dict = {q.id: q for q in Question.objects.filter(
+                id__in=question_ids,
+                level=level,
+                topic=topic_obj
+            ).prefetch_related('answers')}
+            all_questions = [questions_dict[qid] for qid in question_ids if qid in questions_dict]
+        else:
+            all_questions = []
+
         attempt_id = request.session.get('current_attempt_id', '')
         student_answers = StudentAnswer.objects.filter(
             student=request.user,
@@ -2533,57 +2477,63 @@ def topic_questions(request, level_number, topic_name):
             "is_first_attempt": is_first_attempt
         })
 
-    if question_number <= len(all_questions):
-        current_question = all_questions[question_number - 1]
-    else:
-        messages.error(request, "Question not found.")
-        return redirect("maths:level_detail", level_number=level.level_number)
-
-    checked = request.GET.get('checked') == '1'
-    selected_answer_id = request.GET.get('answer_id')
-    text_answer = request.GET.get('text_answer')
-    selected_answer = None
-    is_text_answer = False
-
-    if checked and selected_answer_id:
-        try:
-            selected_answer = Answer.objects.get(id=selected_answer_id, question=current_question)
-        except Answer.DoesNotExist:
-            pass
-    elif checked and text_answer:
-        selected_answer = MockAnswer(text_answer, True)
-        is_text_answer = True
-
-    student_answers = StudentAnswer.objects.filter(
-        student=request.user,
-        question__level=level,
-        question__topic=topic_obj
+    # Fresh start: select questions, store in session, and prefetch all for client-side rendering
+    _clear_session_keys(
+        request.session,
+        timer_session_key, questions_session_key, 'current_attempt_id',
     )
 
-    start_ts = request.session.get(timer_session_key)
-    elapsed_seconds = int(time.time() - start_ts) if start_ts else 0
+    request.session[timer_session_key] = time.time()
+    request.session['current_attempt_id'] = str(uuid.uuid4())
 
-    shuffled_answers = None
-    if not checked and current_question.question_type in ['multiple_choice', 'true_false']:
-        answers_list = list(current_question.answers.all())
-        random.shuffle(answers_list)
-        shuffled_answers = answers_list
+    all_questions_list = []
+    for q in all_questions_query:
+        answer_count = q.answers.count()
+        correct_count = q.answers.filter(is_correct=True).count()
+        wrong_count = q.answers.filter(is_correct=False).count()
+        if answer_count == 0:
+            continue
+        if correct_count == 0:
+            continue
+        if q.question_type in ['multiple_choice', 'true_false'] and wrong_count == 0:
+            continue
+        all_questions_list.append(q)
+
+    if len(all_questions_list) > question_limit:
+        selected_questions = select_questions_stratified(all_questions_list, question_limit)
     else:
-        shuffled_answers = list(current_question.answers.all())
+        selected_questions = all_questions_list
+
+    random.shuffle(selected_questions)
+    request.session[questions_session_key] = [q.id for q in selected_questions]
+
+    # Serialize all questions and their answers as JSON for client-side rendering
+    questions_json_data = []
+    for q in selected_questions:
+        answers_list = list(q.answers.all())
+        random.shuffle(answers_list)
+        answers_data = [{
+            'id': a.id,
+            'answer_text': a.answer_text,
+            'is_correct': a.is_correct,
+        } for a in answers_list]
+        questions_json_data.append({
+            'id': q.id,
+            'question_text': q.question_text,
+            'question_type': q.question_type,
+            'image_url': q.image.url if q.image else None,
+            'points': q.points,
+            'explanation': q.explanation or '',
+            'answers': answers_data,
+        })
 
     return render(request, "maths/topic_quiz.html", {
         "level": level,
-        "current_question": current_question,
-        "question_number": question_number,
-        "total_questions": len(all_questions),
         "topic": topic_obj,
-        "student_answers": student_answers,
-        "checked": checked,
-        "selected_answer": selected_answer,
-        "is_text_answer": is_text_answer,
-        "is_last_question": question_number == len(all_questions),
-        "elapsed_seconds": elapsed_seconds,
-        "shuffled_answers": shuffled_answers
+        "total_questions": len(selected_questions),
+        "questions_json": json.dumps(questions_json_data),
+        "attempt_id": request.session.get('current_attempt_id', ''),
+        "prefetched": True,
     })
 
 

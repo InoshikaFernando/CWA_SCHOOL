@@ -5,7 +5,7 @@ Common utility to add/update questions from JSON files.
 JSON files are stored in Questions/json_questions/ with naming convention:
     <year>-<topic-slug>.json
 
-The year-topic mapping is derived from YEAR_TOPICS_MAP in views.py.
+The year-topic mapping is derived from YEAR_TOPICS_MAP in maths/constants.py.
 
 Usage:
     # Load questions from a specific JSON file
@@ -34,49 +34,8 @@ import django
 django.setup()
 
 from maths.models import Level, Topic
+from maths.constants import YEAR_TOPICS_MAP
 from question_utils import process_questions
-
-YEAR_TOPICS_MAP = {
-    2: [
-        ("Measurements", "measurements_questions", "Measurements"),
-        ("Place Values", "place_values_questions", "Place Values"),
-    ],
-    3: [
-        ("Measurements", "measurements_questions", "Measurements"),
-        ("Fractions", "fractions_questions", "Fractions"),
-        ("Finance", "finance_questions", "Finance"),
-        ("Date and Time", "date_time_questions", "Date and Time"),
-    ],
-    4: [
-        ("Fractions", "fractions_questions", "Fractions"),
-        ("Integers", "integers_questions", "Integers"),
-        ("Place Values", "place_values_questions", "Place Values"),
-    ],
-    5: [
-        ("Measurements", "measurements_questions", "Measurements"),
-        ("BODMAS/PEMDAS", "bodmas_questions", "BODMAS/PEMDAS"),
-    ],
-    6: [
-        ("Measurements", "measurements_questions", "Measurements"),
-        ("BODMAS/PEMDAS", "bodmas_questions", "BODMAS/PEMDAS"),
-        ("Whole Numbers", "whole_numbers_questions", "Whole Numbers"),
-        ("Factors", "factors_questions", "Factors"),
-        ("Angles", "angles_questions", "Angles"),
-    ],
-    7: [
-        ("Measurements", "measurements_questions", "Measurements"),
-        ("BODMAS/PEMDAS", "bodmas_questions", "BODMAS/PEMDAS"),
-        ("Integers", "integers_questions", "Integers"),
-        ("Factors", "factors_questions", "Factors"),
-        ("Fractions", "fractions_questions", "Fractions"),
-    ],
-    8: [
-        ("Trigonometry", "trigonometry_questions", "Trigonometry"),
-        ("Integers", "integers_questions", "Integers"),
-        ("Factors", "factors_questions", "Factors"),
-        ("Fractions", "fractions_questions", "Fractions"),
-    ],
-}
 
 JSON_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "json_questions")
 

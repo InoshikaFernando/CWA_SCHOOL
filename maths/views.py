@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+﻿from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
@@ -64,11 +64,13 @@ YEAR_TOPICS_MAP = {
         ("BODMAS/PEMDAS", "bodmas_questions", "BODMAS/PEMDAS"),
         ("Integers", "integers_questions", "Integers"),
         ("Factors", "factors_questions", "Factors"),
+        ("Fractions", "fractions_questions", "Fractions")
     ],
     8: [
         ("Trigonometry", "trigonometry_questions", "Trigonometry"),
         ("Integers", "integers_questions", "Integers"),
         ("Factors", "factors_questions", "Factors"),
+        ("Fractions", "fractions_questions", "Fractions")
     ],
 }
 

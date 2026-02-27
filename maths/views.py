@@ -90,8 +90,6 @@ def calculate_age_from_dob(date_of_birth):
     return age
 
 
-
-
 def get_or_create_age_level(age):
     """Get or create a Level object for a specific age (for Basic Facts statistics)"""
     # Use level_number = 2000 + age to avoid conflicts with regular levels (2-9) and Basic Facts (100+)

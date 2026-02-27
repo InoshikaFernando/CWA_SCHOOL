@@ -2333,14 +2333,24 @@ def topic_questions(request, level_number, topic_name):
     questions_session_key = f"{topic_slug}_question_ids"
     timer_start = request.session.get(timer_session_key)
 
-    if question_number == 1:
+    # Only reset session on a genuine fresh start: GET request for question 1
+    # without checked or completed params. This prevents clearing the session
+    # during POST (check_answer), the ?checked=1 redirect, or ?completed=1.
+    is_fresh_start = (
+        question_number == 1
+        and request.method == "GET"
+        and not request.GET.get('checked')
+        and not request.GET.get('completed')
+    )
+
+    if is_fresh_start:
         _clear_session_keys(
             request.session,
             timer_session_key, questions_session_key, 'current_attempt_id',
         )
         timer_start = None
 
-    if question_number == 1 and not timer_start:
+    if is_fresh_start and not timer_start:
         request.session[timer_session_key] = time.time()
         request.session['current_attempt_id'] = str(uuid.uuid4())
 

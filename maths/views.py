@@ -699,9 +699,18 @@ def dashboard_detail(request):
             if final_answer_records.exists():
                 # Use StudentFinalAnswer records
                 for fa in final_answer_records:
+                    # Look up time from StudentAnswer for this session
+                    session_time = 0
+                    sa_with_time = StudentAnswer.objects.filter(
+                        student=request.user,
+                        session_id=fa.session_id,
+                        time_taken_seconds__gt=0
+                    ).values_list('time_taken_seconds', flat=True).first()
+                    if sa_with_time:
+                        session_time = sa_with_time
                     attempts_data.append({
                         'points': float(fa.points_earned),
-                        'time_seconds': 0,  # Not stored in StudentFinalAnswer
+                        'time_seconds': session_time,
                         'date': fa.last_updated_time
                     })
                     completed_session_ids.append(fa.session_id)

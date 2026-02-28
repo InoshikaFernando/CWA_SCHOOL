@@ -21,7 +21,7 @@ import threading
 from django.utils.text import slugify
 from .models import Topic, Level, ClassRoom, Enrollment, CustomUser, Question, Answer, StudentAnswer, BasicFactsResult, TimeLog, TopicLevelStatistics, StudentFinalAnswer
 from .forms import CreateClassForm, StudentSignUpForm, TeacherSignUpForm, TeacherCenterRegistrationForm, IndividualStudentRegistrationForm, StudentBulkRegistrationForm, QuestionForm, AnswerFormSet, UserProfileForm, UserPasswordChangeForm
-from .constants import YEAR_TOPICS_MAP
+from .constants import YEAR_TOPICS_MAP, TIMES_TABLES_BY_YEAR
 
 BASIC_FACTS_TOPIC_CONFIG = {
     "addition": {"start_level": 100, "level_count": 7},
@@ -31,7 +31,7 @@ BASIC_FACTS_TOPIC_CONFIG = {
     "place-value-facts": {"start_level": 128, "level_count": 5},
 }
 
-YEAR_QUESTION_COUNTS = {2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
+YEAR_QUESTION_COUNTS = {1: 12, 2: 10, 3: 12, 4: 15, 5: 17, 6: 20, 7: 22, 8: 25, 9: 30}
 
 TOPIC_SESSION_SLUGS = {
     "Measurements": "measurements",
@@ -46,6 +46,11 @@ TOPIC_SESSION_SLUGS = {
     "Integers": "integers",
     "Trigonometry": "trigonometry",
 }
+
+# Add dynamic slugs for all multiplication/division times tables
+for _tt in range(1, 13):
+    TOPIC_SESSION_SLUGS[f"Multiplication ({_tt}\u00d7)"] = f"mult_{_tt}"
+    TOPIC_SESSION_SLUGS[f"Division ({_tt}\u00d7)"] = f"div_{_tt}"
 
 
 def normalize_basic_facts_topic(topic_name):
@@ -2402,6 +2407,10 @@ def topic_questions(request, level_number, topic_name):
 
     question_limit = YEAR_QUESTION_COUNTS.get(level.level_number, 10)
 
+    # Times table topics always have exactly 12 questions — serve them all
+    if topic_name.startswith("Multiplication (") or topic_name.startswith("Division ("):
+        question_limit = max(question_limit, 12)
+
     topic_slug = TOPIC_SESSION_SLUGS.get(topic_name, slugify(topic_name))
     timer_session_key = f"{topic_slug}_timer_start"
     questions_session_key = f"{topic_slug}_question_ids"
@@ -2596,4 +2605,164 @@ def integers_questions(request, level_number):
 
 def trigonometry_questions(request, level_number):
     return topic_questions(request, level_number, "Trigonometry")
+
+
+def _get_or_create_times_table_questions(level, topic_obj, table_number, operation):
+    """Ensure Question and Answer objects exist in the DB for a given times table.
+    Creates them on first access so that submit_topic_answer works seamlessly.
+    operation: 'multiplication' or 'division'
+    Returns the list of Question objects (12 questions: X*1 through X*12)."""
+    existing = list(
+        Question.objects.filter(level=level, topic=topic_obj)
+        .prefetch_related('answers')
+        .order_by('id')
+    )
+    if len(existing) >= 12:
+        return existing[:12]
+
+    # Need to create questions
+    questions = []
+    for i in range(1, 13):
+        if operation == 'multiplication':
+            q_text = f"{table_number} \u00d7 {i} = ?"
+            correct_answer = table_number * i
+        else:  # division
+            product = table_number * i
+            q_text = f"{product} \u00f7 {table_number} = ?"
+            correct_answer = i
+
+        # Check if this specific question already exists
+        q = Question.objects.filter(
+            level=level, topic=topic_obj, question_text=q_text
+        ).first()
+        if q:
+            questions.append(q)
+            continue
+
+        q = Question.objects.create(
+            level=level,
+            topic=topic_obj,
+            question_text=q_text,
+            question_type='multiple_choice',
+            difficulty=1,
+            points=1,
+            explanation=f"{q_text.replace(' = ?', '')} = {correct_answer}",
+        )
+
+        # Create correct answer
+        Answer.objects.create(
+            question=q, answer_text=str(correct_answer), is_correct=True, order=0
+        )
+
+        # Create 3 wrong answers (nearby plausible numbers)
+        wrong_answers = set()
+        # Strategy: offset by -2, -1, +1, +2 from correct, and random nearby
+        candidates = [
+            correct_answer - 2, correct_answer - 1,
+            correct_answer + 1, correct_answer + 2,
+            correct_answer + table_number, correct_answer - table_number,
+            correct_answer * 2, correct_answer + 10,
+        ]
+        for c in candidates:
+            if c > 0 and c != correct_answer and c not in wrong_answers:
+                wrong_answers.add(c)
+            if len(wrong_answers) >= 3:
+                break
+        # Fallback if we don't have 3 yet
+        offset = 3
+        while len(wrong_answers) < 3:
+            candidate = correct_answer + offset
+            if candidate > 0 and candidate != correct_answer and candidate not in wrong_answers:
+                wrong_answers.add(candidate)
+            offset += 1
+
+        for idx, wa in enumerate(sorted(wrong_answers)[:3], start=1):
+            Answer.objects.create(
+                question=q, answer_text=str(wa), is_correct=False, order=idx
+            )
+
+        questions.append(q)
+
+    return questions
+
+
+@login_required
+def multiplication_selection(request, level_number):
+    """Show times table selection grid for Multiplication."""
+    level = get_object_or_404(Level, level_number=level_number)
+    allowed = student_allowed_levels(request.user)
+    if allowed is not None and not allowed.filter(pk=level.pk).exists():
+        messages.error(request, "You don't have access to this level.")
+        return redirect("maths:dashboard")
+
+    tables = TIMES_TABLES_BY_YEAR.get(level_number, [])
+    return render(request, "maths/times_table_selection.html", {
+        "level": level,
+        "tables": tables,
+        "operation": "multiplication",
+        "operation_display": "Multiplication",
+        "operation_symbol": "\u00d7",
+        "operation_icon": "\u2716\ufe0f",
+    })
+
+
+@login_required
+def division_selection(request, level_number):
+    """Show times table selection grid for Division."""
+    level = get_object_or_404(Level, level_number=level_number)
+    allowed = student_allowed_levels(request.user)
+    if allowed is not None and not allowed.filter(pk=level.pk).exists():
+        messages.error(request, "You don't have access to this level.")
+        return redirect("maths:dashboard")
+
+    tables = TIMES_TABLES_BY_YEAR.get(level_number, [])
+    return render(request, "maths/times_table_selection.html", {
+        "level": level,
+        "tables": tables,
+        "operation": "division",
+        "operation_display": "Division",
+        "operation_symbol": "\u00f7",
+        "operation_icon": "\u2797",
+    })
+
+
+@login_required
+def times_table_quiz(request, level_number, table_number, operation):
+    """Run a times table quiz. Generates questions on-the-fly and delegates to
+    the standard topic_questions flow so scoring, progress tracking, and the
+    submit_topic_answer endpoint all work identically to other topics."""
+    level = get_object_or_404(Level, level_number=level_number)
+    allowed = student_allowed_levels(request.user)
+    if allowed is not None and not allowed.filter(pk=level.pk).exists():
+        messages.error(request, "You don't have access to this level.")
+        return redirect("maths:dashboard")
+
+    tables = TIMES_TABLES_BY_YEAR.get(level_number, [])
+    if table_number not in tables:
+        messages.error(request, f"{table_number} times table is not available for Year {level_number}.")
+        return redirect("maths:dashboard")
+
+    if operation == 'multiplication':
+        topic_name = f"Multiplication ({table_number}\u00d7)"
+    else:
+        topic_name = f"Division ({table_number}\u00d7)"
+
+    # Get or create Topic
+    topic_obj = Topic.objects.filter(name=topic_name).first()
+    if not topic_obj:
+        topic_obj = Topic.objects.create(name=topic_name)
+
+    # Ensure questions exist in DB
+    _get_or_create_times_table_questions(level, topic_obj, table_number, operation)
+
+    # Delegate to the standard topic_questions view
+    return topic_questions(request, level_number, topic_name)
+
+
+def multiplication_quiz(request, level_number, table_number):
+    return times_table_quiz(request, level_number, table_number, 'multiplication')
+
+
+def division_quiz(request, level_number, table_number):
+    return times_table_quiz(request, level_number, table_number, 'division')
 

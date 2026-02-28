@@ -475,6 +475,10 @@
                 var aId = parseInt(label.getAttribute('data-answer-id'));
                 var radio = label.querySelector('input[type="radio"]');
 
+                // Clear inline styles set by click handler so class styles take effect
+                label.style.background = '';
+                label.style.borderColor = '';
+
                 label.classList.add('disabled');
                 if (radio) radio.disabled = true;
 

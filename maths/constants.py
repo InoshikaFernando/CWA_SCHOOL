@@ -7,6 +7,8 @@ TIMES_TABLES_BY_YEAR = {
     3: [1, 2, 3, 4, 5, 10],
     4: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     5: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    7: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    8: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
 }
 
 # Year-to-topics mapping for dashboard display and question loading.
@@ -50,6 +52,8 @@ YEAR_TOPICS_MAP = {
         ("Whole Numbers", "whole_numbers_questions", "Whole Numbers"),
         ("Factors", "factors_questions", "Factors"),
         ("Angles", "angles_questions", "Angles"),
+        ("Multiplication", "multiplication_selection", "Multiplication"),
+        ("Division", "division_selection", "Division"),
     ],
     7: [
         ("Measurements", "measurements_questions", "Measurements"),
@@ -57,11 +61,15 @@ YEAR_TOPICS_MAP = {
         ("Integers", "integers_questions", "Integers"),
         ("Factors", "factors_questions", "Factors"),
         ("Fractions", "fractions_questions", "Fractions"),
+        ("Multiplication", "multiplication_selection", "Multiplication"),
+        ("Division", "division_selection", "Division"),
     ],
     8: [
         ("Trigonometry", "trigonometry_questions", "Trigonometry"),
         ("Integers", "integers_questions", "Integers"),
         ("Factors", "factors_questions", "Factors"),
         ("Fractions", "fractions_questions", "Fractions"),
+        ("Multiplication", "multiplication_selection", "Multiplication"),
+        ("Division", "division_selection", "Division"),
     ],
 }
